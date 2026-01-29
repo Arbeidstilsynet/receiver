@@ -1,0 +1,167 @@
+﻿[
+  {
+    ConsumerName: B2B,
+    AppRegistrations: [
+      {
+        AppId: Borders,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Agent,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Avon,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: Intelligent Concrete Shirt,
+    AppRegistrations: [
+      {
+        AppId: SCSI,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Platinum,
+        MessageSource: Altinn
+      },
+      {
+        AppId: seize,
+        MessageSource: Api
+      },
+      {
+        AppId: copy,
+        MessageSource: Api
+      },
+      {
+        AppId: toolset,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: Mali,
+    AppRegistrations: [
+      {
+        AppId: Heights,
+        MessageSource: Altinn
+      }
+    ]
+  },
+  {
+    ConsumerName: Rustic Fresh Chips,
+    AppRegistrations: [
+      {
+        AppId: policy,
+        MessageSource: Altinn
+      },
+      {
+        AppId: foreground,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Platinum,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Home & Shoes,
+        MessageSource: Api
+      },
+      {
+        AppId: Tunisia,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: XSS,
+    AppRegistrations: [
+      {
+        AppId: bypassing,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Associate,
+        MessageSource: Altinn
+      },
+      {
+        AppId: haptic,
+        MessageSource: Altinn
+      }
+    ]
+  },
+  {
+    ConsumerName: card,
+    AppRegistrations: [
+      {
+        AppId: open-source,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Paradigm,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Garden,
+        MessageSource: Altinn
+      }
+    ]
+  },
+  {
+    ConsumerName: interface,
+    AppRegistrations: null
+  },
+  {
+    ConsumerName: methodologies,
+    AppRegistrations: [
+      {
+        AppId: Vietnam,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Gibraltar,
+        MessageSource: Api
+      },
+      {
+        AppId: bi-directional,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: mobile,
+    AppRegistrations: [
+      {
+        AppId: back up,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Rufiyaa,
+        MessageSource: Altinn
+      },
+      {
+        AppId: Future,
+        MessageSource: Api
+      },
+      {
+        AppId: Forges,
+        MessageSource: Api
+      },
+      {
+        AppId: bandwidth-monitored,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: neural,
+    AppRegistrations: [
+      {
+        AppId: real-time,
+        MessageSource: Altinn
+      }
+    ]
+  }
+]

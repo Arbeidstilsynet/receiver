@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../../Domain/Domain.Data/Domain.Data.csproj" />
+    <ProjectReference Include="../../Publish/Receiver.Publish/Receiver.Publish.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Infrastructure.Adapters\Infrastructure.Adapters.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\Domain.Logic\Domain.Logic.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\API.Ports\API.Ports.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.2.0" />
+    <PackageReference
+      Include="OpenTelemetry.Instrumentation.StackExchangeRedis"
+      Version="1.14.0-beta.1"
+    />
+    <PackageReference
+      Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
+      Version="1.14.0-beta.1"
+    />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Quartz" Version="1.14.0-beta.2" />
+    <PackageReference
+      Include="Arbeidstilsynet.Common.Altinn"
+      Version="2.4.0-alpha"
+    ></PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <RootNamespace>Arbeidstilsynet.MeldingerReceiver.API.Adapters</RootNamespace>
+    <AssemblyName>MeldingerReceiver.API.Adapters</AssemblyName>
+    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsPreviewNamespaces>
+  </PropertyGroup>
+</Project>

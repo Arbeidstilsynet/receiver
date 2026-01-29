@@ -1,0 +1,4 @@
+﻿{
+  ConsumerName: a-new-dummy-consumer,
+  AppRegistrations: null
+}

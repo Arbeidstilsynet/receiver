@@ -1,0 +1,12 @@
+﻿{
+  Id: Guid_1,
+  Source: Altinn,
+  ApplicationId: test-app,
+  ReceivedAt: DateTime_1,
+  Tags: null,
+  InternalTags: null,
+  ContentId: Guid_2,
+  AttachmentIds: [
+    Guid_3
+  ]
+}

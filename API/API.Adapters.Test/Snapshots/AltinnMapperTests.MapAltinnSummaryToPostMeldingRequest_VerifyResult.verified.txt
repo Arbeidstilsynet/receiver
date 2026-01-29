@@ -1,0 +1,34 @@
+﻿{
+  MeldingId: 11827765-ed99-44a4-a88b-54a32f7627b6,
+  Source: Altinn,
+  ApplicationReference: test-skjema,
+  MeldingReceivedAt: DateTime_1,
+  MainContent: {
+    FileMetadata: {
+      FileName: structured-data.json,
+      ContentType: application/json
+    },
+    DocumentId: null,
+    ScanResult: Clean
+  },
+  Attachments: [
+    {
+      FileMetadata: {
+        FileName: etellerannet.pdf,
+        ContentType: application/pdf
+      },
+      DocumentId: null,
+      ScanResult: Clean
+    }
+  ],
+  Metadata: {
+    altinnReference: 54a32f7627b6,
+    app: test-skjema,
+    instanceGuid: 11827765-ed99-44a4-a88b-54a32f7627b6,
+    instanceOwnerPartyId: 123123,
+    org: dat,
+    organisationNumber: ,
+    processEnded: ,
+    processStarted: 
+  }
+}

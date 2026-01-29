@@ -1,0 +1,21 @@
+﻿{
+  Melding: {
+    Id: Guid_1,
+    Source: Api,
+    ApplicationId: ulykkesvarsel,
+    ReceivedAt: DateTime_1,
+    Tags: {
+      1: consequatur,
+      2: laudantium,
+      3: eos,
+      4: hic,
+      5: odit
+    },
+    InternalTags: null,
+    ContentId: Guid_1,
+    AttachmentIds: [
+      Guid_2,
+      Guid_3
+    ]
+  }
+}

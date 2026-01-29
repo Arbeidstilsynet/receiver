@@ -1,0 +1,17 @@
+﻿{
+  ConsumerName: test-consumer,
+  AppRegistrations: [
+    {
+      AppId: altinn-app-1,
+      MessageSource: Altinn
+    },
+    {
+      AppId: altinn-app-2,
+      MessageSource: Altinn
+    },
+    {
+      AppId: api-app-1,
+      MessageSource: Api
+    }
+  ]
+}

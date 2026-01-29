@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Arbeidstilsynet.Meldinger.Receiver</RootNamespace>
+    <PackageId>Arbeidstilsynet.Meldinger.Receiver</PackageId>
+    <Product>Arbeidstilsynet.Meldinger.Receiver</Product>
+    <Authors>Digital Samhandling</Authors>
+    <Company>Arbeidstilsynet</Company>
+    <Description></Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Version>3.0.2-alpha</Version>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.2.0" />
+    <PackageReference
+      Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+      Version="10.0.2"
+    />
+    <PackageReference
+      Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
+      Version="1.14.0-beta.1"
+    />
+    <PackageReference
+      Include="OpenTelemetry.Instrumentation.StackExchangeRedis"
+      Version="1.14.0-beta.1"
+    />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Abstract\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Domain/Domain.Data/Domain.Data.csproj">
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+  <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
+</Project>

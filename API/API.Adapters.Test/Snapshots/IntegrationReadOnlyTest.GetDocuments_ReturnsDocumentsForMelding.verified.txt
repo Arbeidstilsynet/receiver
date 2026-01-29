@@ -1,0 +1,24 @@
+﻿{
+  Documents: [
+    {
+      DocumentId: Guid_1,
+      MeldingId: Guid_2,
+      FileMetadata: {
+        FileName: hello-world.txt,
+        ContentType: text/plain
+      },
+      ScanResult: Clean,
+      IsDocumentSafeToUse: true
+    },
+    {
+      DocumentId: Guid_2,
+      MeldingId: Guid_2,
+      FileMetadata: {
+        FileName: main-content.txt,
+        ContentType: text/plain
+      },
+      ScanResult: Clean,
+      IsDocumentSafeToUse: true
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+﻿{
+  ConsumerName: XSS,
+  AppRegistrations: [
+    {
+      AppId: bypassing,
+      MessageSource: Altinn
+    },
+    {
+      AppId: Associate,
+      MessageSource: Altinn
+    },
+    {
+      AppId: haptic,
+      MessageSource: Altinn
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+﻿{
+  Items: [
+    {
+      Id: Guid_1,
+      Source: Altinn,
+      ApplicationId: applikasjon-2,
+      ReceivedAt: DateTime_1,
+      Tags: {
+        1: voluptas,
+        2: ut,
+        3: molestiae,
+        4: officia,
+        5: inventore
+      },
+      InternalTags: null,
+      ContentId: Guid_2,
+      AttachmentIds: [
+        Guid_3,
+        Guid_4,
+        Guid_5
+      ]
+    },
+    {
+      Id: Guid_6,
+      Source: Api,
+      ApplicationId: applikasjon-3,
+      ReceivedAt: DateTime_2,
+      Tags: {
+        1: dolore,
+        2: iste,
+        3: eos,
+        4: deleniti,
+        5: laboriosam
+      },
+      InternalTags: null,
+      ContentId: Guid_7,
+      AttachmentIds: [
+        Guid_8,
+        Guid_9
+      ]
+    },
+    {
+      Id: Guid_10,
+      Source: Altinn,
+      ApplicationId: applikasjon-2,
+      ReceivedAt: DateTime_3,
+      Tags: {
+        1: sunt,
+        2: qui,
+        3: non,
+        4: numquam,
+        5: ea
+      },
+      InternalTags: null,
+      ContentId: Guid_11,
+      AttachmentIds: [
+        Guid_12
+      ]
+    },
+    {
+      Id: Guid_13,
+      Source: Api,
+      ApplicationId: ulykkesvarsel,
+      ReceivedAt: DateTime_4,
+      Tags: {
+        1: consequatur,
+        2: laudantium,
+        3: eos,
+        4: hic,
+        5: odit
+      },
+      InternalTags: null,
+      ContentId: Guid_13,
+      AttachmentIds: [
+        Guid_14,
+        Guid_15
+      ]
+    }
+  ],
+  PageNumber: 1,
+  PageSize: 10,
+  TotalRecords: 4,
+  TotalPages: 1
+}

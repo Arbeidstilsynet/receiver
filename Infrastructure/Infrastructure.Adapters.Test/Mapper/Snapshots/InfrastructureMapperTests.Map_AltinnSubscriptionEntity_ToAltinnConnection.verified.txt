@@ -1,0 +1,5 @@
+﻿{
+  InternalId: Guid_1,
+  AltinnAppId: app-identifier,
+  SubscriptionId: 12341234
+}

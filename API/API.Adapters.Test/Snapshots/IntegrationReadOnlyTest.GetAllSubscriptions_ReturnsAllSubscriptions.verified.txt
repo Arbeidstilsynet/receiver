@@ -1,0 +1,54 @@
+﻿[
+  {
+    ConsumerName: applikasjon-2,
+    AppRegistrations: [
+      {
+        AppId: applikasjon-2,
+        MessageSource: Altinn
+      },
+      {
+        AppId: applikasjon-2,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: applikasjon-3,
+    AppRegistrations: [
+      {
+        AppId: applikasjon-3,
+        MessageSource: Altinn
+      },
+      {
+        AppId: applikasjon-3,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: flip-flop-varsel,
+    AppRegistrations: [
+      {
+        AppId: flip-flop-varsel,
+        MessageSource: Altinn
+      },
+      {
+        AppId: flip-flop-varsel,
+        MessageSource: Api
+      }
+    ]
+  },
+  {
+    ConsumerName: ulykkesvarsel,
+    AppRegistrations: [
+      {
+        AppId: ulykkesvarsel,
+        MessageSource: Altinn
+      },
+      {
+        AppId: ulykkesvarsel,
+        MessageSource: Api
+      }
+    ]
+  }
+]

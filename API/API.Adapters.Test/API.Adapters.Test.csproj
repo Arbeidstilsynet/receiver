@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <OutputType>Exe</OutputType>
+    <IsPublishable>false</IsPublishable>
+    <RootNamespace>Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test</RootNamespace>
+    <AssemblyName>MeldingerReceiver.API.Adapters.Test</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.6.5" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.3.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.2" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Infrastructure/Infrastructure.Adapters.Test/Infrastructure.Adapters.Test.csproj" />
+    <ProjectReference Include="../API.Ports/API.Ports.csproj" />
+    <ProjectReference Include="..\..\Domain\Domain.Logic.Test\Domain.Logic.Test.csproj" />
+    <ProjectReference Include="..\API.Adapters\API.Adapters.csproj" />
+  </ItemGroup>
+</Project>

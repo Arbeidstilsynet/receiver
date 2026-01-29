@@ -1,0 +1,48 @@
+name: meldinger
+
+include:
+  - compose.infra.yaml
+
+networks:
+  meldinger_network:
+    name: meldinger_network
+
+services:
+  receiver-api:
+    build:
+      context: .
+    ports:
+      - "9008:8080"
+    networks:
+      - meldinger_network
+      - altinntestlocal_network
+    extra_hosts:
+      - "${TEST_DOMAIN:-local.altinn.cloud}:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORT: "8080"
+      Infrastructure__PostgresConfiguration__ConnectionString: Host=postgres-receiver;Port=5432;Database=demo_db;Username=postgres;Password=postgres
+      Infrastructure__DocumentStorageConfiguration__BaseUrl: http://file-storage:4443/storage/v1/
+      Infrastructure__DocumentStorageConfiguration__AuthRequired: false
+      Infrastructure__DocumentStorageConfiguration__BucketName: test-bucket
+      Infrastructure__ValkeyConfiguration__ConnectionString: valkey:6379
+      Infrastructure__VirusScanConfiguration__BaseUrl: http://clamav-web:8080/
+      Infrastructure__AltinnAppConfiguration__AltinnOrgIdentifier: dat
+      Infrastructure__AltinnAppConfiguration__MainDocumentDataTypeName: structured-data
+      Infrastructure__AppDomain: http://receiver-api:8080
+      API__Cors__AllowedOrigins__0: http://localhost:3000
+      API__Cors__AllowCredentials: false
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://monitoring_otel:4317
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz/ready"]
+      start_period: 2m
+      interval: 5s
+      timeout: 5s
+      retries: 60
+    depends_on:
+      valkey:
+        condition: service_healthy
+      file-storage:
+        condition: service_healthy
+      postgres-receiver:
+        condition: service_healthy

@@ -1,0 +1,205 @@
+name: Build (PR, reusable)
+
+on:
+  workflow_call:
+    outputs:
+      changes-detected:
+        description: "Whether changes were detected in the package path"
+        value: ${{ jobs.check_changes.outputs.backend }}
+      package-changes-detected:
+        description: "Whether changes were detected in the package path"
+        value: ${{ jobs.check_changes.outputs.publish }}
+
+jobs:
+
+  check_changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      workflow: ${{ steps.workflows.outputs.changes_detected }}
+      backend: ${{ steps.backend.outputs.changes_detected }}
+      publish: ${{ steps.publish.outputs.changes_detected }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Workflows changed?
+        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
+        id: workflows
+        with:
+          base-ref: origin/main
+          include: |
+            .github/workflows/build-pr-template.yml
+            .github/workflows/build-pr.yml
+
+      - name: Backend changed?
+        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
+        id: backend
+        with:
+          base-ref: origin/main
+          include: |
+            ./
+          exclude: |
+            .github/**
+
+
+      - name: Changes for publishing?
+        if: steps.backend.outputs.changes_detected == 'true'
+        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
+        id: publish
+        with:
+          base-ref: origin/main
+          include: |
+            ./Publish/Receiver.Publish
+
+  build_dotnet:
+    needs: [check_changes]
+    runs-on: ubuntu-latest
+    if: needs.check_changes.outputs.backend == 'true' || needs.check_changes.outputs.workflow == 'true'
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Build and Test .NET solution
+        uses: Arbeidstilsynet/action-dotnet-build@a1f3f50f263efb55f38a48fa615e2cf77c4297fa # v3
+        with:
+          working-directory: ./
+
+
+
+  check_publish_version:
+    needs: [build_dotnet, check_changes]
+    runs-on: ubuntu-latest
+    if: needs.check_changes.outputs.publish == 'true'
+    outputs:
+      is-prerelease: ${{ steps.prerelease_check.outputs.is_prerelease }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Get version from *.Publish csproj file
+        id: get_metadata_from_csprojectfile
+        uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
+        with:
+          working-directory: ./Publish/Receiver.Publish
+
+      - name: Check if package version was updated
+        if: needs.check_changes.outputs.backend == 'true'
+        id: get_version
+        run: |
+          VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          FOUND="${{ steps.nuget_version_check.outputs.last_version }}"
+          if [ "${{steps.nuget_version_check.outputs.published }}" = "true" ]; then
+            echo "❌ You did not increase the version number. When you have a code changes, it is required that you increase the version number. This version ($VERSION) is the same as the last published version."
+            exit 1
+          else
+            echo "✅ You increased the version number. The last published version was '$FOUND'. The new version $VERSION is going to be published when merging into main."
+          fi
+
+      - name: Check if version is prerelease
+        id: prerelease_check
+        run: |
+          VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          if [[ "$VERSION" == *-* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get last version
+        id: nuget_version_check
+        uses: Arbeidstilsynet/action-nuget-check-published@4e24ef27f0e3864ce598d1df5c9c28ecdce59208 # v2
+        with:
+          name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
+          version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+          source-feed: AT.Public.NuGet
+          config-file: ${{ needs.load_config.outputs.base_directory }}/nuget.config
+
+      - name: Check if version has been increased
+        id: version_increase_check
+        run: |
+          CURRENT_VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          PUBLISHED_STATUS="${{ steps.nuget_version_check.outputs.published }}"
+          IS_PRERELEASE="${{ steps.prerelease_check.outputs.is_prerelease }}"
+          LAST_VERSION="${{ steps.nuget_version_check.outputs.last_version }}"
+          LAST_PRERELEASE_VERSION="${{ steps.nuget_version_check.outputs.last_prerelease_version }}"
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "Published status: $PUBLISHED_STATUS"
+          echo "Is prerelease: $IS_PRERELEASE"
+
+          # Choose the relevant version to compare against based on release type
+          if [ "$IS_PRERELEASE" == "true" ]; then
+            COMPARE_VERSION="$LAST_PRERELEASE_VERSION"
+            VERSION_TYPE="prerelease"
+            echo "Last prerelease version: $LAST_PRERELEASE_VERSION"
+          else
+            COMPARE_VERSION="$LAST_VERSION"
+            VERSION_TYPE="stable"
+            echo "Last stable version: $LAST_VERSION"
+          fi
+
+          if [ -n "$COMPARE_VERSION" ] && [ "$COMPARE_VERSION" != "null" ]; then
+            echo "Comparing against last $VERSION_TYPE version: $COMPARE_VERSION"
+            # Compare versions using sort -V (version sort)
+            if printf '%s\n%s\n' "$COMPARE_VERSION" "$CURRENT_VERSION" | sort -V -C; then
+              echo "✅ Version has been properly increased from $COMPARE_VERSION to $CURRENT_VERSION"
+            else
+              if [ "$IS_PRERELEASE" == "true" ]; then
+                echo "❌ Version $CURRENT_VERSION is not greater than the last $VERSION_TYPE version $COMPARE_VERSION. Either increase prerelease version or remove the prerelease suffix."
+                echo "Please ensure the version number is properly incremented"
+                exit 1
+              else
+                echo "⚠️  Warning: Version $CURRENT_VERSION is not greater than the last $VERSION_TYPE version $COMPARE_VERSION"
+                echo "💡 Consider increasing the version number, but this won't block the workflow for stable versions"
+              fi
+            fi
+          else
+            echo "✅ This appears to be the first $VERSION_TYPE version of this package"
+          fi
+
+  publish:
+    needs: [load_config, check_changes, check_publish_version]
+    name: Publish prerelease or new receiver version
+    if: needs.check_publish_version.outputs.is-prerelease == 'true'
+    uses: ./.github/workflows/publish-template.yml
+    secrets: inherit
+
+  fail_if_prerelease:
+    needs: [check_publish_version, publish]
+    if: needs.check_publish_version.outputs.is-prerelease == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if version is prerelease
+        run: |
+          echo "✅ Prerelease package was published successfully."
+          echo "❌ This branch cannot be merged until the prerelease version is removed from the .csproj file."
+          exit 1
+  
+  fail_if_changelog_missing:
+    needs: [check_publish_version, publish]
+    if: needs.check_publish_version.outputs.is-prerelease == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if version is prerelease
+        run: |
+          CHANGELOG=$(find "./" -maxdepth 1 -name 'CHANGELOG.md' | head -n 1)
+          if [ -f "$CHANGELOG" ]; then
+            echo "Changelog found."
+            # Optionally, check if the changelog contains the version string
+            if grep -q "${{ steps.get_metadata_from_csprojectfile.outputs.version }}" "$CHANGELOG"; then
+              echo "✅ Changelog contains entry for version ${{ steps.get_metadata_from_csprojectfile.outputs.version }}."
+            else
+              echo "❌ Changelog does not contain entry for version ${{ steps.get_metadata_from_csprojectfile.outputs.version }}."
+              exit 1
+            fi
+          else
+            echo "❌ No changelog found. Please add a CHANGELOG.md file to the package path ${{ needs.check-and-prepare.outputs.package_path }}."
+            exit 1
+          fi
+  

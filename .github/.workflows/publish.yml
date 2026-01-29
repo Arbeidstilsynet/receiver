@@ -1,0 +1,15 @@
+name: Publish changed packages
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish_when_changed:
+    name: Publish if changed
+    uses: ./.github/workflows/publish-template.yml
+    secrets: inherit

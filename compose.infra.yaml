@@ -1,0 +1,103 @@
+name: meldinger
+
+include:
+  - ../compose.infra.yaml
+
+networks:
+  meldinger_network:
+    name: meldinger_network
+
+services:
+  postgres-receiver:
+    image: postgres:17-alpine@sha256:1bccc8c252a75675342061917af942ee08ed54b6ee69da34f9f463d866b3c1e8
+    networks:
+      - meldinger_network
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-receiver-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=demo_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  file-storage:
+    container_name: file-storage
+    image: fsouza/fake-gcs-server@sha256:666f86b873120818b10a5e68d99401422fcf8b00c1f27fe89599c35236f48b4c
+    networks:
+      - meldinger_network
+    ports:
+      - 4443:4443
+    command: ["-scheme", "http", "-backend", "filesystem", "-external-url", "http://localhost:4443"]
+    volumes:
+      - ./.external-deps/cloudstorage:/data
+    post_start:
+      - command: ["apk", "add", "--no-cache", "curl"]
+      - command:
+          [
+            "curl",
+            "-X",
+            "POST",
+            "-d",
+            "'{\"name\": \"test-bucket\",  \"location\": \"EU\",  \"storageClass\": \"STANDARD\",   \"iamConfiguration\": {  \"uniformBucketLevelAccess\": { \"enabled\": true} }}'",
+            "-H",
+            "Content-Type: application/json",
+            "http://localhost:4443/storage/v1/b?project=localhost",
+          ]
+      - command:
+          [
+            "curl",
+            "-X",
+            "PUT",
+            "-d",
+            '{"externalUrl": "http://file-storage:4443"}',
+            "-H",
+            "Content-Type: application/json",
+            "http://file-storage:4443/_internal/config",
+          ]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4443/storage/v1/b/test-bucket"]
+      interval: 1s
+      timeout: 10s
+      retries: 5
+
+  clamav:
+    image: clamav/clamav@sha256:0c5c0e7f1ba77ce66324a3c20d4c49155a465a91be29dbe5e0483c41b9299137
+    environment:
+      MODE: clamd
+    networks:
+      - meldinger_network
+    ulimits:
+      stack: 1048576
+    volumes:
+      - clamav-data:/var/lib/clamav
+    ports:
+      - "3310:3310"
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'PING' | nc -w 5 localhost 3310"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  clamav-web:
+    image: europe-north1-docker.pkg.dev/nais-io/nais/images/clamav-rest:latest@sha256:f63d09769a15517e316e6d35379c66a144e6a5eaee37898ac6e9c56159e7dfda
+    container_name: clamav-web
+    environment:
+      DAEMON_ENDPOINT: clamav:3310
+    ports:
+      #http
+      - "8091:8080"
+    networks:
+      - meldinger_network
+    depends_on:
+      clamav:
+        condition: service_healthy
+
+volumes:
+  postgres-receiver-data:
+  clamav-data:

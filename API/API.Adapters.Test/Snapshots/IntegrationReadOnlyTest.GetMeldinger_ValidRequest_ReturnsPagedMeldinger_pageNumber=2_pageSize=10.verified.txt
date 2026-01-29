@@ -1,0 +1,7 @@
+﻿{
+  Items: null,
+  PageNumber: 2,
+  PageSize: 10,
+  TotalRecords: 4,
+  TotalPages: 1
+}

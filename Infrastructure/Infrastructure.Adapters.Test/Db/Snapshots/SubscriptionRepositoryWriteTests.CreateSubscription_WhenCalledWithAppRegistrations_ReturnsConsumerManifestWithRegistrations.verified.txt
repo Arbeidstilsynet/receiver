@@ -1,0 +1,13 @@
+﻿{
+  ConsumerName: a-new-consumer,
+  AppRegistrations: [
+    {
+      AppId: app-1,
+      MessageSource: Altinn
+    },
+    {
+      AppId: app-2,
+      MessageSource: Api
+    }
+  ]
+}

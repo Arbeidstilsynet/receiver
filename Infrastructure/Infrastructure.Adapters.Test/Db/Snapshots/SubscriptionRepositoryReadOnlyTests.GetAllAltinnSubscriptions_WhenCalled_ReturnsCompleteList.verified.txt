@@ -1,0 +1,92 @@
+﻿[
+  {
+    InternalId: Guid_1,
+    AltinnAppId: SCSI,
+    SubscriptionId: 689741936
+  },
+  {
+    InternalId: Guid_2,
+    AltinnAppId: foreground,
+    SubscriptionId: 513586922
+  },
+  {
+    InternalId: Guid_3,
+    AltinnAppId: back up,
+    SubscriptionId: 80125616
+  },
+  {
+    InternalId: Guid_4,
+    AltinnAppId: Paradigm,
+    SubscriptionId: 915974909
+  },
+  {
+    InternalId: Guid_5,
+    AltinnAppId: haptic,
+    SubscriptionId: 5527264
+  },
+  {
+    InternalId: Guid_6,
+    AltinnAppId: policy,
+    SubscriptionId: 1054022988
+  },
+  {
+    InternalId: Guid_7,
+    AltinnAppId: Rufiyaa,
+    SubscriptionId: 97839075
+  },
+  {
+    InternalId: Guid_8,
+    AltinnAppId: open-source,
+    SubscriptionId: 1802684432
+  },
+  {
+    InternalId: Guid_9,
+    AltinnAppId: bypassing,
+    SubscriptionId: 1448761927
+  },
+  {
+    InternalId: Guid_10,
+    AltinnAppId: Garden,
+    SubscriptionId: 1913530898
+  },
+  {
+    InternalId: Guid_11,
+    AltinnAppId: Heights,
+    SubscriptionId: 885470561
+  },
+  {
+    InternalId: Guid_12,
+    AltinnAppId: Vietnam,
+    SubscriptionId: 1631198519
+  },
+  {
+    InternalId: Guid_13,
+    AltinnAppId: Associate,
+    SubscriptionId: 511775704
+  },
+  {
+    InternalId: Guid_14,
+    AltinnAppId: Borders,
+    SubscriptionId: 1609221783
+  },
+  {
+    InternalId: Guid_15,
+    AltinnAppId: Platinum,
+    SubscriptionId: 749733180
+  },
+  {
+    InternalId: Guid_16,
+    AltinnAppId: Agent,
+    SubscriptionId: 1312027488
+  },
+  {
+    InternalId: Guid_17,
+    AltinnAppId: real-time,
+    SubscriptionId: 591400526
+  },
+  {
+    InternalId: Guid_18,
+    AltinnAppId: Platinum,
+    SubscriptionId: 536053608
+  }
+]

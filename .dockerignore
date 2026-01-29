@@ -1,0 +1,42 @@
+# Git and metadata
+.git
+.gitignore
+**/.gitignore
+
+# Docker files
+**/Dockerfile*
+**/.dockerignore
+**/compose*.yaml
+**/docker-compose*.yml
+
+# Documentation
+**/*.md
+**/README*
+
+# Environment files
+**/.env*
+
+# Logs
+**/*.log
+**/logs
+
+# .NET/C#
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/*.cache
+**/packages
+**/.vs
+**/.vscode/settings.json
+**/TestResults
+**/*.trx
+
+# IDE files
+**/.idea
+**/.vscode/launch.json
+**/.vscode/tasks.json
+
+# OS files
+**/.DS_Store
+**/Thumbs.db

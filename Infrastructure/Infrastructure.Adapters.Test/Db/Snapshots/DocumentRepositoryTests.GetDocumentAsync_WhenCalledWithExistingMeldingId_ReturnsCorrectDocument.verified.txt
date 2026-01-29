@@ -1,0 +1,10 @@
+﻿{
+  DocumentId: Guid_1,
+  MeldingId: Guid_2,
+  FileMetadata: {
+    FileName: null,
+    ContentType: null
+  },
+  ScanResult: Clean,
+  IsDocumentSafeToUse: true
+}

@@ -1,0 +1,18 @@
+﻿{
+  Id: Guid_1,
+  Source: Api,
+  ApplicationId: app-id,
+  ReceivedAt: DateTime_1,
+  Tags: {
+    tag1: value1,
+    tag2: value2
+  },
+  InternalTags: {
+    internalTag1: internalValue1,
+    internalTag2: internalValue2
+  },
+  ContentId: Guid_2,
+  AttachmentIds: [
+    Guid_3
+  ]
+}

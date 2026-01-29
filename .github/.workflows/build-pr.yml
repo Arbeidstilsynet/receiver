@@ -1,0 +1,34 @@
+name: Build (PR)
+
+on:
+  pull_request:
+
+jobs:
+  build_receiver:
+    uses: ./.github/workflows/build-pr-template.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+    with:
+      app: receiver
+
+  check:
+    needs: [build_receiver]
+    runs-on: ubuntu-latest
+    if: always()
+    timeout-minutes: 10
+    steps:
+      - name: Evaluate results
+        run: |
+          echo "Build Receiver: ${{ needs.build_receiver.result }}"
+
+          # Pass if all succeeded
+          if [[ "${{ needs.build_receiver.result }}" == "success" ]]; then
+            echo "✅ All checks passed"
+            exit 0
+          fi
+
+          # Fail otherwise
+          echo "❌ Checks failed"
+          exit 1

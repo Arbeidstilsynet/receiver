@@ -1,0 +1,130 @@
+using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
+using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
+
+internal class MeldingRepository : IMeldingRepository
+{
+    private readonly InfrastructureAdaptersDbContext _dbContext;
+    private readonly IMapper _mapper;
+    private readonly ILogger<MeldingRepository> _logger;
+    private readonly Dictionary<Guid, Melding> _meldinger = new();
+
+    public MeldingRepository(
+        InfrastructureAdaptersDbContext dbContext,
+        IMapper mapper,
+        ILogger<MeldingRepository> logger
+    )
+    {
+        _dbContext = dbContext;
+        _mapper = mapper;
+        _logger = logger;
+    }
+
+    private InfrastructureAdaptersDbContext DbContext
+    {
+        get
+        {
+            _dbContext.Database.EnsureCreated();
+            return _dbContext;
+        }
+    }
+
+    public async Task<Melding> SaveMelding(CreateMeldingRequest createMeldingRequest)
+    {
+        using var activity = Tracer.Source.StartActivity("Persist Melding");
+        List<DocumentEntity> documents =
+        [
+            new DocumentEntity
+            {
+                Id = createMeldingRequest.MainDocumentData.DocumentId,
+                MeldingId = createMeldingRequest.Id,
+                InternalDocumentReference = createMeldingRequest
+                    .MainDocumentData
+                    .InternalDocumentReference,
+                IsAttachment = false,
+                ContentType = createMeldingRequest.MainDocumentData.ContentType,
+                FileName = createMeldingRequest.MainDocumentData.FileName,
+                ScanResult = createMeldingRequest.MainDocumentData.ScanResult,
+            },
+        ];
+        documents.AddRange([
+            .. createMeldingRequest.AttachmentData.Select(s => new DocumentEntity
+            {
+                Id = s.DocumentId,
+                MeldingId = createMeldingRequest.Id,
+                IsAttachment = true,
+                InternalDocumentReference = s.InternalDocumentReference,
+                ContentType = s.ContentType,
+                FileName = s.FileName,
+                ScanResult = s.ScanResult,
+            }),
+        ]);
+        var meldingEntity = new MeldingEntity
+        {
+            Id = createMeldingRequest.Id,
+            Source = createMeldingRequest.Source,
+            ApplicationId = createMeldingRequest.ApplicationId,
+            ReceivedAt = createMeldingRequest.ReceivedAt.ToUniversalTime(),
+            Tags = createMeldingRequest.Tags,
+            InternalTags = createMeldingRequest.InternalTags,
+            Documents = documents,
+        };
+
+        var updatedEntity = await DbContext.Meldinger.AddAsync(meldingEntity);
+
+        await DbContext.SaveChangesAsync();
+        await updatedEntity.ReloadAsync();
+        return _mapper.Map<Melding>(updatedEntity.Entity);
+    }
+
+    public async Task<Melding?> GetMeldingAsync(Guid meldingId)
+    {
+        using var activity = Tracer.Source.StartActivity("Get Melding");
+        var entity = await DbContext
+            .Meldinger.Include(m => m.Documents)
+            .FirstOrDefaultAsync(f => f.Id == meldingId);
+        if (entity != null)
+        {
+            return _mapper.Map<Melding>(entity);
+        }
+        return null;
+    }
+
+    public async Task<PaginationResponse<Melding>> GetMeldingerAsync(
+        int pageSize,
+        int pageNumber = 1
+    )
+    {
+        using var activity = Tracer.Source.StartActivity("Get Meldinger");
+        var baseQuery = DbContext.Meldinger.Select(s => new { s.Id, s.ReceivedAt });
+        int totalRecords = await baseQuery.CountAsync();
+        int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+        var items = await baseQuery
+            .OrderByDescending(b => b.ReceivedAt)
+            .ThenBy(b => b.Id)
+            .Skip(pageNumber == 1 ? 0 : (pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        var meldingIds = items.Select(s => s.Id).ToList();
+        var itemsWithDocument = await DbContext
+            .Meldinger.Include(m => m.Documents)
+            .Where(w => meldingIds.Contains(w.Id))
+            .OrderByDescending(b => b.ReceivedAt)
+            .ThenBy(b => b.Id)
+            .ToListAsync();
+        return new PaginationResponse<Melding>
+        {
+            Items = [.. itemsWithDocument.Select(s => _mapper.Map<Melding>(s))],
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalPages = totalPages,
+            TotalRecords = totalRecords,
+        };
+    }
+}

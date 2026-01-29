@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <OutputType>Exe</OutputType>
+    <IsPublishable>false</IsPublishable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.3.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="TngTech.ArchUnitNET" Version="0.13.2" />
+    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Infrastructure\Infrastructure.Adapters\Infrastructure.Adapters.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.Ports\Infrastructure.Ports.csproj" />
+    <ProjectReference Include="..\API\API.Ports\API.Ports.csproj" />
+    <ProjectReference Include="..\API\API.Adapters\API.Adapters.csproj" />
+    <ProjectReference Include="..\Domain\Domain.Logic\Domain.Logic.csproj" />
+    <ProjectReference Include="..\Domain\Domain.Data\Domain.Data.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>
