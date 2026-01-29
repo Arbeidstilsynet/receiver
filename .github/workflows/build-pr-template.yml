@@ -18,7 +18,6 @@ jobs:
     outputs:
       workflow: ${{ steps.workflows.outputs.changes_detected }}
       backend: ${{ steps.backend.outputs.changes_detected }}
-      publish: ${{ steps.publish.outputs.changes_detected }}
     permissions:
       contents: read
       actions: read
@@ -46,16 +45,6 @@ jobs:
           exclude: |
             .github/**
 
-
-      - name: Changes for publishing?
-        if: steps.backend.outputs.changes_detected == 'true'
-        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
-        id: publish
-        with:
-          base-ref: origin/main
-          include: |
-            ./Publish/Receiver.Publish
-
   build_dotnet:
     needs: [check_changes]
     runs-on: ubuntu-latest
@@ -73,7 +62,7 @@ jobs:
   check_publish_version:
     needs: [build_dotnet, check_changes]
     runs-on: ubuntu-latest
-    if: needs.check_changes.outputs.publish == 'true'
+    if: needs.check_changes.outputs.backend == 'true'
     outputs:
       is-prerelease: ${{ steps.prerelease_check.outputs.is_prerelease }}
       publish-version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
