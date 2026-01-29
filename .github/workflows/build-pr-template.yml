@@ -155,6 +155,8 @@ jobs:
     if: needs.check_publish_version.outputs.is-prerelease == 'true'
     uses: ./.github/workflows/publish-template.yml
     secrets: inherit
+    with:
+      is-prerelease: needs.check_publish_version.outputs.is-prerelease
 
   fail_if_prerelease:
     needs: [check_publish_version, publish]

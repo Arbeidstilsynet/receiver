@@ -13,3 +13,5 @@ jobs:
     name: Publish if changed
     uses: ./.github/workflows/publish-template.yml
     secrets: inherit
+    with:
+      is-prerelease: false
