@@ -36,7 +36,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-publish@8d282653fd85f9a26e80d4f6a4c660eb5d6c8896 # v2
         with:
           working-directory: ./Publish/Receiver.Publish
-          nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PUBLISH_PACKAGE_PAT }}
+          nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
           config-file: ./nuget.config
 
       - name: Docker meta
