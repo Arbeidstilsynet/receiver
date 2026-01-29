@@ -10,8 +10,6 @@ jobs:
     permissions:
       contents: read
       actions: read
-    with:
-      app: receiver
 
   check:
     needs: [build_receiver]

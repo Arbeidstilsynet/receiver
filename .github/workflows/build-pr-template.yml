@@ -164,7 +164,7 @@ jobs:
           fi
 
   publish:
-    needs: [load_config, check_changes, check_publish_version]
+    needs: [check_changes, check_publish_version]
     name: Publish prerelease or new receiver version
     if: needs.check_publish_version.outputs.is-prerelease == 'true'
     uses: ./.github/workflows/publish-template.yml
