@@ -45,7 +45,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            name/app
+            ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
