@@ -54,3 +54,34 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Extract changelog section for current version
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: changelog
+        working-directory: ./
+        run: |
+          VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          if [ -f CHANGELOG.md ]; then
+            awk -v ver="$VERSION" '
+              BEGIN {found=0}
+              # Match headings like ## 1.2.3 or ## [1.2.3]
+              $0 ~ "^##[[:space:]]*\\[?"ver"\\]?" {found=1; print; next}
+              found && /^##[[:space:]]*\[?[0-9]+\.[0-9]+\.[0-9]+/ {exit}
+              found {print}
+            ' CHANGELOG.md > section.txt
+            echo 'changelog<<EOF' >> $GITHUB_OUTPUT
+            cat section.txt >> $GITHUB_OUTPUT
+            echo 'EOF' >> $GITHUB_OUTPUT
+          else
+            echo 'changelog=No changelog found.' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        if: steps.nuget_version_check.outputs.published == 'false'
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        with:
+          tag_name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }} v${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          body: ${{ steps.changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
