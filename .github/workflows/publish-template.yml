@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -70,7 +70,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Extract changelog section for current version
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: steps.nuget_version_check.outputs.published == 'true' && inputs.is-prerelease == false
         id: changelog
         working-directory: ./
         run: |
@@ -91,7 +91,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: steps.nuget_version_check.outputs.published == 'true' && inputs.is-prerelease == false
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           tag_name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
