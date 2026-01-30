@@ -104,7 +104,7 @@ jobs:
           nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
 
       - name: Docker meta
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: steps.nuget_version_check.outputs.published == 'true'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -116,7 +116,7 @@ jobs:
             type=raw,value=${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Log in to GHCR
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: steps.nuget_version_check.outputs.published == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -124,7 +124,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push image to NAIS registry
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: steps.nuget_version_check.outputs.published == 'true'
         id: nais_build_push
         uses: nais/docker-build-push@v0
         with:
@@ -134,7 +134,7 @@ jobs:
           tag: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Push image to GHCR (from NAIS image)
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: steps.nuget_version_check.outputs.published == 'true'
         shell: bash
         run: |
           set -euo pipefail
