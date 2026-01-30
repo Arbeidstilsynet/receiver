@@ -49,14 +49,10 @@ public class AltinnRecoveryServiceTests
         AltinnAppId = "test2",
         SubscriptionId = 7654321,
     };
-    
+
     public AltinnRecoveryServiceTests()
     {
-        _sut = new AltinnRecoveryService(
-            _altinnAdapter,
-            _subscriptionsRepository,
-            _logger
-        );
+        _sut = new AltinnRecoveryService(_altinnAdapter, _subscriptionsRepository, _logger);
     }
 
     [Theory]
@@ -76,16 +72,10 @@ public class AltinnRecoveryServiceTests
             .GetAllActiveAltinnSubscriptions()
             .Returns([SampleTestAppRegistration, SampleTestAppRegistration2]);
         _altinnAdapter
-            .GetNonCompletedInstances(
-                SampleTestAppRegistration.AltinnAppId,
-                true
-            )
+            .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
             .Returns(GetDummyInstances(nonCompletedInstancesForFirstAppCount));
         _altinnAdapter
-            .GetNonCompletedInstances(
-                SampleTestAppRegistration2.AltinnAppId,
-                true
-            )
+            .GetNonCompletedInstances(SampleTestAppRegistration2.AltinnAppId, true)
             .Returns(GetDummyInstances(nonCompletedInstancesForSecondAppCount));
         //act
         var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps();

@@ -23,10 +23,7 @@ internal class AltinnRecoveryService(
         {
             return [];
         }
-        var nonCompletedInstances = await altinnAdapter.GetNonCompletedInstances(
-            appId,
-            true
-        );
+        var nonCompletedInstances = await altinnAdapter.GetNonCompletedInstances(appId, true);
         return nonCompletedInstances;
     }
 
@@ -35,11 +32,7 @@ internal class AltinnRecoveryService(
     > GetAllNonCompletedInstancesForRegisteredApps()
     {
         return GetAllNonCompletedInstancesForRegisteredAppsInternal<AltinnInstanceSummary>(
-            (appId) =>
-                altinnAdapter.GetNonCompletedInstances(
-                    appId,
-                    true
-                )
+            (appId) => altinnAdapter.GetNonCompletedInstances(appId, true)
         );
     }
 
@@ -64,11 +57,7 @@ internal class AltinnRecoveryService(
     > GetMetadataForAllNonCompletedInstancesForRegisteredApps()
     {
         return GetAllNonCompletedInstancesForRegisteredAppsInternal<AltinnMetadata>(
-            (appId) =>
-                altinnAdapter.GetMetadataForNonCompletedInstances(
-                    appId,
-                    true
-                )
+            (appId) => altinnAdapter.GetMetadataForNonCompletedInstances(appId, true)
         );
     }
 

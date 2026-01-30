@@ -26,7 +26,7 @@ public record PostMeldingBody
     /// Optional structured data file (e.g. JSON matching the contract of the consumer).
     /// </summary>
     public required IFormFile? StructuredData { get; init; }
-    
+
     /// <summary>
     /// Optional attachment files.
     /// </summary>

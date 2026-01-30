@@ -38,7 +38,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                 ContentType = "application/json",
             },
             InputStream = new MemoryStream(),
-        }
+        },
     };
 
     private readonly IDocumentStorage _documentStorage = Substitute.For<IDocumentStorage>();

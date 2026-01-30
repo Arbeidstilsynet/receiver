@@ -68,11 +68,8 @@ internal class MeldingService : IMeldingService
         }
 
         // upload documents
-        var (mainDocumentUpload, structuredDocumentUpload, attachmentUploads) = await UploadDocuments(
-            meldingId,
-            request,
-            cancellationToken
-        );
+        var (mainDocumentUpload, structuredDocumentUpload, attachmentUploads) =
+            await UploadDocuments(meldingId, request, cancellationToken);
 
         // create and persist melding
         var createMeldingRequest = new CreateMeldingRequest
@@ -125,11 +122,11 @@ internal class MeldingService : IMeldingService
         );
 
         var structuredDataUploadRequest = request.StructuredData?.ToUploadRequest(meldingId);
-        var structuredDocumentUpload = structuredDataUploadRequest == null ? null : await ProcessUploadRequest(
-            structuredDataUploadRequest,
-            cancellationToken
-        );
-        
+        var structuredDocumentUpload =
+            structuredDataUploadRequest == null
+                ? null
+                : await ProcessUploadRequest(structuredDataUploadRequest, cancellationToken);
+
         List<UploadResponse> attachmentUploads = [];
         // Process attachments one at a time to avoid loading all streams into memory at once
         foreach (var attachment in request.Attachments)

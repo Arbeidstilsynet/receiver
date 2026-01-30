@@ -48,7 +48,7 @@ public class AltinnMapperTests
         //assert
         result.MainContent.InputStream.ShouldBeSameAs(summary.SkjemaAsPdf.DocumentContent);
     }
-    
+
     [Fact]
     public void MapAltinnSummaryToPostMeldingRequest_WhenCalledWithCompleteAltinnSummary_MapsStructuredData()
     {
