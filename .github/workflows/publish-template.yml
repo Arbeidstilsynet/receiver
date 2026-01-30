@@ -12,6 +12,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
@@ -43,11 +46,19 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            arbeidstilsynet/receiver
+            ghcr.io/arbeidstilsynet/receiver
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+
+      - name: Log in to GHCR
+        if: steps.nuget_version_check.outputs.published == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         if: steps.nuget_version_check.outputs.published == 'false'

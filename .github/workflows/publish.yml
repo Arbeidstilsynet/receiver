@@ -16,5 +16,6 @@ jobs:
     permissions:
       contents: write
       actions: read
+      packages: write
     with:
       is-prerelease: false

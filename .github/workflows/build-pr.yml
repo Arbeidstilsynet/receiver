@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      packages: write
 
   check:
     needs: [build_receiver]
