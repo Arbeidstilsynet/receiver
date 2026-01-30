@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security <!-- in case of vulnerabilities. -->
 
+## 3.0.2
+
+### Added
+
+- feat: possibility to configure altinn app related config via env variables
+
+### Changed
+
+- chore: first test deploy to ghcr image repository (should be published as receiver repo packages)
+
 ## 3.0.1
 
 ### Fixed
