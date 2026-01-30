@@ -13,6 +13,7 @@ public record PostMeldingRequest
     public required DateTime MeldingReceivedAt { get; init; }
 
     public required UploadDocumentRequest MainContent { get; init; }
+    public UploadDocumentRequest? StructuredData { get; init; }
     public List<UploadDocumentRequest> Attachments { get; init; } = [];
     public Dictionary<string, string> Metadata { get; init; } = new();
 }

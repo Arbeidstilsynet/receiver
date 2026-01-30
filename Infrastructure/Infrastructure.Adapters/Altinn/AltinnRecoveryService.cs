@@ -11,8 +11,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
 internal class AltinnRecoveryService(
     IAltinnAdapter altinnAdapter,
     ISubscriptionsRepository subscriptionRepository,
-    ILogger<AltinnRecoveryService> logger,
-    IOptions<InfrastructureConfiguration> options
+    ILogger<AltinnRecoveryService> logger
 ) : IAltinnRecoveryService
 {
     public async Task<IEnumerable<AltinnInstanceSummary>?> GetNonCompletedInstancesByAppId(
@@ -26,8 +25,7 @@ internal class AltinnRecoveryService(
         }
         var nonCompletedInstances = await altinnAdapter.GetNonCompletedInstances(
             appId,
-            true,
-            options.Value.AltinnAppConfiguration
+            true
         );
         return nonCompletedInstances;
     }
@@ -40,8 +38,7 @@ internal class AltinnRecoveryService(
             (appId) =>
                 altinnAdapter.GetNonCompletedInstances(
                     appId,
-                    true,
-                    options.Value.AltinnAppConfiguration
+                    true
                 )
         );
     }
@@ -57,8 +54,7 @@ internal class AltinnRecoveryService(
         }
         var nonCompletedInstances = await altinnAdapter.GetMetadataForNonCompletedInstances(
             appId,
-            true,
-            options.Value.AltinnAppConfiguration
+            true
         );
         return nonCompletedInstances;
     }
@@ -71,8 +67,7 @@ internal class AltinnRecoveryService(
             (appId) =>
                 altinnAdapter.GetMetadataForNonCompletedInstances(
                     appId,
-                    true,
-                    options.Value.AltinnAppConfiguration
+                    true
                 )
         );
     }
@@ -80,7 +75,7 @@ internal class AltinnRecoveryService(
     private async Task<
         Dictionary<string, IEnumerable<T>>
     > GetAllNonCompletedInstancesForRegisteredAppsInternal<T>(
-        Func<string, Task<IEnumerable<T>>> GetNonCompletedInstances
+        Func<string, Task<IEnumerable<T>>> getNonCompletedInstances
     )
     {
         using var activity = Tracer.Source.StartActivity();
@@ -96,7 +91,7 @@ internal class AltinnRecoveryService(
                 registeredApp
             );
             var nonCompletedInstances = (
-                await GetNonCompletedInstances(registeredApp.AltinnAppId)
+                await getNonCompletedInstances(registeredApp.AltinnAppId)
             ).ToList();
             logger.LogInformation(
                 "Found {Count} non completed instances for app '{AppIdentifier}'.",

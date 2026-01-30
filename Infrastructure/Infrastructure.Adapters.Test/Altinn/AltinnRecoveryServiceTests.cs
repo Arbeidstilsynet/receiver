@@ -1,3 +1,4 @@
+using Arbeidstilsynet.Common.Altinn.DependencyInjection;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
@@ -48,22 +49,13 @@ public class AltinnRecoveryServiceTests
         AltinnAppId = "test2",
         SubscriptionId = 7654321,
     };
-
-    private static AltinnAppConfiguration DefaultAltinnConfig = new AltinnAppConfiguration
-    {
-        AltinnOrgIdentifier = "dat",
-        MainDocumentDataTypeName = "structured-data",
-    };
-
+    
     public AltinnRecoveryServiceTests()
     {
-        var infraConfig = Substitute.For<InfrastructureConfiguration>();
-        infraConfig.AltinnAppConfiguration.Returns(DefaultAltinnConfig);
         _sut = new AltinnRecoveryService(
             _altinnAdapter,
             _subscriptionsRepository,
-            _logger,
-            Options.Create(infraConfig)
+            _logger
         );
     }
 
@@ -86,15 +78,13 @@ public class AltinnRecoveryServiceTests
         _altinnAdapter
             .GetNonCompletedInstances(
                 SampleTestAppRegistration.AltinnAppId,
-                true,
-                DefaultAltinnConfig
+                true
             )
             .Returns(GetDummyInstances(nonCompletedInstancesForFirstAppCount));
         _altinnAdapter
             .GetNonCompletedInstances(
                 SampleTestAppRegistration2.AltinnAppId,
-                true,
-                DefaultAltinnConfig
+                true
             )
             .Returns(GetDummyInstances(nonCompletedInstancesForSecondAppCount));
         //act

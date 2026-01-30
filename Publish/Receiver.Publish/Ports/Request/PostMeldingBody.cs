@@ -23,6 +23,11 @@ public record PostMeldingBody
     public required IFormFile MainContent { get; init; }
 
     /// <summary>
+    /// Optional structured data file (e.g. JSON matching the contract of the consumer).
+    /// </summary>
+    public required IFormFile? StructuredData { get; init; }
+    
+    /// <summary>
     /// Optional attachment files.
     /// </summary>
     public List<IFormFile> Attachments { get; init; } = [];

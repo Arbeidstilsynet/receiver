@@ -25,11 +25,20 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         {
             FileMetadata = new FileMetadata
             {
-                FileName = "test.json",
-                ContentType = "application/json",
+                FileName = "main-content.pdf",
+                ContentType = "application/pdf",
             },
             InputStream = new MemoryStream(),
         },
+        StructuredData = new UploadDocumentRequest()
+        {
+            FileMetadata = new FileMetadata
+            {
+                FileName = "structured-data.json",
+                ContentType = "application/json",
+            },
+            InputStream = new MemoryStream(),
+        }
     };
 
     private readonly IDocumentStorage _documentStorage = Substitute.For<IDocumentStorage>();
@@ -140,6 +149,17 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                 ScanResult = request.MainContent.ScanResult,
             },
         };
+        var structuredDataUploadResponse = new UploadResponse
+        {
+            PersistedDocument = new DocumentStorageDto
+            {
+                DocumentId = Guid.NewGuid(),
+                InternalDocumentReference = "/a/b/structured",
+                FileName = request.StructuredData!.FileMetadata.FileName,
+                ContentType = request.StructuredData.FileMetadata.ContentType,
+                ScanResult = request.StructuredData.ScanResult,
+            },
+        };
         var attachmentUploadResponse = new UploadResponse
         {
             PersistedDocument = new DocumentStorageDto
@@ -159,6 +179,12 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             .Returns(mainContentUploadResponse);
         _documentStorage
             .Upload(
+                Arg.Is<UploadRequest>(i => i.InputStream == request.StructuredData.InputStream),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(structuredDataUploadResponse);
+        _documentStorage
+            .Upload(
                 Arg.Is<UploadRequest>(i => i.InputStream == request.Attachments[0].InputStream),
                 Arg.Any<CancellationToken>()
             )
@@ -167,7 +193,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         await _sut.ProcessMelding(request, TestContext.Current.CancellationToken);
         //assert
         await _documentStorage
-            .Received(2)
+            .Received(3)
             .Upload(Arg.Any<UploadRequest>(), Arg.Any<CancellationToken>());
         await _meldingRepository
             .Received(1)
@@ -177,6 +203,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                     && i.ApplicationId == request.ApplicationReference
                     && i.Source == request.Source
                     && i.MainDocumentData == mainContentUploadResponse.PersistedDocument
+                    && i.StructuredData == structuredDataUploadResponse.PersistedDocument
                     && i.AttachmentData[0] == attachmentUploadResponse.PersistedDocument
                     && i.Tags == request.Metadata
                 )

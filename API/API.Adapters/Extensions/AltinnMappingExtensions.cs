@@ -26,7 +26,8 @@ internal static class AltinnMappingExtensions
                 ),
             MeldingReceivedAt = meldingReceivedAt,
             Metadata = altinnInstanceSummary.ToMetadataDictionary(),
-            MainContent = altinnInstanceSummary.AltinnSkjema.ToUploadDocumentRequest(),
+            MainContent = altinnInstanceSummary.SkjemaAsPdf.ToUploadDocumentRequest(),
+            StructuredData = altinnInstanceSummary.StructuredData?.ToUploadDocumentRequest(),
             Attachments = altinnInstanceSummary
                 .Attachments.Select(attachment => attachment.ToUploadDocumentRequest())
                 .ToList(),

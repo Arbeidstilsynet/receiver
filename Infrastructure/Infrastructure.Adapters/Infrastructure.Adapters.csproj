@@ -16,8 +16,8 @@
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.13.0" />
     <PackageReference
       Include="Arbeidstilsynet.Common.Altinn"
-      Version="2.4.0-alpha"
-    ></PackageReference>
+      Version="2.4.0-alpha.6"
+    />
     <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.2" />
     <PackageReference

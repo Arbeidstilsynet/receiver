@@ -46,7 +46,19 @@ public class AltinnMapperTests
         //act
         var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
         //assert
-        result.MainContent.InputStream.ShouldBeSameAs(summary.AltinnSkjema.DocumentContent);
+        result.MainContent.InputStream.ShouldBeSameAs(summary.SkjemaAsPdf.DocumentContent);
+    }
+    
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenCalledWithCompleteAltinnSummary_MapsStructuredData()
+    {
+        //arrange
+        var summary = GetCompleteAltinnSummary();
+        //act
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        //assert
+        result.StructuredData.ShouldNotBeNull();
+        result.StructuredData.InputStream.ShouldBeSameAs(summary.StructuredData!.DocumentContent);
     }
 
     [Fact]
@@ -73,10 +85,9 @@ public class AltinnMapperTests
                 InstanceOwnerPartyId = TestOwnerPartyid,
             },
 
-            AltinnSkjema = new AltinnDocument
+            StructuredData = new AltinnDocument
             {
                 DocumentContent = new MemoryStream("mainDocumentContent"u8.ToArray()),
-                IsMainDocument = true,
                 FileMetadata = new AltinnFileMetadata
                 {
                     ContentType = "application/json",
@@ -85,16 +96,26 @@ public class AltinnMapperTests
                     FileScanResult = FileScanResult.Clean,
                 },
             },
+            SkjemaAsPdf = new AltinnDocument()
+            {
+                DocumentContent = new MemoryStream("attachmentContent"u8.ToArray()),
+                FileMetadata = new AltinnFileMetadata
+                {
+                    ContentType = "application/pdf",
+                    DataType = "ref-data-as-pdf",
+                    Filename = "main-data.pdf",
+                    FileScanResult = FileScanResult.Clean,
+                },
+            },
             Attachments =
             [
                 new AltinnDocument
                 {
                     DocumentContent = new MemoryStream("attachmentContent"u8.ToArray()),
-                    IsMainDocument = false,
                     FileMetadata = new AltinnFileMetadata
                     {
                         ContentType = "application/pdf",
-                        DataType = "ref-data-as-pdf",
+                        DataType = "some-type",
                         Filename = "etellerannet.pdf",
                         FileScanResult = FileScanResult.Clean,
                     },

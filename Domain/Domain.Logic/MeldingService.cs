@@ -68,7 +68,7 @@ internal class MeldingService : IMeldingService
         }
 
         // upload documents
-        var (mainDocumentUpload, attachmentUploads) = await UploadDocuments(
+        var (mainDocumentUpload, structuredDocumentUpload, attachmentUploads) = await UploadDocuments(
             meldingId,
             request,
             cancellationToken
@@ -82,6 +82,7 @@ internal class MeldingService : IMeldingService
             ApplicationId = request.ApplicationReference,
             ReceivedAt = request.MeldingReceivedAt,
             MainDocumentData = mainDocumentUpload.PersistedDocument,
+            StructuredData = structuredDocumentUpload?.PersistedDocument,
             AttachmentData = attachmentUploads.Select(a => a.PersistedDocument).ToList(),
             Tags = request.Metadata,
         };
@@ -108,6 +109,7 @@ internal class MeldingService : IMeldingService
 
     private async Task<(
         UploadResponse mainDocumentUpload,
+        UploadResponse? structuredDocumentUpload,
         List<UploadResponse> attachmentUploads
     )> UploadDocuments(
         Guid meldingId,
@@ -121,6 +123,13 @@ internal class MeldingService : IMeldingService
             mainContentUploadRequest,
             cancellationToken
         );
+
+        var structuredDataUploadRequest = request.StructuredData?.ToUploadRequest(meldingId);
+        var structuredDocumentUpload = structuredDataUploadRequest == null ? null : await ProcessUploadRequest(
+            structuredDataUploadRequest,
+            cancellationToken
+        );
+        
         List<UploadResponse> attachmentUploads = [];
         // Process attachments one at a time to avoid loading all streams into memory at once
         foreach (var attachment in request.Attachments)
@@ -129,7 +138,7 @@ internal class MeldingService : IMeldingService
             var uploadResponse = await ProcessUploadRequest(uploadRequest, cancellationToken);
             attachmentUploads.Add(uploadResponse);
         }
-        return (mainDocumentUpload, attachmentUploads);
+        return (mainDocumentUpload, structuredDocumentUpload, attachmentUploads);
     }
 
     private async Task RunPostActions(Melding melding)

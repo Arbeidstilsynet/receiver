@@ -1,4 +1,5 @@
 using System.Text;
+using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Quartz;
+using FileMetadata = Arbeidstilsynet.MeldingerReceiver.Domain.Data.FileMetadata;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.fixture;
 

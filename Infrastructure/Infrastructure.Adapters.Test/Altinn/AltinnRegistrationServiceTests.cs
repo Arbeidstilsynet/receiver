@@ -53,7 +53,7 @@ public class AltinnRegistrationServiceTests
             .Received(1)
             .SubscribeForCompletedProcessEvents(
                 Arg.Is<SubscriptionRequestDto>(s =>
-                    s.AltinnAppIdentifier == newAppId
+                    s.AltinnAppId == newAppId
                     && s.CallbackUrl
                         == new Uri(new Uri(DummyCallbackUrl), "webhook/receive-altinn-cloudevent")
                 )

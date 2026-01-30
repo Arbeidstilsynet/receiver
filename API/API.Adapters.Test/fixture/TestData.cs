@@ -42,7 +42,8 @@ public static class TestData
                 f => f.Make(f.Random.Int(1, 5), () => CreateUploadDocumentRequestFaker().Generate())
             )
             .RuleFor(r => r.Metadata, f => f.CreateDictionary())
-            .RuleFor(r => r.MainContent, f => CreateUploadDocumentRequestFaker().Generate());
+            .RuleFor(r => r.MainContent, f => CreateUploadDocumentRequestFaker().Generate())
+            .RuleFor(r => r.StructuredData, f => CreateUploadDocumentRequestFaker().Generate());
 
     public static Faker<AltinnSubscription> CreateSubscriptionFaker() =>
         CreateFaker<AltinnSubscription>().UseSeed(1337);
@@ -63,7 +64,8 @@ public static class TestData
         CreateFaker<AltinnInstanceSummary>()
             .UseSeed(1337)
             .RuleFor(s => s.Metadata, f => CreateFaker<AltinnMetadata>().Generate())
-            .RuleFor(s => s.AltinnSkjema, f => CreateAltinnDocumentFaker().Generate())
+            .RuleFor(s => s.SkjemaAsPdf, f => CreateAltinnDocumentFaker().Generate())
+            .RuleFor(s => s.StructuredData, f => CreateAltinnDocumentFaker().Generate())
             .RuleFor(
                 s => s.Attachments,
                 f => f.Make(f.Random.Int(1, 5), () => CreateAltinnDocumentFaker().Generate())

@@ -47,8 +47,7 @@ public class WebhookController(
     {
         using var activity = Tracer.Source.StartActivity();
         var altinnSummary = await altinnAdapter.GetSummary(
-            cloudEvent,
-            options.Value.AltinnAppConfiguration
+            cloudEvent
         );
         return altinnSummary.MapAltinnSummaryToPostMeldingRequest(meldingReceivedAt);
     }
