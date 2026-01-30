@@ -19,7 +19,7 @@ jobs:
       workflow: ${{ steps.workflows.outputs.changes_detected }}
       backend: ${{ steps.backend.outputs.changes_detected }}
     permissions:
-      contents: read
+      contents: write
       actions: read
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
