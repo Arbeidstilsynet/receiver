@@ -9,7 +9,8 @@ on:
         type: boolean
 
 jobs:
-  publish:
+  publish_prerelease:
+    if: inputs.is-prerelease == true
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -60,17 +61,100 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push (GHCR)
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  publish_release:
+    if: inputs.is-prerelease == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Get version and name from csproj file
+        id: get_metadata_from_csprojectfile
+        uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
+        with:
+          working-directory: ./Publish/Receiver.Publish
+
+      - name: Check if package version exists
+        id: nuget_version_check
+        uses: Arbeidstilsynet/action-nuget-check-published@4e24ef27f0e3864ce598d1df5c9c28ecdce59208 # v2
+        with:
+          name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
+          version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+          source-feed: AT.Public.NuGet
+
+      - name: Publish package if not already published
+        id: publish
+        if: steps.nuget_version_check.outputs.published == 'false'
+        uses: Arbeidstilsynet/action-dotnet-publish@8d282653fd85f9a26e80d4f6a4c660eb5d6c8896 # v2
+        with:
+          working-directory: ./Publish/Receiver.Publish
+          nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
+
+      - name: Docker meta
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/arbeidstilsynet/receiver
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+
+      - name: Log in to GHCR
+        if: steps.nuget_version_check.outputs.published == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image to NAIS registry
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: nais_build_push
+        uses: nais/docker-build-push@v0
+        with:
+          team: meldinger
+          docker_context: .
+          dockerfile: Dockerfile
+          tag: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+
+      - name: Push image to GHCR (from NAIS image)
+        if: steps.nuget_version_check.outputs.published == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          src_image='${{ steps.nais_build_push.outputs.image }}'
+          if [ -z "$src_image" ]; then
+            echo "::error::nais/docker-build-push did not produce an image output."
+            exit 1
+          fi
+
+          # Convert multiline tags into repeated "-t <tag>" args
+          args=()
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            args+=( -t "$tag" )
+          done <<< '${{ steps.meta.outputs.tags }}'
+
+          docker buildx imagetools create "${args[@]}" "$src_image"
+
       - name: Extract changelog section for current version
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: steps.nuget_version_check.outputs.published == 'false'
         id: changelog
         working-directory: ./
         run: |
@@ -91,7 +175,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: steps.nuget_version_check.outputs.published == 'false'
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           tag_name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
