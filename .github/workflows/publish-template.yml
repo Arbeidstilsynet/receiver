@@ -43,11 +43,11 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
+            arbeidstilsynet/receiver
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern=${{steps.get_metadata_from_csprojectfile.outputs.version}}
+            type=raw,value=${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Build and push
         if: steps.nuget_version_check.outputs.published == 'false'
