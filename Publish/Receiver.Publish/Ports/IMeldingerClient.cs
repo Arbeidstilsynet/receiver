@@ -1,5 +1,5 @@
-using Arbeidstilsynet.Receiver.Model.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Model.Response;
 
 namespace Arbeidstilsynet.Receiver.Ports;
 

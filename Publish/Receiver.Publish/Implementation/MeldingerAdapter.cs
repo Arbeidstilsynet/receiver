@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Arbeidstilsynet.Receiver.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Ports;
 
 namespace Arbeidstilsynet.Receiver.Implementation;
 

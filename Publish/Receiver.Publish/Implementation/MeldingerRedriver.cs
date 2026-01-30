@@ -1,6 +1,6 @@
+using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Ports;
 using Arbeidstilsynet.Receiver.Ports.Model;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.Receiver.Implementation;

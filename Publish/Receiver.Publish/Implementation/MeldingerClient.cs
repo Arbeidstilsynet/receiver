@@ -1,10 +1,10 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.DependencyInjection;
 using Arbeidstilsynet.Receiver.Model.Response;
 using Arbeidstilsynet.Receiver.Ports;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
 namespace Arbeidstilsynet.Receiver.Implementation;
 
