@@ -1,10 +1,10 @@
 using System.Diagnostics;
-using Arbeidstilsynet.Meldinger.Receiver.Ports;
-using Arbeidstilsynet.Meldinger.Receiver.Ports.Model;
+using Arbeidstilsynet.Receiver.Ports;
+using Arbeidstilsynet.Receiver.Ports.Model;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Microsoft.Extensions.Logging;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Implementation;
+namespace Arbeidstilsynet.Receiver.Implementation;
 
 internal static class RedisExtensions
 {

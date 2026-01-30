@@ -1,10 +1,10 @@
 using System.Text.Json;
-using Arbeidstilsynet.Meldinger.Receiver.Ports;
+using Arbeidstilsynet.Receiver.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Implementation;
+namespace Arbeidstilsynet.Receiver.Implementation;
 
 internal class ValkeyConsumer : IValkeyConsumer
 {

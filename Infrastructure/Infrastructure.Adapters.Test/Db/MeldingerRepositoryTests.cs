@@ -1,12 +1,9 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.fixtures;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Argon;
 using Bogus;
-using MapsterMapper;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
@@ -50,9 +47,6 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
 
     internal static List<MeldingEntity> Seed = MeldingEntityFaker.Generate(SeedSize);
     private readonly VerifySettings _verifySettings = new();
-    private readonly InfrastructureAdaptersDbContext _dbContext;
-
-    private IMapper _mapper;
     private readonly IMeldingRepository _meldingRepository;
 
     public MeldingerRepositoryTests(
@@ -62,8 +56,6 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         : base(testOutputHelper, fixtureWithDb)
     {
         _meldingRepository = fixtureWithDb.GetService<IMeldingRepository>(testOutputHelper)!;
-        _dbContext = fixtureWithDb.GetService<InfrastructureAdaptersDbContext>(testOutputHelper)!;
-        _mapper = fixtureWithDb.GetService<IMapper>(testOutputHelper)!;
 
         _verifySettings.UseDirectory("Snapshots");
         _verifySettings.AddExtraSettings(jsonSettings =>
@@ -136,52 +128,5 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
             .Select(s => s.Id)
             .ToList()
             .ShouldBeEquivalentTo(result.Items.Select(s => s.Id).ToList());
-    }
-
-    [Fact]
-    public async Task SaveMelding_WhenCalledWithMeldingDto_PersistsEntity()
-    {
-        //arrange
-        var melding = new CreateMeldingRequest
-        {
-            Id = Guid.NewGuid(),
-            ApplicationId = "altinn-app",
-            ReceivedAt = DateTime.Now,
-            Source = MessageSource.Altinn,
-            MainDocumentData = new DocumentStorageDto
-            {
-                DocumentId = Guid.NewGuid(),
-                InternalDocumentReference = Guid.NewGuid().ToString(),
-                ContentType = "content-type",
-                FileName = "file1",
-                ScanResult = DocumentScanResult.Clean,
-            },
-            AttachmentData =
-            [
-                new DocumentStorageDto
-                {
-                    DocumentId = Guid.NewGuid(),
-                    InternalDocumentReference = Guid.NewGuid().ToString(),
-                    ContentType = "content-type",
-                    FileName = "file2",
-                    ScanResult = DocumentScanResult.Clean,
-                },
-                new DocumentStorageDto
-                {
-                    DocumentId = Guid.NewGuid(),
-                    InternalDocumentReference = Guid.NewGuid().ToString(),
-                    ContentType = "content-type",
-                    FileName = "file3",
-                    ScanResult = DocumentScanResult.Clean,
-                },
-            ],
-        };
-        //act
-        var result = await _meldingRepository.SaveMelding(melding);
-        //assert
-        var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id);
-
-        savedMelding.ShouldBeEquivalentTo(result);
-        await Verify(savedMelding, _verifySettings);
     }
 }

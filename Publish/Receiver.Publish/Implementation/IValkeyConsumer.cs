@@ -1,7 +1,7 @@
 global using MessageId = StackExchange.Redis.RedisValue;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 /// <summary>
 /// Interface which can be dependency injected to use methods of <see cref="MeldingerReceiver"/>

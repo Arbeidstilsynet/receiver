@@ -28,14 +28,12 @@ services.AddDomain(appSettings.DomainConfig);
 
 //overwrite settings with constants
 appSettings.InfrastructureConfig.ValkeyConfiguration.StreamName = Arbeidstilsynet
-    .Meldinger
     .Receiver
     .Ports
     .IConstants
     .Stream
     .StreamName;
 appSettings.InfrastructureConfig.ValkeyConfiguration.MessageKey = Arbeidstilsynet
-    .Meldinger
     .Receiver
     .Ports
     .IConstants

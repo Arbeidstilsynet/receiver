@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Arbeidstilsynet.Meldinger.Receiver.Model.Request;
-using Arbeidstilsynet.Meldinger.Receiver.Model.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Model.Request;
+using Arbeidstilsynet.Receiver.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Controllers;

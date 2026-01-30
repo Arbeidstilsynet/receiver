@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Model.Request;
+namespace Arbeidstilsynet.Receiver.Model.Request;
 
 /// <summary>
 /// Request body for submitting a melding with file content and metadata.

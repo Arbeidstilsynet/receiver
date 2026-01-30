@@ -1,5 +1,5 @@
-using Arbeidstilsynet.Meldinger.Receiver.Implementation;
-using Arbeidstilsynet.Meldinger.Receiver.Ports;
+using Arbeidstilsynet.Receiver.Implementation;
+using Arbeidstilsynet.Receiver.Ports;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Trace;
 using StackExchange.Redis;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.DependencyInjection;
+namespace Arbeidstilsynet.Receiver.DependencyInjection;
 
 /// <summary>
 /// Configuration for Valkey (Redis) connection.

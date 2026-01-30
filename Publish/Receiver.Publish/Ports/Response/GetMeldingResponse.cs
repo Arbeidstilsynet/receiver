@@ -1,6 +1,6 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Model.Response;
+namespace Arbeidstilsynet.Receiver.Model.Response;
 
 public record GetMeldingResponse
 {

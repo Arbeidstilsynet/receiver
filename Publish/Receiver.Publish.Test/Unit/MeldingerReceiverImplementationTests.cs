@@ -1,12 +1,12 @@
 using System.Text.Json;
-using Arbeidstilsynet.Meldinger.Receiver.Adapters.Test.fixtures;
-using Arbeidstilsynet.Meldinger.Receiver.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Adapters.Test.fixtures;
+using Arbeidstilsynet.Receiver.Ports;
 using Shouldly;
 using StackExchange.Redis;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Test;
+namespace Arbeidstilsynet.Receiver.Test;
 
 public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
 {
