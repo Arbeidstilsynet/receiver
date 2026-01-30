@@ -173,7 +173,7 @@ jobs:
           exit 1
   
   fail_if_changelog_missing:
-    needs: [check_publish_version, publish]
+    needs: [check_publish_version]
     if: ${{ needs.check_publish_version.outputs.is-prerelease == 'false' }}
     runs-on: ubuntu-latest
     steps:
