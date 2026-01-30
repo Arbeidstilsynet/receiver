@@ -141,7 +141,7 @@ jobs:
 
           src_image='${{ steps.nais_build_push.outputs.image }}'
           if [ -z "$src_image" ]; then
-            echo "::error ::nais/docker-build-push did not produce an image output."
+            echo "::error::nais/docker-build-push did not produce an image output."
             exit 1
           fi
 

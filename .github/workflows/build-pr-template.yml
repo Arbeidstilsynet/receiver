@@ -6,9 +6,6 @@ on:
       changes-detected:
         description: "Whether changes were detected in the package path"
         value: ${{ jobs.check_changes.outputs.backend }}
-      package-changes-detected:
-        description: "Whether changes were detected in the publish path"
-        value: ${{ jobs.check_changes.outputs.backend }}
 
 jobs:
 
