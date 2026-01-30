@@ -1,7 +1,7 @@
 using System.Diagnostics.Metrics;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 internal class ApiMeters
 {

@@ -1,8 +1,8 @@
-using Arbeidstilsynet.Meldinger.Receiver.Implementation;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Implementation;
 using Shouldly;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Test;
+namespace Arbeidstilsynet.Receiver.Test;
 
 public class ReceiverListenerTests
 {

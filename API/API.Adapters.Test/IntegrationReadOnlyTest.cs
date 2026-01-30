@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Arbeidstilsynet.Meldinger.Receiver.Model.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Model.Response;
 using Argon;
 using Shouldly;
 

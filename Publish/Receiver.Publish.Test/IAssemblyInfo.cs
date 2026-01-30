@@ -1,3 +1,3 @@
-namespace Arbeidstilsynet.Meldinger.Receiver.Adapters.Test;
+namespace Arbeidstilsynet.Receiver.Adapters.Test;
 
 public interface IAssemblyInfo { }

@@ -18,7 +18,6 @@ jobs:
     outputs:
       workflow: ${{ steps.workflows.outputs.changes_detected }}
       backend: ${{ steps.backend.outputs.changes_detected }}
-      publish: ${{ steps.publish.outputs.changes_detected }}
     permissions:
       contents: read
       actions: read
@@ -46,16 +45,6 @@ jobs:
           exclude: |
             .github/**
 
-
-      - name: Changes for publishing?
-        if: steps.backend.outputs.changes_detected == 'true'
-        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
-        id: publish
-        with:
-          base-ref: origin/main
-          include: |
-            ./Publish/Receiver.Publish
-
   build_dotnet:
     needs: [check_changes]
     runs-on: ubuntu-latest
@@ -73,9 +62,10 @@ jobs:
   check_publish_version:
     needs: [build_dotnet, check_changes]
     runs-on: ubuntu-latest
-    if: needs.check_changes.outputs.publish == 'true'
+    if: needs.check_changes.outputs.backend == 'true'
     outputs:
       is-prerelease: ${{ steps.prerelease_check.outputs.is_prerelease }}
+      publish-version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -87,7 +77,23 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
           working-directory: ./Publish/Receiver.Publish
-
+      - name: Check if version is prerelease
+        id: prerelease_check
+        run: |
+          VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          if [[ "$VERSION" == *-* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Get last version
+        id: nuget_version_check
+        uses: Arbeidstilsynet/action-nuget-check-published@4e24ef27f0e3864ce598d1df5c9c28ecdce59208 # v2
+        with:
+          name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
+          version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+          source-feed: AT.Public.NuGet
+          config-file: ./nuget.config
       - name: Check if package version was updated
         if: needs.check_changes.outputs.backend == 'true'
         id: get_version
@@ -100,26 +106,6 @@ jobs:
           else
             echo "✅ You increased the version number. The last published version was '$FOUND'. The new version $VERSION is going to be published when merging into main."
           fi
-
-      - name: Check if version is prerelease
-        id: prerelease_check
-        run: |
-          VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
-          if [[ "$VERSION" == *-* ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get last version
-        id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@4e24ef27f0e3864ce598d1df5c9c28ecdce59208 # v2
-        with:
-          name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
-          version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
-          source-feed: AT.Public.NuGet
-          config-file: ${{ needs.load_config.outputs.base_directory }}/nuget.config
-
       - name: Check if version has been increased
         id: version_increase_check
         run: |
@@ -164,15 +150,20 @@ jobs:
           fi
 
   publish:
-    needs: [load_config, check_changes, check_publish_version]
+    needs: [check_changes, check_publish_version]
     name: Publish prerelease or new receiver version
-    if: needs.check_publish_version.outputs.is-prerelease == 'true'
+    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
     uses: ./.github/workflows/publish-template.yml
     secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+    with:
+      is-prerelease: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
 
   fail_if_prerelease:
     needs: [check_publish_version, publish]
-    if: needs.check_publish_version.outputs.is-prerelease == 'true'
+    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Fail if version is prerelease
@@ -182,24 +173,27 @@ jobs:
           exit 1
   
   fail_if_changelog_missing:
-    needs: [check_publish_version, publish]
-    if: needs.check_publish_version.outputs.is-prerelease == 'true'
+    needs: [check_publish_version]
+    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'false' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Fail if version is prerelease
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Fail if changelog is missing
+        working-directory: ./
         run: |
-          CHANGELOG=$(find "./" -maxdepth 1 -name 'CHANGELOG.md' | head -n 1)
-          if [ -f "$CHANGELOG" ]; then
+          if [ -f CHANGELOG.md ]; then
             echo "Changelog found."
             # Optionally, check if the changelog contains the version string
-            if grep -q "${{ steps.get_metadata_from_csprojectfile.outputs.version }}" "$CHANGELOG"; then
-              echo "✅ Changelog contains entry for version ${{ steps.get_metadata_from_csprojectfile.outputs.version }}."
+            if grep -q "${{ needs.check_publish_version.outputs.publish-version }}" "CHANGELOG.md"; then
+              echo "✅ Changelog contains entry for version ${{ needs.check_publish_version.outputs.publish-version }}."
             else
-              echo "❌ Changelog does not contain entry for version ${{ steps.get_metadata_from_csprojectfile.outputs.version }}."
+              echo "❌ Changelog does not contain entry for version ${{ needs.check_publish_version.outputs.publish-version }}."
               exit 1
             fi
           else
-            echo "❌ No changelog found. Please add a CHANGELOG.md file to the package path ${{ needs.check-and-prepare.outputs.package_path }}."
+            echo "❌ No changelog found. Please add a CHANGELOG.md file to the package path."
             exit 1
           fi
   

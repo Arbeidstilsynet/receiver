@@ -5,7 +5,7 @@ namespace ArchUnit.Tests
 {
     internal static class Constants
     {
-        internal static string NameSpacePrefix = @"Arbeidstilsynet\.Meldinger\.Receiver";
+        internal static string NameSpacePrefix = @"Arbeidstilsynet\.Receiver";
         internal static string RootNamespace = $"^({NameSpacePrefix}|{NameSpacePrefix}\\..*)$";
         internal static string ExtensionsNamespace = CreateNamespaceRegex("Extensions");
         internal static string DependencyInjectionNamespace = CreateNamespaceRegex(
@@ -25,7 +25,7 @@ namespace ArchUnit.Tests
     internal static class Layers
     {
         internal static readonly System.Reflection.Assembly MeldingerReceiverCommonAssembly =
-            typeof(Arbeidstilsynet.Meldinger.Receiver.IAssemblyInfo).Assembly;
+            typeof(Arbeidstilsynet.Receiver.IAssemblyInfo).Assembly;
 
         internal static readonly System.Reflection.Assembly SystemConsoleAssembly =
             typeof(System.Console).Assembly;

@@ -1,4 +1,4 @@
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports.Model;
+namespace Arbeidstilsynet.Receiver.Ports.Model;
 
 /// <summary>
 /// Represents the result of a redrive operation, including counts of successful and unsuccessful attempts,

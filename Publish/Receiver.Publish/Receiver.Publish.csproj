@@ -3,15 +3,15 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Arbeidstilsynet.Meldinger.Receiver</RootNamespace>
-    <PackageId>Arbeidstilsynet.Meldinger.Receiver</PackageId>
-    <Product>Arbeidstilsynet.Meldinger.Receiver</Product>
+    <RootNamespace>Arbeidstilsynet.Receiver</RootNamespace>
+    <PackageId>Arbeidstilsynet.Receiver</PackageId>
+    <Product>Arbeidstilsynet.Receiver</Product>
     <Authors>Digital Samhandling</Authors>
     <Company>Arbeidstilsynet</Company>
     <Description></Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>3.0.2-alpha</Version>
+    <Version>1.0.0</Version>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>

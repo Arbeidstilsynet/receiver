@@ -1,4 +1,4 @@
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports.Model;
+namespace Arbeidstilsynet.Receiver.Ports.Model;
 
 /// <summary>
 /// Represents an exception that occurred during the redrive process of a message.

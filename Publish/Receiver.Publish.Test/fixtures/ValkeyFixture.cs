@@ -1,7 +1,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Adapters.Test.fixtures;
+namespace Arbeidstilsynet.Receiver.Adapters.Test.fixtures;
 
 public class ValkeyFixture : IAsyncLifetime
 {

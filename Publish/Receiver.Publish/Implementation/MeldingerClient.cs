@@ -1,12 +1,12 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Arbeidstilsynet.Meldinger.Receiver.DependencyInjection;
-using Arbeidstilsynet.Meldinger.Receiver.Model.Response;
-using Arbeidstilsynet.Meldinger.Receiver.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.DependencyInjection;
+using Arbeidstilsynet.Receiver.Model.Response;
+using Arbeidstilsynet.Receiver.Ports;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Implementation;
+namespace Arbeidstilsynet.Receiver.Implementation;
 
 internal class MeldingerClient : IMeldingerClient
 {

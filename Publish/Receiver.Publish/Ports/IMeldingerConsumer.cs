@@ -1,6 +1,6 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 /// <summary>
 /// Defines the contract for a consumer application that receives and processes notifications from MeldingerReceiver.

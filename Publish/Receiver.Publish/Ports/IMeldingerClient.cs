@@ -1,7 +1,7 @@
-using Arbeidstilsynet.Meldinger.Receiver.Model.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Model.Response;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 /// <summary>
 /// REST API client interface for interacting with the MeldingerReceiver application.

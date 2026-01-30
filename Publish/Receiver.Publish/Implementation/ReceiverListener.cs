@@ -1,14 +1,14 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading.Channels;
-using Arbeidstilsynet.Meldinger.Receiver.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Ports;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Implementation;
+namespace Arbeidstilsynet.Receiver.Implementation;
 
 internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {

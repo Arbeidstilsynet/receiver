@@ -1,6 +1,6 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 /// <summary>
 /// Adapter for using <see cref="IMeldingerClient"/> methods.

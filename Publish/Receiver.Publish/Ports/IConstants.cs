@@ -1,4 +1,4 @@
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 public interface IConstants
 {

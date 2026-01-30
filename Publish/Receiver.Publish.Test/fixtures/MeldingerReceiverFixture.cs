@@ -1,9 +1,9 @@
-using Arbeidstilsynet.Meldinger.Receiver.DependencyInjection;
+using Arbeidstilsynet.Receiver.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Microsoft.DependencyInjection;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Adapters.Test.fixtures;
+namespace Arbeidstilsynet.Receiver.Adapters.Test.fixtures;
 
 public class MeldingerReceiverFixture : TestBedFixture, IAsyncLifetime
 {

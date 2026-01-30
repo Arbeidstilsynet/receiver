@@ -1,7 +1,7 @@
-using Arbeidstilsynet.Meldinger.Receiver.Ports.Model;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Ports.Model;
 
-namespace Arbeidstilsynet.Meldinger.Receiver.Ports;
+namespace Arbeidstilsynet.Receiver.Ports;
 
 /// <summary>
 /// Provides methods for redriving (reprocessing) pending messages in the MeldingerReceiver system.

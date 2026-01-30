@@ -1,4 +1,4 @@
-namespace Arbeidstilsynet.Meldinger.Receiver.Model.Response;
+namespace Arbeidstilsynet.Receiver.Model.Response;
 
 public class PostMeldingResponse
 {

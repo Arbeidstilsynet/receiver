@@ -1,9 +1,9 @@
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
-using Arbeidstilsynet.Meldinger.Receiver.Model.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
+using Arbeidstilsynet.Receiver.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
