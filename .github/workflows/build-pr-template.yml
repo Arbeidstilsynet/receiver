@@ -156,7 +156,7 @@ jobs:
     uses: ./.github/workflows/publish-template.yml
     secrets: inherit
     permissions:
-      contents: read
+      contents: write
       packages: write
     with:
       is-prerelease: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
