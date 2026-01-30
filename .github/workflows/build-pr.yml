@@ -8,7 +8,7 @@ jobs:
     uses: ./.github/workflows/build-pr-template.yml
     secrets: inherit
     permissions:
-      contents: read
+      contents: write
       actions: read
       packages: write
 
