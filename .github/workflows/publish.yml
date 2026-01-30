@@ -17,6 +17,5 @@ jobs:
       contents: write
       actions: read
       packages: write
-      id-token: write
     with:
       is-prerelease: false
