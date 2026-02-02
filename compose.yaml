@@ -4,6 +4,8 @@ include:
   - compose.infra.yaml
 
 networks:
+  # altinntestlocal_network:
+  #   external: true
   meldinger_network:
     name: meldinger_network
 
@@ -15,7 +17,7 @@ services:
       - "9008:8080"
     networks:
       - meldinger_network
-      - altinntestlocal_network
+      # - altinntestlocal_network
     extra_hosts:
       - "${TEST_DOMAIN:-local.altinn.cloud}:host-gateway"
     environment:
@@ -46,3 +48,5 @@ services:
         condition: service_healthy
       postgres-receiver:
         condition: service_healthy
+      clamav-web:
+        condition: service_started
