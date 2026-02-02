@@ -12,10 +12,11 @@
       5: odit
     },
     InternalTags: null,
-    ContentId: Guid_1,
+    MainContentId: Guid_1,
+    StructuredDataId: Guid_2,
     AttachmentIds: [
-      Guid_2,
-      Guid_3
+      Guid_3,
+      Guid_4
     ]
   }
 }

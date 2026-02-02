@@ -19,6 +19,16 @@
       },
       ScanResult: Clean,
       IsDocumentSafeToUse: true
+    },
+    {
+      DocumentId: Guid_3,
+      MeldingId: Guid_2,
+      FileMetadata: {
+        FileName: plastic.pde,
+        ContentType: image/vnd.dxf
+      },
+      ScanResult: Clean,
+      IsDocumentSafeToUse: true
     }
   ]
 }

@@ -13,15 +13,16 @@
         5: inventore
       },
       InternalTags: null,
-      ContentId: Guid_2,
+      MainContentId: Guid_2,
+      StructuredDataId: Guid_3,
       AttachmentIds: [
-        Guid_3,
         Guid_4,
-        Guid_5
+        Guid_5,
+        Guid_6
       ]
     },
     {
-      Id: Guid_6,
+      Id: Guid_7,
       Source: Api,
       ApplicationId: applikasjon-3,
       ReceivedAt: DateTime_2,
@@ -33,14 +34,15 @@
         5: laboriosam
       },
       InternalTags: null,
-      ContentId: Guid_7,
+      MainContentId: Guid_8,
+      StructuredDataId: Guid_9,
       AttachmentIds: [
-        Guid_8,
-        Guid_9
+        Guid_10,
+        Guid_11
       ]
     },
     {
-      Id: Guid_10,
+      Id: Guid_12,
       Source: Altinn,
       ApplicationId: applikasjon-2,
       ReceivedAt: DateTime_3,
@@ -52,13 +54,14 @@
         5: ea
       },
       InternalTags: null,
-      ContentId: Guid_11,
+      MainContentId: Guid_13,
+      StructuredDataId: Guid_14,
       AttachmentIds: [
-        Guid_12
+        Guid_15
       ]
     },
     {
-      Id: Guid_13,
+      Id: Guid_16,
       Source: Api,
       ApplicationId: ulykkesvarsel,
       ReceivedAt: DateTime_4,
@@ -70,10 +73,11 @@
         5: odit
       },
       InternalTags: null,
-      ContentId: Guid_13,
+      MainContentId: Guid_16,
+      StructuredDataId: Guid_17,
       AttachmentIds: [
-        Guid_14,
-        Guid_15
+        Guid_18,
+        Guid_19
       ]
     }
   ],
