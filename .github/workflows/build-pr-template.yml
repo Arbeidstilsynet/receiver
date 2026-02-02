@@ -31,8 +31,8 @@ jobs:
             ./
           exclude: |
             .github/**
-            .renovate.json
-            .compose**.yaml
+            renovate.json
+            compose**.yaml
 
   build_dotnet:
     needs: [check_changes]
