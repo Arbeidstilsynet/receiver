@@ -58,7 +58,7 @@ public class DocumentServiceTests
         };
         _meldingRepository
             .GetMeldingAsync(request.MeldingId)
-            .Returns(SampleMelding with { Id = request.MeldingId, ContentId = request.DocumentId });
+            .Returns(SampleMelding with { Id = request.MeldingId, MainContentId = request.DocumentId });
         //act
         await _sut.GetDocument(request);
         //assert
@@ -121,7 +121,7 @@ public class DocumentServiceTests
         };
         _meldingRepository
             .GetMeldingAsync(request.MeldingId)
-            .Returns(SampleMelding with { ContentId = request.DocumentId });
+            .Returns(SampleMelding with { MainContentId = request.DocumentId });
         //act
         var result = await _sut.GetDocument(request);
         //assert
@@ -143,7 +143,7 @@ public class DocumentServiceTests
         };
         _meldingRepository
             .GetMeldingAsync(request.MeldingId)
-            .Returns(SampleMelding with { Id = request.MeldingId, ContentId = request.DocumentId });
+            .Returns(SampleMelding with { Id = request.MeldingId, MainContentId = request.DocumentId });
         _documentRepository
             .GetDocumentAsync(request.DocumentId)
             .Returns(

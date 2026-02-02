@@ -52,11 +52,9 @@ internal class InfrastructureMapper : IRegister
         config
             .NewConfig<MeldingEntity, Domain.Data.Melding>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
-            .Map(target => target.ContentId, src => src.Documents.First(d => !d.IsAttachment).Id)
-            .Map(
-                target => target.AttachmentIds,
-                src => src.Documents.Where(d => d.IsAttachment).Select(s => s.Id).ToList()
-            );
+            .Map(target => target.MainContentId, src => src.GetMainContentId())
+            .Map(target => target.StructuredDataId, src => src.GetStructuredDataId())
+            .Map(target => target.AttachmentIds, src => src.GetAttachmentIds());
 
         config
             .NewConfig<DocumentEntity, Domain.Data.Document>()
@@ -72,4 +70,26 @@ internal class InfrastructureMapper : IRegister
             .NewConfig<DocumentEntity, FileMetadata>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible);
     }
+}
+
+file static class MappingExtensions
+{
+    public static Guid? GetMainContentId(this MeldingEntity melding)
+    {
+        return melding.Documents.First(d => d.DocumentType == DocumentType.MainContent).Id;
+    }
+    
+    public static Guid? GetStructuredDataId(this MeldingEntity melding)
+    {
+        return melding.Documents.FirstOrDefault(d => d.DocumentType == DocumentType.StructuredData)?.Id;
+    }
+    
+    public static List<Guid> GetAttachmentIds(this MeldingEntity melding)
+    {
+        return melding.Documents
+            .Where(d => d.DocumentType == DocumentType.Attachment)
+            .Select(d => d.Id)
+            .ToList();
+    }
+    
 }

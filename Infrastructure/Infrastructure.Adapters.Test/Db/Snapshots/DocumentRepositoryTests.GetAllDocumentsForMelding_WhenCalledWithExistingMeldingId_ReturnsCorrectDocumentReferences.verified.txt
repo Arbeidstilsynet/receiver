@@ -18,5 +18,15 @@
     },
     ScanResult: Clean,
     IsDocumentSafeToUse: true
+  },
+  {
+    DocumentId: Guid_4,
+    MeldingId: Guid_2,
+    FileMetadata: {
+      FileName: null,
+      ContentType: null
+    },
+    ScanResult: Clean,
+    IsDocumentSafeToUse: true
   }
 ]

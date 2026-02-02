@@ -28,7 +28,7 @@ public class AltinnCompletionActionTests
             Id = Guid.NewGuid(),
             Source = MessageSource.Altinn,
             ApplicationId = "altinn-app",
-            ContentId = Guid.NewGuid(),
+            MainContentId = Guid.NewGuid(),
             ReceivedAt = DateTime.Now,
             Tags = altinnMetadata.ToMetadataDictionary(),
             InternalTags = new Dictionary<string, string> { { "tag1", "tag2" } },

@@ -15,14 +15,14 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient) : IMeldingerAd
             );
         }
         var mainDocumentMetadata =
-            await meldingerClient.GetDocument(melding.Id, melding.ContentId)
+            await meldingerClient.GetDocument(melding.Id, melding.MainContentId)
             ?? throw new InvalidOperationException(
-                $"Could not get the message's document metadata. Id: {melding.Id}, ContentId: {melding.ContentId}"
+                $"Could not get the message's document metadata. Id: {melding.Id}, ContentId: {melding.MainContentId}"
             );
         if (!mainDocumentMetadata.IsDocumentSafeToUse)
         {
             throw new InvalidOperationException(
-                $"The message's document is not safe to use based on anti virus scan result. We do not proceed here, process this message manually. Id: {melding.Id}, ContentId: {melding.ContentId}"
+                $"The message's document is not safe to use based on anti virus scan result. We do not proceed here, process this message manually. Id: {melding.Id}, ContentId: {melding.MainContentId}"
             );
         }
 
@@ -34,9 +34,9 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient) : IMeldingerAd
         }
 
         var document =
-            await meldingerClient.DownloadDocument(melding.Id, melding.ContentId)
+            await meldingerClient.DownloadDocument(melding.Id, melding.MainContentId)
             ?? throw new InvalidOperationException(
-                $"Could not download the message's main document. Id: {melding.Id}, ContentId: {melding.ContentId}"
+                $"Could not download the message's main document. Id: {melding.Id}, ContentId: {melding.MainContentId}"
             );
 
         return JsonSerializer.Deserialize<T>(document)

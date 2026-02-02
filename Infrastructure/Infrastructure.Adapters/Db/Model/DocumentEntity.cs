@@ -14,9 +14,7 @@ internal class DocumentEntity : BaseEntity
 
     public required string InternalDocumentReference { get; set; }
 
-    public required bool IsAttachment { get; set; }
-
-    public required bool IsStructured { get; set; }
+    public required DocumentType DocumentType { get; set; }
 
     public string? ContentType { get; set; } = null;
 

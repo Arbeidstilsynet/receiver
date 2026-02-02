@@ -38,43 +38,8 @@ internal class MeldingRepository : IMeldingRepository
     public async Task<Melding> SaveMelding(CreateMeldingRequest createMeldingRequest)
     {
         using var activity = Tracer.Source.StartActivity("Persist Melding");
-        List<DocumentEntity> documents =
-        [
-            new DocumentEntity
-            {
-                Id = createMeldingRequest.MainDocumentData.DocumentId,
-                MeldingId = createMeldingRequest.Id,
-                InternalDocumentReference = createMeldingRequest
-                    .MainDocumentData
-                    .InternalDocumentReference,
-                IsAttachment = false,
-                ContentType = createMeldingRequest.MainDocumentData.ContentType,
-                FileName = createMeldingRequest.MainDocumentData.FileName,
-                ScanResult = createMeldingRequest.MainDocumentData.ScanResult,
-            },
-        ];
-        documents.AddRange([
-            .. createMeldingRequest.AttachmentData.Select(s => new DocumentEntity
-            {
-                Id = s.DocumentId,
-                MeldingId = createMeldingRequest.Id,
-                IsAttachment = true,
-                InternalDocumentReference = s.InternalDocumentReference,
-                ContentType = s.ContentType,
-                FileName = s.FileName,
-                ScanResult = s.ScanResult,
-            }),
-        ]);
-        var meldingEntity = new MeldingEntity
-        {
-            Id = createMeldingRequest.Id,
-            Source = createMeldingRequest.Source,
-            ApplicationId = createMeldingRequest.ApplicationId,
-            ReceivedAt = createMeldingRequest.ReceivedAt.ToUniversalTime(),
-            Tags = createMeldingRequest.Tags,
-            InternalTags = createMeldingRequest.InternalTags,
-            Documents = documents,
-        };
+        
+        var meldingEntity = createMeldingRequest.ToMeldingEntity();
 
         var updatedEntity = await DbContext.Meldinger.AddAsync(meldingEntity);
 
@@ -125,6 +90,70 @@ internal class MeldingRepository : IMeldingRepository
             PageSize = pageSize,
             TotalPages = totalPages,
             TotalRecords = totalRecords,
+        };
+    }
+}
+
+file static class MappingExtensions
+{
+    public static MeldingEntity ToMeldingEntity(this CreateMeldingRequest createMeldingRequest)
+    {
+        List<DocumentEntity> documents =
+        [
+            createMeldingRequest.MapMainDocument()
+        ];
+        
+        if (createMeldingRequest.MapStructuredDocument() is {} structuredDocument)
+        {
+            documents.Add(structuredDocument);
+        }
+        
+        documents.AddRange(createMeldingRequest.MapAttachmentDocuments());
+        
+        return new MeldingEntity
+        {
+            Id = createMeldingRequest.Id,
+            Source = createMeldingRequest.Source,
+            ApplicationId = createMeldingRequest.ApplicationId,
+            ReceivedAt = createMeldingRequest.ReceivedAt.ToUniversalTime(),
+            Tags = createMeldingRequest.Tags,
+            InternalTags = createMeldingRequest.InternalTags,
+            Documents = documents
+        };
+    }
+    
+    public static DocumentEntity MapMainDocument(this CreateMeldingRequest createMeldingRequest)
+    {
+        return createMeldingRequest.MainDocumentData.ToDocumentEntity(createMeldingRequest.Id,
+            DocumentType.MainContent);
+    }
+    
+    public static DocumentEntity? MapStructuredDocument(this CreateMeldingRequest createMeldingRequest)
+    {
+        if (createMeldingRequest.StructuredData == null)
+        {
+            return null;
+        }
+        return createMeldingRequest.StructuredData.ToDocumentEntity(createMeldingRequest.Id, DocumentType.StructuredData);
+    }
+    
+    public static IEnumerable<DocumentEntity> MapAttachmentDocuments(this CreateMeldingRequest createMeldingRequest)
+    {
+        return createMeldingRequest.AttachmentData.Select(attachment => 
+            attachment.ToDocumentEntity(createMeldingRequest.Id, DocumentType.Attachment));
+    }
+    
+    private static DocumentEntity ToDocumentEntity(this DocumentStorageDto storageDto, Guid meldingId, DocumentType documentType)
+    {
+        return new DocumentEntity
+        {
+            Id = storageDto.DocumentId,
+            MeldingId =  meldingId,
+            InternalDocumentReference = storageDto.InternalDocumentReference,
+            DocumentType =  documentType,
+            ContentType = storageDto.ContentType,
+            FileName = storageDto.FileName,
+            ScanResult = storageDto.ScanResult,
         };
     }
 }

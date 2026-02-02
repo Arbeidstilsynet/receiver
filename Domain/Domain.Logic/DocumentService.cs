@@ -19,7 +19,7 @@ internal class DocumentService(
         if (
             melding != null
             && (
-                melding.ContentId == request.DocumentId
+                melding.MainContentId == request.DocumentId
                 || melding.AttachmentIds.Contains(request.DocumentId)
             )
         )

@@ -31,7 +31,15 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
                         Id = Guid.NewGuid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
-                        IsAttachment = false,
+                        DocumentType = DocumentType.MainContent,
+                        ScanResult = DocumentScanResult.Clean,
+                    },
+                    new DocumentEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        MeldingId = current.Id,
+                        InternalDocumentReference = "",
+                        DocumentType = DocumentType.StructuredData,
                         ScanResult = DocumentScanResult.Clean,
                     },
                     new DocumentEntity
@@ -39,9 +47,9 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
                         Id = Guid.NewGuid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
-                        IsAttachment = true,
+                        DocumentType = DocumentType.Attachment,
                         ScanResult = DocumentScanResult.Clean,
-                    },
+                    }
                 ]
         );
 

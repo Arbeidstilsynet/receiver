@@ -11,8 +11,9 @@
     internalTag1: internalValue1,
     internalTag2: internalValue2
   },
-  ContentId: Guid_2,
+  MainContentId: Guid_2,
+  StructuredDataId: Guid_3,
   AttachmentIds: [
-    Guid_3
+    Guid_4
   ]
 }

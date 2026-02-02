@@ -5,6 +5,14 @@
   MeldingReceivedAt: DateTime_1,
   MainContent: {
     FileMetadata: {
+      FileName: main-data.pdf,
+      ContentType: application/pdf
+    },
+    DocumentId: null,
+    ScanResult: Clean
+  },
+  StructuredData: {
+    FileMetadata: {
       FileName: structured-data.json,
       ContentType: application/json
     },
