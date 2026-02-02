@@ -38,7 +38,7 @@ internal class MeldingRepository : IMeldingRepository
     public async Task<Melding> SaveMelding(CreateMeldingRequest createMeldingRequest)
     {
         using var activity = Tracer.Source.StartActivity("Persist Melding");
-        
+
         var meldingEntity = createMeldingRequest.ToMeldingEntity();
 
         var updatedEntity = await DbContext.Meldinger.AddAsync(meldingEntity);
@@ -98,18 +98,15 @@ file static class MappingExtensions
 {
     public static MeldingEntity ToMeldingEntity(this CreateMeldingRequest createMeldingRequest)
     {
-        List<DocumentEntity> documents =
-        [
-            createMeldingRequest.MapMainDocument()
-        ];
-        
-        if (createMeldingRequest.MapStructuredDocument() is {} structuredDocument)
+        List<DocumentEntity> documents = [createMeldingRequest.MapMainDocument()];
+
+        if (createMeldingRequest.MapStructuredDocument() is { } structuredDocument)
         {
             documents.Add(structuredDocument);
         }
-        
+
         documents.AddRange(createMeldingRequest.MapAttachmentDocuments());
-        
+
         return new MeldingEntity
         {
             Id = createMeldingRequest.Id,
@@ -118,39 +115,53 @@ file static class MappingExtensions
             ReceivedAt = createMeldingRequest.ReceivedAt.ToUniversalTime(),
             Tags = createMeldingRequest.Tags,
             InternalTags = createMeldingRequest.InternalTags,
-            Documents = documents
+            Documents = documents,
         };
     }
-    
+
     public static DocumentEntity MapMainDocument(this CreateMeldingRequest createMeldingRequest)
     {
-        return createMeldingRequest.MainDocumentData.ToDocumentEntity(createMeldingRequest.Id,
-            DocumentType.MainContent);
+        return createMeldingRequest.MainDocumentData.ToDocumentEntity(
+            createMeldingRequest.Id,
+            DocumentType.MainContent
+        );
     }
-    
-    public static DocumentEntity? MapStructuredDocument(this CreateMeldingRequest createMeldingRequest)
+
+    public static DocumentEntity? MapStructuredDocument(
+        this CreateMeldingRequest createMeldingRequest
+    )
     {
         if (createMeldingRequest.StructuredData == null)
         {
             return null;
         }
-        return createMeldingRequest.StructuredData.ToDocumentEntity(createMeldingRequest.Id, DocumentType.StructuredData);
+        return createMeldingRequest.StructuredData.ToDocumentEntity(
+            createMeldingRequest.Id,
+            DocumentType.StructuredData
+        );
     }
-    
-    public static IEnumerable<DocumentEntity> MapAttachmentDocuments(this CreateMeldingRequest createMeldingRequest)
+
+    public static IEnumerable<DocumentEntity> MapAttachmentDocuments(
+        this CreateMeldingRequest createMeldingRequest
+    )
     {
-        return createMeldingRequest.AttachmentData.Select(attachment => 
-            attachment.ToDocumentEntity(createMeldingRequest.Id, DocumentType.Attachment));
+        return createMeldingRequest.AttachmentData.Select(attachment =>
+            attachment.ToDocumentEntity(createMeldingRequest.Id, DocumentType.Attachment)
+        );
     }
-    
-    private static DocumentEntity ToDocumentEntity(this DocumentStorageDto storageDto, Guid meldingId, DocumentType documentType)
+
+    private static DocumentEntity ToDocumentEntity(
+        this DocumentStorageDto storageDto,
+        Guid meldingId,
+        DocumentType documentType
+    )
     {
         return new DocumentEntity
         {
             Id = storageDto.DocumentId,
-            MeldingId =  meldingId,
+            MeldingId = meldingId,
             InternalDocumentReference = storageDto.InternalDocumentReference,
-            DocumentType =  documentType,
+            DocumentType = documentType,
             ContentType = storageDto.ContentType,
             FileName = storageDto.FileName,
             ScanResult = storageDto.ScanResult,

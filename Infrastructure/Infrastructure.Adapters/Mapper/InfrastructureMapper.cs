@@ -78,18 +78,19 @@ file static class MappingExtensions
     {
         return melding.Documents.First(d => d.DocumentType == DocumentType.MainContent).Id;
     }
-    
+
     public static Guid? GetStructuredDataId(this MeldingEntity melding)
     {
-        return melding.Documents.FirstOrDefault(d => d.DocumentType == DocumentType.StructuredData)?.Id;
+        return melding
+            .Documents.FirstOrDefault(d => d.DocumentType == DocumentType.StructuredData)
+            ?.Id;
     }
-    
+
     public static List<Guid> GetAttachmentIds(this MeldingEntity melding)
     {
-        return melding.Documents
-            .Where(d => d.DocumentType == DocumentType.Attachment)
+        return melding
+            .Documents.Where(d => d.DocumentType == DocumentType.Attachment)
             .Select(d => d.Id)
             .ToList();
     }
-    
 }

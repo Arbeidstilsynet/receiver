@@ -49,7 +49,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
                         InternalDocumentReference = "",
                         DocumentType = DocumentType.Attachment,
                         ScanResult = DocumentScanResult.Clean,
-                    }
+                    },
                 ]
         );
 
