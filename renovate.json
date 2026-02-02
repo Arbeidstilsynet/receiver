@@ -1,0 +1,16 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":automergeDigest",
+    "mergeConfidence:all-badges",
+    "group:allNonMajor"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["pinDigest"],
+      "automerge": true,
+      "description": "Automerge pinDigest PRs (e.g., GitHub Actions)"
+    }
+  ]
+}
