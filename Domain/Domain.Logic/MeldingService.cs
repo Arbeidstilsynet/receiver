@@ -1,6 +1,7 @@
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using MapsterMapper;

@@ -149,11 +149,45 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
     }
 
     [Fact]
-    public async Task GetDocument_ReturnsDocument()
+    public async Task GetDocument_ReturnsAttachment()
     {
         // Arrange
         var meldingId = ApplicationFixture.KnownMeldingId;
-        var documentId = ApplicationFixture.KnownDocumentId;
+        var documentId = ApplicationFixture.KnownAttachmentDocumentId;
+
+        // Act
+        var response = await _client.GetFromJsonAsync<Document>(
+            $"/meldinger/{meldingId}/documents/{documentId}",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+
+        await Verify(response, _verifySettings);
+    }
+    
+    [Fact]
+    public async Task GetDocument_ReturnsMainContent()
+    {
+        // Arrange
+        var meldingId = ApplicationFixture.KnownMeldingId;
+        var documentId = ApplicationFixture.KnownMeldingId; // Main content uses MeldingId as DocumentId
+
+        // Act
+        var response = await _client.GetFromJsonAsync<Document>(
+            $"/meldinger/{meldingId}/documents/{documentId}",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+
+        await Verify(response, _verifySettings);
+    }
+    
+    [Fact]
+    public async Task GetDocument_ReturnsStructuredData()
+    {
+        // Arrange
+        var meldingId = ApplicationFixture.KnownMeldingId;
+        var documentId = ApplicationFixture.KnownStructuredDataId;
 
         // Act
         var response = await _client.GetFromJsonAsync<Document>(
@@ -186,7 +220,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
     {
         // Arrange
         var unknownMeldingId = Guid.NewGuid();
-        var documentId = ApplicationFixture.KnownDocumentId;
+        var documentId = ApplicationFixture.KnownAttachmentDocumentId;
 
         // Act
         var response = await _client.GetAsync(
@@ -202,7 +236,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
     {
         // Arrange
         var meldingId = ApplicationFixture.KnownMeldingId;
-        var documentId = ApplicationFixture.KnownDocumentId;
+        var documentId = ApplicationFixture.KnownAttachmentDocumentId;
 
         // Act
         var response = await _client.GetAsync(
@@ -238,7 +272,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
     {
         // Arrange
         var unknownMeldingId = Guid.NewGuid();
-        var documentId = ApplicationFixture.KnownDocumentId;
+        var documentId = ApplicationFixture.KnownAttachmentDocumentId;
 
         // Act
         var response = await _client.GetAsync(

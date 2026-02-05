@@ -24,8 +24,8 @@
       DocumentId: Guid_3,
       MeldingId: Guid_2,
       FileMetadata: {
-        FileName: plastic.pde,
-        ContentType: image/vnd.dxf
+        FileName: structured-data.json,
+        ContentType: application/json
       },
       ScanResult: Clean,
       IsDocumentSafeToUse: true

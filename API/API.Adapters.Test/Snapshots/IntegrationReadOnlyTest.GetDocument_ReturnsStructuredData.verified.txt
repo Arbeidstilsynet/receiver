@@ -1,0 +1,10 @@
+﻿{
+  DocumentId: Guid_1,
+  MeldingId: Guid_2,
+  FileMetadata: {
+    FileName: structured-data.json,
+    ContentType: application/json
+  },
+  ScanResult: Clean,
+  IsDocumentSafeToUse: true
+}

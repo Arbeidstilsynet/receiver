@@ -131,11 +131,7 @@ file static class MappingExtensions
         this CreateMeldingRequest createMeldingRequest
     )
     {
-        if (createMeldingRequest.StructuredData == null)
-        {
-            return null;
-        }
-        return createMeldingRequest.StructuredData.ToDocumentEntity(
+        return createMeldingRequest.StructuredData?.ToDocumentEntity(
             createMeldingRequest.Id,
             DocumentType.StructuredData
         );

@@ -54,8 +54,11 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
     public const string SafeToDeleteApplicationId = "flip-flop-varsel";
     public static Guid KnownMeldingId { get; } = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
-    public static Guid KnownDocumentId { get; } =
+    public static Guid KnownAttachmentDocumentId { get; } =
         Guid.Parse("11111111-1111-1111-1111-111111111111");
+    
+    public static Guid KnownStructuredDataId { get; } =
+        Guid.Parse("33333333-3333-3333-3333-333333333333");
 
     public const string KnownDocumentContent = "Hello World.";
 
@@ -176,11 +179,23 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
                 InputStream = new MemoryStream(Encoding.UTF8.GetBytes(KnownDocumentContent)),
                 ScanResult = DocumentScanResult.Clean,
             },
+            StructuredData = new UploadDocumentRequest()
+            {
+                DocumentId = KnownStructuredDataId,
+                FileMetadata = new FileMetadata
+                {
+                    FileName = "structured-data.json",
+                    ContentType = "application/json",
+                },
+                InputStream = new MemoryStream(Encoding.UTF8.GetBytes("{ \"key\": \"value\" }")),
+                ScanResult = DocumentScanResult.Clean,
+                
+            },
             Attachments =
             [
                 new UploadDocumentRequest
                 {
-                    DocumentId = KnownDocumentId,
+                    DocumentId = KnownAttachmentDocumentId,
                     FileMetadata = new FileMetadata
                     {
                         FileName = "hello-world.txt",

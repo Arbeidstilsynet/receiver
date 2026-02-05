@@ -1,6 +1,7 @@
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Microsoft.Extensions.Logging;
 
@@ -16,29 +17,22 @@ internal class DocumentService(
     public async Task<Document?> GetDocument(GetDocumentRequest request)
     {
         var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
-        if (
-            melding != null
-            && (
-                melding.MainContentId == request.DocumentId
-                || melding.AttachmentIds.Contains(request.DocumentId)
-            )
-        )
+        
+        if (!melding.ContainsDocument(request.DocumentId)) return null;
+        
+        var document = await documentRepository.GetDocumentAsync(request.DocumentId);
+
+        if (document == null)
         {
-            var document = await documentRepository.GetDocumentAsync(request.DocumentId);
-
-            if (document == null)
-            {
-                return null;
-            }
-
-            if (!document.IsDocumentSafeToUse)
-            {
-                throw new DocumentNotSafeToUseException(document);
-            }
-            return document;
+            return null;
         }
 
-        return null;
+        if (!document.IsDocumentSafeToUse)
+        {
+            throw new DocumentNotSafeToUseException(document);
+        }
+        return document;
+
     }
 
     public async Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request)
