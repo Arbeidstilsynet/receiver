@@ -58,18 +58,31 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<Meldin
             return default(TStructuredData);
         }
 
-        var structuredData = JsonSerializer.Deserialize<TStructuredData>(document);
+        try
+        {
+            var structuredData = JsonSerializer.Deserialize<TStructuredData>(document);
 
-        if (structuredData == null)
+            if (structuredData == null)
+            {
+                logger.LogError(
+                    "The message's structured data could not be deserialized. Id: {MeldingId}, DocumentId: {DocumentId}",
+                    melding.Id,
+                    melding.StructuredDataId
+                );
+                return default(TStructuredData);
+            }
+
+            return structuredData;
+        }
+        catch (JsonException ex)
         {
             logger.LogError(
-                "The message's structured data could not be deserialized. Id: {MeldingId}, DocumentId: {DocumentId}",
+                ex,
+                "The message's structured data could not be deserialized due to a JSON exception. Id: {MeldingId}, DocumentId: {DocumentId}",
                 melding.Id,
                 melding.StructuredDataId
             );
             return default(TStructuredData);
         }
-
-        return structuredData;
     }
 }
