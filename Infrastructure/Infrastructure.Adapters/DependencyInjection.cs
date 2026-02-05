@@ -30,7 +30,7 @@ public record InfrastructureConfiguration
 
     public virtual required MaskinportenConfiguration MaskinportenConfiguration { get; init; }
 
-    public virtual required AltinnConfiguration AltinnAppConfiguration { get; init; }
+    public virtual required AltinnConfiguration AltinnConfiguration { get; init; }
 
     public virtual required string AppDomain { get; init; }
 }

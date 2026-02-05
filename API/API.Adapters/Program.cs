@@ -41,7 +41,7 @@ appSettings.InfrastructureConfig.ValkeyConfiguration.MessageKey = Arbeidstilsyne
     .MessageKey;
 services.AddInfrastructure(appSettings.InfrastructureConfig);
 
-services.AddAltinnAdapter(env, appSettings.InfrastructureConfig.MaskinportenConfiguration);
+services.AddAltinnAdapter(env, appSettings.InfrastructureConfig.MaskinportenConfiguration, appSettings.InfrastructureConfig.AltinnConfiguration);
 services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.ConnectionString, env);
 var app = builder.Build();
 
