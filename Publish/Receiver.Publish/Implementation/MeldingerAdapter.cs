@@ -5,13 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.Receiver.Implementation;
 
-internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<MeldingerAdapter> logger) : IMeldingerAdapter
+internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<MeldingerAdapter> logger)
+    : IMeldingerAdapter
 {
     public async Task<TStructuredData?> FetchStructuredData<TStructuredData>(Melding melding)
     {
         if (melding.StructuredDataId is not { } structuredDataId)
             return default(TStructuredData);
-        
+
         var mainDocumentMetadata = await meldingerClient.GetDocument(melding.Id, structuredDataId);
 
         if (mainDocumentMetadata == null)
@@ -23,7 +24,7 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<Meldin
             );
             return default(TStructuredData);
         }
-            
+
         if (!mainDocumentMetadata.IsDocumentSafeToUse)
         {
             logger.LogError(
@@ -46,9 +47,8 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<Meldin
         }
 
         var document = await meldingerClient.DownloadDocument(melding.Id, structuredDataId);
-            
 
-        if (document is not {Length: > 0})
+        if (document is not { Length: > 0 })
         {
             logger.LogError(
                 "The message's structured data could not be downloaded or is empty. Id: {MeldingId}, DocumentId: {DocumentId}",
