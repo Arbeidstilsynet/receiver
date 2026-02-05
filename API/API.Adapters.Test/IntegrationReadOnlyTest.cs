@@ -164,7 +164,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
 
         await Verify(response, _verifySettings);
     }
-    
+
     [Fact]
     public async Task GetDocument_ReturnsMainContent()
     {
@@ -181,7 +181,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
 
         await Verify(response, _verifySettings);
     }
-    
+
     [Fact]
     public async Task GetDocument_ReturnsStructuredData()
     {

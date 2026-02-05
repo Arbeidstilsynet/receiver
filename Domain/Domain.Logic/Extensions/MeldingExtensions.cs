@@ -6,11 +6,11 @@ internal static class MeldingExtensions
 {
     public static bool ContainsDocument(this Melding? melding, Guid documentId)
     {
-        return
-            melding != null &&
-            (melding.MainContentId == documentId
-             || melding.StructuredDataId == documentId
-             || melding.AttachmentIds.Contains(documentId));
+        return melding != null
+            && (
+                melding.MainContentId == documentId
+                || melding.StructuredDataId == documentId
+                || melding.AttachmentIds.Contains(documentId)
+            );
     }
-    
 }

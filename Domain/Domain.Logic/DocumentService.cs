@@ -17,9 +17,10 @@ internal class DocumentService(
     public async Task<Document?> GetDocument(GetDocumentRequest request)
     {
         var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
-        
-        if (!melding.ContainsDocument(request.DocumentId)) return null;
-        
+
+        if (!melding.ContainsDocument(request.DocumentId))
+            return null;
+
         var document = await documentRepository.GetDocumentAsync(request.DocumentId);
 
         if (document == null)
@@ -32,7 +33,6 @@ internal class DocumentService(
             throw new DocumentNotSafeToUseException(document);
         }
         return document;
-
     }
 
     public async Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request)

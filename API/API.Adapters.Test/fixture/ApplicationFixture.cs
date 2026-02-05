@@ -56,7 +56,7 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
 
     public static Guid KnownAttachmentDocumentId { get; } =
         Guid.Parse("11111111-1111-1111-1111-111111111111");
-    
+
     public static Guid KnownStructuredDataId { get; } =
         Guid.Parse("33333333-3333-3333-3333-333333333333");
 
@@ -189,7 +189,6 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
                 },
                 InputStream = new MemoryStream(Encoding.UTF8.GetBytes("{ \"key\": \"value\" }")),
                 ScanResult = DocumentScanResult.Clean,
-                
             },
             Attachments =
             [
