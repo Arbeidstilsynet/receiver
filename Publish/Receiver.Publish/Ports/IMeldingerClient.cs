@@ -32,5 +32,10 @@ public interface IMeldingerClient
     /// <returns>A <see cref="GetAllDocumentsResponse"/> containing metadata for all documents.</returns>
     Task<GetAllDocumentsResponse> GetDocuments(Guid meldingId);
 
+    /// <summary>
+    /// Subscribes a consumer to receive messages from the MeldingerReceiver application.
+    /// </summary>
+    /// <param name="consumerManifest"></param>
+    /// <returns></returns>
     Task<ConsumerManifest> SubscribeConsumer(ConsumerManifest consumerManifest);
 }

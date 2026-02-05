@@ -36,9 +36,6 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Abstract\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../Domain/Domain.Data/Domain.Data.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <PrivateAssets>All</PrivateAssets>
