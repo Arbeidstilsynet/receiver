@@ -1,6 +1,6 @@
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 
-public enum DocumentType
+internal enum DocumentType
 {
     MainContent,
     StructuredData,
