@@ -73,7 +73,9 @@ file static class MappingExtensions
 
     public static Guid? GetMainContentId(this MeldingEntity melding)
     {
-        return melding.Documents.FirstOrDefault(d => d.DocumentType == DocumentType.MainContent)?.Id;
+        return melding
+            .Documents.FirstOrDefault(d => d.DocumentType == DocumentType.MainContent)
+            ?.Id;
     }
 
     public static Guid? GetStructuredDataId(this MeldingEntity melding)
