@@ -16,16 +16,14 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 schema: "public",
                 table: "documents",
                 type: "hstore",
-                nullable: false);
+                nullable: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Tags",
-                schema: "public",
-                table: "documents");
+            migrationBuilder.DropColumn(name: "Tags", schema: "public", table: "documents");
         }
     }
 }
