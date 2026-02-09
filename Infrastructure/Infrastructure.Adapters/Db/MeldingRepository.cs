@@ -99,7 +99,7 @@ file static class MappingExtensions
     public static MeldingEntity ToMeldingEntity(this CreateMeldingRequest createMeldingRequest)
     {
         List<DocumentEntity> documents = [];
-        
+
         if (createMeldingRequest.MapMainDocument() is { } mainDocument)
         {
             documents.Add(mainDocument);
