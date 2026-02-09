@@ -17,8 +17,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 table: "documents",
                 type: "hstore",
                 nullable: false,
-                defaultValue: new Dictionary<string, string>()
-            );
+                defaultValueSql: "''::hstore"
+                );
         }
 
         /// <inheritdoc />
