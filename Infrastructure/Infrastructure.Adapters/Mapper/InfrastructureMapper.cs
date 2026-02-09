@@ -21,23 +21,7 @@ internal class InfrastructureMapper : IRegister
             .NewConfig<SubscriptionEntity, ConsumerManifest>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.ConsumerName, src => src.ConsumerName)
-            .Map(
-                target => target.AppRegistrations,
-                src =>
-                    src.RegisteredAltinnApps.Select(a => new AppRegistration
-                        {
-                            AppId = a.AppIdentifier,
-                            MessageSource = MessageSource.Altinn,
-                        })
-                        .Concat(
-                            src.RegisteredApiApps.Select(a => new AppRegistration
-                            {
-                                AppId = a.AppIdentifier,
-                                MessageSource = MessageSource.Api,
-                            })
-                        )
-                        .ToList()
-            );
+            .Map(target => target.AppRegistrations, src => src.ToAppRegistrations());
 
         config
             .NewConfig<AltinnSubscription, AltinnEventsSubscription>()
@@ -60,11 +44,7 @@ internal class InfrastructureMapper : IRegister
             .NewConfig<DocumentEntity, Domain.Data.Document>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.DocumentId, src => src.Id)
-            .Map(target => target.FileMetadata, src => src.Adapt<FileMetadata>())
-            .Map(
-                target => target.IsDocumentSafeToUse,
-                src => src.ScanResult == DocumentScanResult.Clean
-            );
+            .Map(target => target.FileMetadata, src => src.Adapt<FileMetadata>());
 
         config
             .NewConfig<DocumentEntity, FileMetadata>()
@@ -74,6 +54,23 @@ internal class InfrastructureMapper : IRegister
 
 file static class MappingExtensions
 {
+    public static List<AppRegistration> ToAppRegistrations(this SubscriptionEntity subscription)
+    {
+        var altinnApps = subscription.RegisteredAltinnApps.Select(a => new AppRegistration
+        {
+            AppId = a.AppIdentifier,
+            MessageSource = MessageSource.Altinn,
+        });
+
+        var apiApps = subscription.RegisteredApiApps.Select(a => new AppRegistration
+        {
+            AppId = a.AppIdentifier,
+            MessageSource = MessageSource.Api,
+        });
+
+        return altinnApps.Concat(apiApps).ToList();
+    }
+
     public static Guid? GetMainContentId(this MeldingEntity melding)
     {
         return melding.Documents.First(d => d.DocumentType == DocumentType.MainContent).Id;

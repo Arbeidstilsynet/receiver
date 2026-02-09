@@ -87,22 +87,24 @@ public class AltinnMapperTests
 
             StructuredData = new AltinnDocument
             {
-                DocumentContent = new MemoryStream("mainDocumentContent"u8.ToArray()),
+                DocumentContent = new MemoryStream("{ \"key\": \"value\" }"u8.ToArray()),
                 FileMetadata = new AltinnFileMetadata
                 {
+                    AltinnId = Guid.NewGuid(),
                     ContentType = "application/json",
-                    DataType = "structured-data",
+                    AltinnDataType = "structured-data",
                     Filename = "structured-data.json",
                     FileScanResult = FileScanResult.Clean,
                 },
             },
             SkjemaAsPdf = new AltinnDocument()
             {
-                DocumentContent = new MemoryStream("attachmentContent"u8.ToArray()),
+                DocumentContent = new MemoryStream("maincContent"u8.ToArray()),
                 FileMetadata = new AltinnFileMetadata
                 {
+                    AltinnId = Guid.NewGuid(),
                     ContentType = "application/pdf",
-                    DataType = "ref-data-as-pdf",
+                    AltinnDataType = "ref-data-as-pdf",
                     Filename = "main-data.pdf",
                     FileScanResult = FileScanResult.Clean,
                 },
@@ -114,8 +116,9 @@ public class AltinnMapperTests
                     DocumentContent = new MemoryStream("attachmentContent"u8.ToArray()),
                     FileMetadata = new AltinnFileMetadata
                     {
+                        AltinnId = Guid.NewGuid(),
                         ContentType = "application/pdf",
-                        DataType = "some-type",
+                        AltinnDataType = "some-type",
                         Filename = "etellerannet.pdf",
                         FileScanResult = FileScanResult.Clean,
                     },

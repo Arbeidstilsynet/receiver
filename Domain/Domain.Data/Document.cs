@@ -6,11 +6,7 @@ public record Document
     public required Guid MeldingId { get; init; }
     public required FileMetadata FileMetadata { get; init; }
     public required DocumentScanResult ScanResult { get; init; }
-
-    public bool IsDocumentSafeToUse
-    {
-        get { return ScanResult == DocumentScanResult.Clean; }
-    }
+    public Dictionary<string, string> Tags { get; init; } = [];
 }
 
 public record FileMetadata

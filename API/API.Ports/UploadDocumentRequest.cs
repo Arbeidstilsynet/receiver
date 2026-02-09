@@ -9,4 +9,5 @@ public record UploadDocumentRequest
 
     public Guid? DocumentId { get; init; }
     public DocumentScanResult ScanResult { get; init; } = DocumentScanResult.Unknown;
+    public Dictionary<string, string> Tags { get; init; } = [];
 }

@@ -41,6 +41,7 @@ internal static class AltinnMappingExtensions
             FileMetadata = altinnDocument.FileMetadata.ToDocumentMetadata(),
             InputStream = altinnDocument.DocumentContent,
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),
+            Tags = altinnDocument.FileMetadata.ToDocumentTags(),
         };
     }
 
@@ -51,6 +52,23 @@ internal static class AltinnMappingExtensions
             ContentType = fileMetadata.ContentType ?? "application/octet-stream",
             FileName = fileMetadata.Filename ?? "unknown",
         };
+    }
+
+    private static Dictionary<string, string> ToDocumentTags(this AltinnFileMetadata fileMetadata)
+    {
+        var tags = new Dictionary<string, string>();
+
+        if (fileMetadata.AltinnId != Guid.Empty)
+        {
+            tags.Add("AltinnId", fileMetadata.AltinnId.ToString());
+        }
+
+        if (fileMetadata.AltinnDataType is { Length: > 0 } dataType)
+        {
+            tags.Add("AltinnDataType", dataType);
+        }
+
+        return tags;
     }
 
     private static DocumentScanResult MapToDocumentScanResult(this FileScanResult? fileScanResult)

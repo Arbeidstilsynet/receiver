@@ -16,6 +16,8 @@ internal class DocumentEntity : BaseEntity
 
     public required DocumentType DocumentType { get; set; }
 
+    public Dictionary<string, string> Tags { get; set; } = [];
+
     public string? ContentType { get; set; } = null;
 
     public string? FileName { get; set; } = null;

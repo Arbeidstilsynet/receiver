@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\Domain.Data\Domain.Data.csproj" />
-    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="2.2.0"></PackageReference>
+    <PackageReference
+      Include="Arbeidstilsynet.Common.Altinn"
+      Version="2.4.0-alpha.8"
+    ></PackageReference>
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>

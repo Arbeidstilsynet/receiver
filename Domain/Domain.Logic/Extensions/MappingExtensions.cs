@@ -23,6 +23,7 @@ internal static class MappingExtensions
             MeldingId = meldingId,
             FileMetadata = request.FileMetadata,
             ScanResult = request.ScanResult,
+            Tags = request.Tags,
         };
     }
 }
