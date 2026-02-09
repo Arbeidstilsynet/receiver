@@ -9,7 +9,11 @@
       ContentType: application/pdf
     },
     DocumentId: null,
-    ScanResult: Clean
+    ScanResult: Clean,
+    Tags: {
+      AltinnDataType: ref-data-as-pdf,
+      AltinnId: c9fe4325-4c0d-441a-aa34-8566aefd6538
+    }
   },
   StructuredData: {
     FileMetadata: {
@@ -17,7 +21,11 @@
       ContentType: application/json
     },
     DocumentId: null,
-    ScanResult: Clean
+    ScanResult: Clean,
+    Tags: {
+      AltinnDataType: structured-data,
+      AltinnId: 359b6e86-1f7f-4d0e-a989-71542219db52
+    }
   },
   Attachments: [
     {
@@ -26,7 +34,11 @@
         ContentType: application/pdf
       },
       DocumentId: null,
-      ScanResult: Clean
+      ScanResult: Clean,
+      Tags: {
+        AltinnDataType: some-type,
+        AltinnId: 4cdba3ec-604d-48a9-a884-4a946e09b570
+      }
     }
   ],
   Metadata: {

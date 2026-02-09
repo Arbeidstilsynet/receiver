@@ -6,5 +6,5 @@
     ContentType: application/json
   },
   ScanResult: Clean,
-  IsDocumentSafeToUse: true
+  Tags: null
 }

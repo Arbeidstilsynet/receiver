@@ -6,5 +6,5 @@
     ContentType: text/plain
   },
   ScanResult: Clean,
-  IsDocumentSafeToUse: true
+  Tags: null
 }

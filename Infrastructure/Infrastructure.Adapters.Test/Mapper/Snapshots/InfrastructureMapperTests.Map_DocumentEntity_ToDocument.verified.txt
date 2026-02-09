@@ -6,5 +6,5 @@
     ContentType: application/pdf
   },
   ScanResult: Clean,
-  IsDocumentSafeToUse: true
+  Tags: null
 }
