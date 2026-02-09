@@ -9,7 +9,7 @@ public static class MeldingExtensions
 {
     public static bool ContainsDocument(this Melding? melding, Guid documentId)
     {
-        return melding != null
+        return melding != null && documentId != Guid.Empty
             && (
                 melding.MainContentId == documentId
                 || melding.StructuredDataId == documentId
