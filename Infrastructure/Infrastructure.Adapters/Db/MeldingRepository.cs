@@ -98,7 +98,12 @@ file static class MappingExtensions
 {
     public static MeldingEntity ToMeldingEntity(this CreateMeldingRequest createMeldingRequest)
     {
-        List<DocumentEntity> documents = [createMeldingRequest.MapMainDocument()];
+        List<DocumentEntity> documents = [];
+        
+        if (createMeldingRequest.MapMainDocument() is { } mainDocument)
+        {
+            documents.Add(mainDocument);
+        }
 
         if (createMeldingRequest.MapStructuredDocument() is { } structuredDocument)
         {
@@ -119,9 +124,9 @@ file static class MappingExtensions
         };
     }
 
-    public static DocumentEntity MapMainDocument(this CreateMeldingRequest createMeldingRequest)
+    public static DocumentEntity? MapMainDocument(this CreateMeldingRequest createMeldingRequest)
     {
-        return createMeldingRequest.MainDocumentData.ToDocumentEntity(
+        return createMeldingRequest.MainDocumentData?.ToDocumentEntity(
             createMeldingRequest.Id,
             DocumentType.MainContent
         );

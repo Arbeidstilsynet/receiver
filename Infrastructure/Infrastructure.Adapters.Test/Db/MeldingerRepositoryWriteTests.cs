@@ -80,4 +80,43 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
         savedMelding.ShouldBeEquivalentTo(result);
         await Verify(savedMelding, _verifySettings);
     }
+
+    [Fact]
+    public async Task SaveMelding_WhenCalledWithMeldingDtoWithoutMainDocument_PersistsEntity()
+    {
+        //arrange
+        var melding = new CreateMeldingRequest
+        {
+            Id = Guid.NewGuid(),
+            ApplicationId = "altinn-app",
+            ReceivedAt = DateTime.Now,
+            Source = MessageSource.Altinn,
+            AttachmentData =
+            [
+                new DocumentStorageDto
+                {
+                    DocumentId = Guid.NewGuid(),
+                    InternalDocumentReference = Guid.NewGuid().ToString(),
+                    ContentType = "content-type",
+                    FileName = "file2",
+                    ScanResult = DocumentScanResult.Clean,
+                },
+                new DocumentStorageDto
+                {
+                    DocumentId = Guid.NewGuid(),
+                    InternalDocumentReference = Guid.NewGuid().ToString(),
+                    ContentType = "content-type",
+                    FileName = "file3",
+                    ScanResult = DocumentScanResult.Clean,
+                },
+            ],
+        };
+        //act
+        var result = await _meldingRepository.SaveMelding(melding);
+        //assert
+        var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id);
+
+        savedMelding.ShouldBeEquivalentTo(result);
+        await Verify(savedMelding, _verifySettings);
+    }
 }

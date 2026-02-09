@@ -269,4 +269,32 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
 
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
+
+    [Fact]
+    public async Task ProcessMelding_WhenCalledWithNoContent_ShouldPersistMelding()
+    {
+        //arrange
+        var request = SampleMeldingRequest with
+        {
+            MainContent = null,
+            StructuredData = null,
+            Attachments = [],
+        };
+        //act
+        await _sut.ProcessMelding(request, TestContext.Current.CancellationToken);
+        //assert
+        await _meldingRepository
+            .Received(1)
+            .SaveMelding(
+                Arg.Is<CreateMeldingRequest>(i =>
+                    i.Id == request.MeldingId
+                    && i.ApplicationId == request.ApplicationReference
+                    && i.Source == request.Source
+                    && i.MainDocumentData == null
+                    && i.StructuredData == null
+                    && i.AttachmentData.Count == 0
+                    && i.Tags == request.Metadata
+                )
+            );
+    }
 }

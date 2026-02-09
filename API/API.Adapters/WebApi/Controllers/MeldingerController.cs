@@ -43,7 +43,7 @@ public class MeldingerController : ControllerBase
             Source = MessageSource.Api,
             ApplicationReference = model.ApplicationId,
             MeldingReceivedAt = meldingReceivedAt,
-            MainContent = model.MainContent.ToUploadDocumentRequest(),
+            MainContent = model.MainContent?.ToUploadDocumentRequest(),
             StructuredData = model.StructuredData?.ToUploadDocumentRequest(),
             Attachments = model.Attachments.Select(a => a.ToUploadDocumentRequest()).ToList(),
             Metadata = model.Metadata,

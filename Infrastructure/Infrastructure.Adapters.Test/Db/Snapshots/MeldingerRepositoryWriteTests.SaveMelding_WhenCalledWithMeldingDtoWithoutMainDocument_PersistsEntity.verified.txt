@@ -1,0 +1,14 @@
+﻿{
+  Id: Guid_1,
+  Source: Altinn,
+  ApplicationId: altinn-app,
+  ReceivedAt: DateTime_1,
+  Tags: null,
+  InternalTags: null,
+  MainContentId: null,
+  StructuredDataId: null,
+  AttachmentIds: [
+    Guid_2,
+    Guid_3
+  ]
+}

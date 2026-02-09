@@ -18,9 +18,9 @@ public record PostMeldingBody
     public Dictionary<string, string> Metadata { get; init; } = [];
 
     /// <summary>
-    /// Main content file for the melding.
+    /// Main content file for the melding. This is usually a human-readable document (e.g. PDF).
     /// </summary>
-    public required IFormFile MainContent { get; init; }
+    public IFormFile? MainContent { get; init; }
 
     /// <summary>
     /// Optional structured data file (e.g. JSON matching the contract of the consumer).

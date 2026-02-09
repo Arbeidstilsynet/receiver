@@ -79,7 +79,7 @@ internal class MeldingService : IMeldingService
             Source = request.Source,
             ApplicationId = request.ApplicationReference,
             ReceivedAt = request.MeldingReceivedAt,
-            MainDocumentData = mainDocumentUpload.PersistedDocument,
+            MainDocumentData = mainDocumentUpload?.PersistedDocument,
             StructuredData = structuredDocumentUpload?.PersistedDocument,
             AttachmentData = attachmentUploads.Select(a => a.PersistedDocument).ToList(),
             Tags = request.Metadata,
@@ -106,7 +106,7 @@ internal class MeldingService : IMeldingService
     }
 
     private async Task<(
-        UploadResponse mainDocumentUpload,
+        UploadResponse? mainDocumentUpload,
         UploadResponse? structuredDocumentUpload,
         List<UploadResponse> attachmentUploads
     )> UploadDocuments(
@@ -116,11 +116,11 @@ internal class MeldingService : IMeldingService
     )
     {
         using var activity = Tracer.Source.StartActivity();
-        var mainContentUploadRequest = request.MainContent.ToUploadRequest(meldingId);
-        var mainDocumentUpload = await ProcessUploadRequest(
-            mainContentUploadRequest,
-            cancellationToken
-        );
+        var mainContentUploadRequest = request.MainContent?.ToUploadRequest(meldingId);
+        var mainDocumentUpload =
+            mainContentUploadRequest == null
+                ? null
+                : await ProcessUploadRequest(mainContentUploadRequest, cancellationToken);
 
         var structuredDataUploadRequest = request.StructuredData?.ToUploadRequest(meldingId);
         var structuredDocumentUpload =
