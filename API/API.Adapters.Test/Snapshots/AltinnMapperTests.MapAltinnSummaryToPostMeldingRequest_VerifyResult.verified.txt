@@ -12,7 +12,7 @@
     ScanResult: Clean,
     Tags: {
       AltinnDataType: ref-data-as-pdf,
-      AltinnId: c9fe4325-4c0d-441a-aa34-8566aefd6538
+      AltinnId: abcd1234-5678-90ab-cdef-1234567890ab
     }
   },
   StructuredData: {
@@ -24,7 +24,7 @@
     ScanResult: Clean,
     Tags: {
       AltinnDataType: structured-data,
-      AltinnId: 359b6e86-1f7f-4d0e-a989-71542219db52
+      AltinnId: da158178-b7e1-44a1-bd20-7de5ef2fbc7a
     }
   },
   Attachments: [
@@ -37,7 +37,7 @@
       ScanResult: Clean,
       Tags: {
         AltinnDataType: some-type,
-        AltinnId: 4cdba3ec-604d-48a9-a884-4a946e09b570
+        AltinnId: a013a210-e65d-46cb-8eb8-d41d41756be6
       }
     }
   ],

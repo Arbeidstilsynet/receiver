@@ -13,6 +13,9 @@ public class AltinnMapperTests
     private const string TestOrg = "dat";
     private const string TestOwnerPartyid = "123123";
     private const string TestInstanceId = "11827765-ed99-44a4-a88b-54a32f7627b6";
+    private const string MainContentId = "abcd1234-5678-90ab-cdef-1234567890ab";
+    private const string StructuredDataId = "da158178-b7e1-44a1-bd20-7de5ef2fbc7a";
+    private const string AttachmentId = "a013a210-e65d-46cb-8eb8-d41d41756be6";
 
     private readonly VerifySettings _verifySettings = new();
 
@@ -90,7 +93,7 @@ public class AltinnMapperTests
                 DocumentContent = new MemoryStream("{ \"key\": \"value\" }"u8.ToArray()),
                 FileMetadata = new AltinnFileMetadata
                 {
-                    AltinnId = Guid.NewGuid(),
+                    AltinnId = new Guid(StructuredDataId),
                     ContentType = "application/json",
                     AltinnDataType = "structured-data",
                     Filename = "structured-data.json",
@@ -102,7 +105,7 @@ public class AltinnMapperTests
                 DocumentContent = new MemoryStream("maincContent"u8.ToArray()),
                 FileMetadata = new AltinnFileMetadata
                 {
-                    AltinnId = Guid.NewGuid(),
+                    AltinnId = new Guid(MainContentId),
                     ContentType = "application/pdf",
                     AltinnDataType = "ref-data-as-pdf",
                     Filename = "main-data.pdf",
@@ -116,7 +119,7 @@ public class AltinnMapperTests
                     DocumentContent = new MemoryStream("attachmentContent"u8.ToArray()),
                     FileMetadata = new AltinnFileMetadata
                     {
-                        AltinnId = Guid.NewGuid(),
+                        AltinnId = new Guid(AttachmentId),
                         ContentType = "application/pdf",
                         AltinnDataType = "some-type",
                         Filename = "etellerannet.pdf",
