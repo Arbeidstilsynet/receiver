@@ -29,10 +29,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                         WHEN d.""IsAttachment"" = FALSE THEN 2 -- StructuredData
                         WHEN d.""IsAttachment"" = TRUE THEN
                             CASE
-                                WHEN m.""ApplicationId"" = 'ulykkesvarsel' AND d.""FileName"" = 'Varsel om arbeidsulykke med alvorlig personskade eller dødsfall.pdf' THEN 0 -- MainContent
-                                ELSE 1 -- Attachment
+                                WHEN m.""ApplicationId"" = 'ulykkesvarsel' AND d.""FileName"" = 'Varsel om arbeidsulykke med alvorlig personskade eller dødsfall.pdf' THEN 1 -- MainContent
+                                ELSE 0 -- Attachment
                             END
-                        ELSE 2 -- fallback to StructuredData
+                        ELSE 0 -- fallback to Attachment if IsAttachment is NULL (shouldn't happen due to default, but just in case)
                     END
                 FROM ""public"".""meldinger"" m
                 WHERE d.""MeldingId"" = m.""Id"";
