@@ -114,7 +114,7 @@ VALUES
                     d.Id == docId2 && d.DocumentType == DocumentType.Attachment
                 );
                 docs.ShouldContain(d =>
-                    d.Id == docId3 && d.DocumentType == DocumentType.MainContent
+                    d.Id == docId3 && d.DocumentType == DocumentType.Attachment
                 );
                 docs.ShouldContain(d =>
                     d.Id == docId4 && d.DocumentType == DocumentType.Attachment

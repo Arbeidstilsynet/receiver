@@ -20,19 +20,14 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 defaultValue: 0
             );
 
-            // 2. Migrate IsAttachment data to DocumentType with logic based on ApplicationId and FileName
+            // 2. Migrate IsAttachment data to DocumentType with logic. MainDocument will need to be moved manually
             migrationBuilder.Sql(
                 @"
                 UPDATE ""public"".""documents"" d
                 SET ""DocumentType"" =
                     CASE
                         WHEN d.""IsAttachment"" = FALSE THEN 2 -- StructuredData
-                        WHEN d.""IsAttachment"" = TRUE THEN
-                            CASE
-                                WHEN m.""ApplicationId"" = 'ulykkesvarsel' AND d.""FileName"" = 'Varsel om arbeidsulykke med alvorlig personskade eller dødsfall.pdf' THEN 1 -- MainContent
-                                ELSE 0 -- Attachment
-                            END
-                        ELSE 0 -- fallback to Attachment if IsAttachment is NULL (shouldn't happen due to default, but just in case)
+                        ELSE 0 -- Attachment 
                     END
                 FROM ""public"".""meldinger"" m
                 WHERE d.""MeldingId"" = m.""Id"";
@@ -56,9 +51,9 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 defaultValue: false
             );
 
-            // 2. Migrate DocumentType data back to IsAttachment (example: DocumentType = 1 => IsAttachment = true)
+            // 2. Migrate DocumentType data back to IsAttachment (example: DocumentType = 2 => IsAttachment = true)
             migrationBuilder.Sql(
-                @"UPDATE ""public"".""documents"" SET ""IsAttachment"" = CASE WHEN ""DocumentType"" = 1 THEN TRUE ELSE FALSE END;"
+                @"UPDATE ""public"".""documents"" SET ""IsAttachment"" = CASE WHEN ""DocumentType"" = 2 THEN TRUE ELSE FALSE END;"
             );
 
             // 3. Drop DocumentType column
