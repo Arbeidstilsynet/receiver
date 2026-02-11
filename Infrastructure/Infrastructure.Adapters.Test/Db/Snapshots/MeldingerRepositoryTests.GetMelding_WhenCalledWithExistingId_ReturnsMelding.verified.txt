@@ -1,6 +1,6 @@
 ﻿{
   Id: Guid_1,
-  Source: Altinn,
+  Source: Api,
   ApplicationId: test-app,
   ReceivedAt: DateTime_1,
   Tags: null,
