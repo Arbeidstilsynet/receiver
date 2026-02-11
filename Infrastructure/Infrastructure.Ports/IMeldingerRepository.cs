@@ -5,7 +5,6 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 
 public interface IMeldingRepository
 {
-    Task<Melding?> SaveMelding(Melding melding, CancellationToken cancellationToken);
     Task<Melding> CreateMelding(CreateMeldingRequest request, CancellationToken cancellationToken);
     Task<Melding?> GetMeldingAsync(Guid meldingId, CancellationToken cancellationToken);
 

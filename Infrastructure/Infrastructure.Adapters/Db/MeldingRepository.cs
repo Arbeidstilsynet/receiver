@@ -34,28 +34,6 @@ internal class MeldingRepository : IMeldingRepository
         }
     }
 
-    public async Task<Melding?> SaveMelding(Melding melding, CancellationToken cancellationToken)
-    {
-        using var activity = Tracer.Source.StartActivity();
-
-        var existingEntity = await DbContext.Meldinger.FindAsync([melding.Id], cancellationToken);
-        
-        if (existingEntity != null)
-        {
-            DbContext.Meldinger.Update(_mapper.Map<MeldingEntity>(melding));
-        }
-        else
-        {
-            return null;
-        }
-
-        await DbContext.SaveChangesAsync();
-
-        await DbContext.Entry(existingEntity).ReloadAsync();
-
-        return _mapper.Map<Melding>(existingEntity);
-    }
-
     public async Task<Melding> CreateMelding(CreateMeldingRequest createMeldingRequest, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity();
