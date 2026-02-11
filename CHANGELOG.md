@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Differentiate between MainContent and StructuredData on Melding
 - Add Tags to Documents
+- Add GetMeldinger to IMeldingerClient
 
 ## 1.0.0
 
