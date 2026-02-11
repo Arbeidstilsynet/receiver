@@ -166,6 +166,7 @@ file static class MappingExtensions
             ContentType = storageDto.ContentType,
             FileName = storageDto.FileName,
             ScanResult = storageDto.ScanResult,
+            Tags = storageDto.Tags,
         };
     }
 }

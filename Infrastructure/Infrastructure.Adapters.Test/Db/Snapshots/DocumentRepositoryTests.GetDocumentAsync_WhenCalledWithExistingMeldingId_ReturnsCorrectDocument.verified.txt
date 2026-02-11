@@ -6,5 +6,9 @@
     ContentType: null
   },
   ScanResult: Clean,
-  Tags: null
+  Tags: {
+    AltinnDataType: ref-data-as-pdf,
+    AltinnId: Guid_3,
+    key1: value1
+  }
 }

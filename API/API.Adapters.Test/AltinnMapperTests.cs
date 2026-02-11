@@ -49,6 +49,7 @@ public class AltinnMapperTests
         //act
         var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
         //assert
+        result.MainContent.ShouldNotBeNull();
         result.MainContent.InputStream.ShouldBeSameAs(summary.SkjemaAsPdf.DocumentContent);
     }
 
@@ -76,7 +77,20 @@ public class AltinnMapperTests
         result.Attachments[0].InputStream.ShouldBeSameAs(summary.Attachments[0].DocumentContent);
     }
 
-    private static AltinnInstanceSummary GetCompleteAltinnSummary()
+    [Fact]
+    public async Task MapAltinnSummaryToPostMeldingRequest_AllDocumentsAreInfected_TreatStructuredDataAndMainContentAsClean()
+    {
+        //arrange
+        var summary = GetCompleteAltinnSummary(FileScanResult.Infected);
+        //act
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        //assert
+        await Verify(result, _verifySettings);
+    }
+
+    private static AltinnInstanceSummary GetCompleteAltinnSummary(
+        FileScanResult fileScanResult = FileScanResult.Clean
+    )
     {
         return new AltinnInstanceSummary
         {
@@ -97,7 +111,7 @@ public class AltinnMapperTests
                     ContentType = "application/json",
                     AltinnDataType = "structured-data",
                     Filename = "structured-data.json",
-                    FileScanResult = FileScanResult.Clean,
+                    FileScanResult = fileScanResult,
                 },
             },
             SkjemaAsPdf = new AltinnDocument()
@@ -109,7 +123,7 @@ public class AltinnMapperTests
                     ContentType = "application/pdf",
                     AltinnDataType = "ref-data-as-pdf",
                     Filename = "main-data.pdf",
-                    FileScanResult = FileScanResult.Clean,
+                    FileScanResult = fileScanResult,
                 },
             },
             Attachments =
@@ -123,7 +137,7 @@ public class AltinnMapperTests
                         ContentType = "application/pdf",
                         AltinnDataType = "some-type",
                         Filename = "etellerannet.pdf",
-                        FileScanResult = FileScanResult.Clean,
+                        FileScanResult = fileScanResult,
                     },
                 },
             ],

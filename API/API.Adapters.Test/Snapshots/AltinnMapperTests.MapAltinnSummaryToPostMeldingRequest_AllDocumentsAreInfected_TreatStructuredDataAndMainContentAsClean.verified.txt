@@ -1,0 +1,54 @@
+﻿{
+  MeldingId: 11827765-ed99-44a4-a88b-54a32f7627b6,
+  Source: Altinn,
+  ApplicationReference: test-skjema,
+  MeldingReceivedAt: DateTime_1,
+  MainContent: {
+    FileMetadata: {
+      FileName: main-data.pdf,
+      ContentType: application/pdf
+    },
+    DocumentId: null,
+    ScanResult: Clean,
+    Tags: {
+      AltinnDataType: ref-data-as-pdf,
+      AltinnId: abcd1234-5678-90ab-cdef-1234567890ab
+    }
+  },
+  StructuredData: {
+    FileMetadata: {
+      FileName: structured-data.json,
+      ContentType: application/json
+    },
+    DocumentId: null,
+    ScanResult: Clean,
+    Tags: {
+      AltinnDataType: structured-data,
+      AltinnId: da158178-b7e1-44a1-bd20-7de5ef2fbc7a
+    }
+  },
+  Attachments: [
+    {
+      FileMetadata: {
+        FileName: etellerannet.pdf,
+        ContentType: application/pdf
+      },
+      DocumentId: null,
+      ScanResult: Infected,
+      Tags: {
+        AltinnDataType: some-type,
+        AltinnId: a013a210-e65d-46cb-8eb8-d41d41756be6
+      }
+    }
+  ],
+  Metadata: {
+    altinnReference: 54a32f7627b6,
+    app: test-skjema,
+    instanceGuid: 11827765-ed99-44a4-a88b-54a32f7627b6,
+    instanceOwnerPartyId: 123123,
+    org: dat,
+    organisationNumber: ,
+    processEnded: ,
+    processStarted: 
+  }
+}

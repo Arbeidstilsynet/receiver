@@ -15,7 +15,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
 
     private static readonly Faker<MeldingEntity> MeldingEntityFaker = new Faker<MeldingEntity>()
         .UseSeed(1337)
-        .RuleForType(typeof(Guid), faker => Guid.NewGuid())
+        .RuleForType(typeof(Guid), faker => faker.Random.Guid())
         .RuleFor(x => x.Source, faker => faker.PickRandom(MessageSource.Altinn, MessageSource.Api))
         .RuleForType(
             typeof(DateTime),
@@ -28,27 +28,43 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
                 [
                     new DocumentEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = faker.Random.Guid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
                         DocumentType = DocumentType.MainContent,
                         ScanResult = DocumentScanResult.Clean,
+                        Tags = new Dictionary<string, string>()
+                        {
+                            { "key1", "value1" },
+                            { "AltinnId", faker.Random.Guid().ToString() },
+                            { "AltinnDataType", "ref-data-as-pdf" },
+                        },
                     },
                     new DocumentEntity()
                     {
-                        Id = Guid.NewGuid(),
+                        Id = faker.Random.Guid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
                         DocumentType = DocumentType.StructuredData,
                         ScanResult = DocumentScanResult.Clean,
+                        Tags = new Dictionary<string, string>()
+                        {
+                            { "AltinnId", faker.Random.Guid().ToString() },
+                            { "AltinnDataType", "skjema" },
+                        },
                     },
                     new DocumentEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = faker.Random.Guid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
                         DocumentType = DocumentType.Attachment,
                         ScanResult = DocumentScanResult.Clean,
+                        Tags = new Dictionary<string, string>()
+                        {
+                            { "AltinnId", faker.Random.Guid().ToString() },
+                            { "AltinnDataType", "vedlegg" },
+                        },
                     },
                 ]
         );

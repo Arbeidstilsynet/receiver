@@ -1,3 +1,4 @@
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
@@ -15,6 +16,15 @@ public static class ModelMappingExtensions
                 FileName = file.FileName,
             },
             InputStream = file.OpenReadStream(),
+        };
+    }
+
+    public static UploadDocumentRequest AsCleanFile(this UploadDocumentRequest request)
+    {
+        return new UploadDocumentRequest()
+        {
+            FileMetadata = request.FileMetadata,
+            InputStream = request.InputStream,
         };
     }
 }

@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Differentiate between MainContent and StructuredData on Melding
 - Add Tags to Documents
 - Add GetMeldinger to IMeldingerClient
+- Treat structured data and main content as clean when coming from Altinn (since they are both generated based on the DataModel of the instance)
 
 ## 1.0.0
 

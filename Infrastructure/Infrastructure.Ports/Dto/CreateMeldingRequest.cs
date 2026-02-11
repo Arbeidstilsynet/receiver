@@ -28,4 +28,5 @@ public record DocumentStorageDto
     public required string FileName { get; init; }
 
     public required DocumentScanResult ScanResult { get; set; }
+    public Dictionary<string, string> Tags { get; set; } = [];
 }

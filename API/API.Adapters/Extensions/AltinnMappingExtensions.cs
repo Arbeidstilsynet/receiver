@@ -26,8 +26,10 @@ internal static class AltinnMappingExtensions
                 ),
             MeldingReceivedAt = meldingReceivedAt,
             Metadata = altinnInstanceSummary.ToMetadataDictionary(),
-            MainContent = altinnInstanceSummary.SkjemaAsPdf.ToUploadDocumentRequest(),
-            StructuredData = altinnInstanceSummary.StructuredData?.ToUploadDocumentRequest(),
+            MainContent = altinnInstanceSummary.SkjemaAsPdf.ToUploadDocumentRequest().AsClean(),
+            StructuredData = altinnInstanceSummary
+                .StructuredData?.ToUploadDocumentRequest()
+                .AsClean(),
             Attachments = altinnInstanceSummary
                 .Attachments.Select(attachment => attachment.ToUploadDocumentRequest())
                 .ToList(),
@@ -43,6 +45,11 @@ internal static class AltinnMappingExtensions
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),
             Tags = altinnDocument.FileMetadata.ToDocumentTags(),
         };
+    }
+
+    private static UploadDocumentRequest AsClean(this UploadDocumentRequest uploadDocumentRequest)
+    {
+        return uploadDocumentRequest with { ScanResult = DocumentScanResult.Clean };
     }
 
     private static DocumentFileMetadata ToDocumentMetadata(this AltinnFileMetadata fileMetadata)

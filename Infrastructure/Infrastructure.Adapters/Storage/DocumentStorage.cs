@@ -49,6 +49,7 @@ internal class DocumentStorage(
                     FileName = request.Document.FileMetadata.FileName,
                     InternalDocumentReference = uploadedObject.Name,
                     ScanResult = request.Document.ScanResult,
+                    Tags = request.Document.Tags,
                 },
             };
         }
