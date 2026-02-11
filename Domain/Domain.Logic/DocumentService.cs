@@ -14,14 +14,14 @@ internal class DocumentService(
     ILogger<DocumentService> logger
 ) : IDocumentService
 {
-    public async Task<Document?> GetDocument(GetDocumentRequest request)
+    public async Task<Document?> GetDocument(GetDocumentRequest request, CancellationToken cancellationToken)
     {
-        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
+        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId, cancellationToken);
 
         if (melding == null || !melding.ContainsDocument(request.DocumentId))
             return null;
 
-        var document = await documentRepository.GetDocumentAsync(request.DocumentId);
+        var document = await documentRepository.GetDocumentAsync(request.DocumentId, cancellationToken);
 
         if (document == null)
         {
@@ -35,12 +35,12 @@ internal class DocumentService(
         return document;
     }
 
-    public async Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request)
+    public async Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request, CancellationToken cancellationToken)
     {
-        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
+        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId, cancellationToken);
         if (melding != null)
         {
-            var documents = await documentRepository.GetAllDocumentsForMelding(request.MeldingId);
+            var documents = await documentRepository.GetAllDocumentsForMelding(request.MeldingId, cancellationToken);
 
             var unsafeDocuments = new List<Document>();
             var safeDocuments = new List<Document>();
@@ -79,7 +79,7 @@ internal class DocumentService(
         await documentStorage.Download(
             document,
             outputStream,
-            cancellationToken: cancellationToken
+            cancellationToken
         );
     }
 }

@@ -40,12 +40,12 @@ public class MeldingerController : ControllerBase
     )
     {
         var validationResult = await _postMeldingValidator.ValidateAsync(model, cancellationToken);
-        
+
         if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.ToString());
         }
-        
+
         _apiMeters.MeldingReceived(MessageSource.Api, model.ApplicationId);
         var postMeldingRequest = new CreateMeldingRequest
         {
@@ -62,27 +62,6 @@ public class MeldingerController : ControllerBase
         _apiMeters.MeldingProcessed(melding);
         _apiMeters.RegisterMeldingDuration(melding);
         return new PostMeldingResponse { MeldingId = melding.Id };
-    }
-    
-    [HttpPost("{meldingId:guid}/edit")]
-    public async Task<ActionResult<Melding>> PostMeldingEdit(
-        Guid meldingId, 
-        [FromBody]PostEditMeldingBody model,
-        CancellationToken cancellationToken
-    )
-    {
-        var editRequest = new EditMeldingRequest
-        {
-            MeldingId = meldingId,
-            MainContentId = model.MainContentId,
-            StructuredDataId = model.StructuredDataId,
-            AttachmentReferenceIds = model.AttachmentReferenceIds,
-            MetadataUpdates = model.Metadata,
-        };
-        
-        var melding = await _meldingService.EditMelding(editRequest, cancellationToken);
-        
-        return melding != null ? melding : NotFound();
     }
 
     [HttpGet]
@@ -104,11 +83,12 @@ public class MeldingerController : ControllerBase
 
     [HttpGet("{meldingId:guid}")]
     public async Task<ActionResult<GetMeldingResponse>> GetMelding(
-        [Required] [FromRoute] Guid meldingId
+        [Required] [FromRoute] Guid meldingId,
+        CancellationToken cancellationToken
     )
     {
         var melding = await _meldingService.GetMelding(
-            new GetMeldingRequest { MeldingId = meldingId }
+            new GetMeldingRequest { MeldingId = meldingId }, cancellationToken
         );
 
         if (melding == null)
@@ -120,12 +100,13 @@ public class MeldingerController : ControllerBase
     [HttpGet("{meldingId:guid}/documents/{documentId:guid}")]
     public async Task<ActionResult<Document>> GetDocument(
         [Required] [FromRoute] Guid meldingId,
-        [Required] [FromRoute] Guid documentId
+        [Required] [FromRoute] Guid documentId,
+        CancellationToken cancellationToken
     )
     {
         var request = new GetDocumentRequest { MeldingId = meldingId, DocumentId = documentId };
 
-        var document = await _documentService.GetDocument(request);
+        var document = await _documentService.GetDocument(request, cancellationToken);
 
         if (document == null)
             return NotFound();
@@ -141,7 +122,7 @@ public class MeldingerController : ControllerBase
     {
         var request = new GetDocumentRequest { MeldingId = meldingId, DocumentId = documentId };
 
-        var document = await _documentService.GetDocument(request);
+        var document = await _documentService.GetDocument(request, cancellationToken);
 
         if (document == null)
             return NotFound();
@@ -160,12 +141,13 @@ public class MeldingerController : ControllerBase
 
     [HttpGet("{meldingId:guid}/documents")]
     public async Task<ActionResult<GetAllDocumentsResponse>> GetAllDocuments(
-        [Required] [FromRoute] Guid meldingId
+        [Required] [FromRoute] Guid meldingId,
+        CancellationToken cancellationToken
     )
     {
         var request = new GetAllDocumentsRequest { MeldingId = meldingId };
 
-        var documents = await _documentService.GetAllDocuments(request);
+        var documents = await _documentService.GetAllDocuments(request, cancellationToken);
 
         if (documents == null)
             return NotFound();

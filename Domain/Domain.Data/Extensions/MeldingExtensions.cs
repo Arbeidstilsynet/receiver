@@ -13,25 +13,29 @@ public static class MeldingExtensions
         {
             return melding.AllDocumentIds().Contains(documentId);
         }
-        
+
         public IEnumerable<Guid> AllDocumentIds()
         {
             if (melding.MainContentId != null && melding.MainContentId != Guid.Empty)
             {
                 yield return melding.MainContentId.Value;
             }
-            
+
             if (melding.StructuredDataId != null && melding.StructuredDataId != Guid.Empty)
             {
                 yield return melding.StructuredDataId.Value;
             }
-            
-            foreach (var attachmentId in melding.AttachmentIds.Where(attachmentId => attachmentId != Guid.Empty))
+
+            foreach (
+                var attachmentId in melding.AttachmentIds.Where(attachmentId =>
+                    attachmentId != Guid.Empty
+                )
+            )
             {
                 yield return attachmentId;
             }
         }
-        
+
         public void AddTag(string key, string value)
         {
             var tags = melding.Tags;

@@ -39,9 +39,7 @@ public class WebhookController(
         return Ok(new PostMeldingResponse { MeldingId = melding.Id });
     }
 
-    private async Task<CreateMeldingRequest> GetAltinnInstanceData(
-        AltinnCloudEvent cloudEvent
-    )
+    private async Task<CreateMeldingRequest> GetAltinnInstanceData(AltinnCloudEvent cloudEvent)
     {
         using var activity = Tracer.Source.StartActivity();
         var altinnSummary = await altinnAdapter.GetSummary(cloudEvent);

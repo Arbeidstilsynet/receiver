@@ -39,37 +39,6 @@ internal class MeldingService : IMeldingService
         _logger = logger;
     }
 
-    public async Task<Melding?> EditMelding(EditMeldingRequest editRequest, CancellationToken cancellationToken)
-    {
-        var existingMelding = await _meldingRepository.GetMeldingAsync(editRequest.MeldingId);
-        if (existingMelding == null)
-            return null;
-
-
-        var hangingDocReferences = editRequest.AllDocumentIds().Where(id => !existingMelding.AllDocumentIds().Contains(id)).ToList();
-        
-        if (hangingDocReferences.Count != 0)
-        {
-            throw new InvalidOperationException(
-                $"The edit request contains document references that are not part of the existing melding. Hanging document references: {string.Join(", ", hangingDocReferences)}"
-            );
-        }
-
-        var editedTags = editRequest.MetadataUpdates != null
-            ? existingMelding.Tags.Merge(editRequest.MetadataUpdates)
-            : existingMelding.Tags;
-
-        var editedMelding = existingMelding with
-        {
-            MainContentId = editRequest.MainContentId ?? existingMelding.MainContentId,
-            StructuredDataId = editRequest.StructuredDataId ?? existingMelding.StructuredDataId,
-            AttachmentIds = editRequest.AttachmentReferenceIds ?? existingMelding.AttachmentIds,
-            Tags = editedTags,
-        };
-
-        return await _meldingRepository.UpdateMelding(editedMelding);
-    }
-
     public async Task<Melding> ProcessMelding(
         CreateMeldingRequest request,
         CancellationToken cancellationToken
@@ -92,7 +61,7 @@ internal class MeldingService : IMeldingService
                 """
             );
         }
-        var existingMelding = await _meldingRepository.GetMeldingAsync(meldingId);
+        var existingMelding = await _meldingRepository.GetMeldingAsync(meldingId, cancellationToken);
         if (existingMelding != null)
         {
             await RunPostActions(existingMelding);
@@ -115,15 +84,15 @@ internal class MeldingService : IMeldingService
             AttachmentData = attachmentUploads.Select(a => a.PersistedDocument).ToList(),
             Tags = request.Metadata,
         };
-        var melding = await _meldingRepository.CreateMelding(createMeldingRequest);
+        var melding = await _meldingRepository.CreateMelding(createMeldingRequest, cancellationToken);
 
         await RunPostActions(melding);
         return melding;
     }
 
-    public async Task<Melding?> GetMelding(GetMeldingRequest request)
+    public async Task<Melding?> GetMelding(GetMeldingRequest request, CancellationToken cancellationToken)
     {
-        return await _meldingRepository.GetMeldingAsync(request.MeldingId);
+        return await _meldingRepository.GetMeldingAsync(request.MeldingId, cancellationToken);
     }
 
     public async Task<API.Ports.PaginationResponse<Melding>> GetMeldinger(

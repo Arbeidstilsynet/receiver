@@ -26,5 +26,4 @@ internal static class CollectionExtensions
             return mergedDict;
         }
     }
-    
 }

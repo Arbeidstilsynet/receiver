@@ -62,7 +62,7 @@ internal class DocumentStorage(
     )
     {
         var internalDocumentReference =
-            await internalDocumentRepository.GetInternalDocumentReferenceAsync(document.DocumentId)
+            await internalDocumentRepository.GetInternalDocumentReferenceAsync(document.DocumentId, cancellationToken)
             ?? throw new InvalidOperationException(
                 $"Document with ID {document.DocumentId} not found. This might happen if the document ID is invalid or the document does not exist in the repository. Please verify the document ID and ensure it is correct."
             );

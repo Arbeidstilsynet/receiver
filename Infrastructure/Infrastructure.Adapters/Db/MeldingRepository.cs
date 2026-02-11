@@ -34,15 +34,15 @@ internal class MeldingRepository : IMeldingRepository
         }
     }
 
-    public async Task<Melding?> UpdateMelding(Melding melding)
+    public async Task<Melding?> SaveMelding(Melding melding, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity();
-        
-        var existingEntity = await DbContext.Meldinger.FindAsync(melding.Id);
+
+        var existingEntity = await DbContext.Meldinger.FindAsync([melding.Id], cancellationToken);
         
         if (existingEntity != null)
         {
-            _mapper.Map(melding, existingEntity);
+            DbContext.Meldinger.Update(_mapper.Map<MeldingEntity>(melding));
         }
         else
         {
@@ -50,31 +50,31 @@ internal class MeldingRepository : IMeldingRepository
         }
 
         await DbContext.SaveChangesAsync();
-        
+
         await DbContext.Entry(existingEntity).ReloadAsync();
-        
+
         return _mapper.Map<Melding>(existingEntity);
     }
 
-    public async Task<Melding> CreateMelding(CreateMeldingRequest createMeldingRequest)
+    public async Task<Melding> CreateMelding(CreateMeldingRequest createMeldingRequest, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity();
 
         var meldingEntity = createMeldingRequest.ToMeldingEntity();
 
-        var updatedEntity = await DbContext.Meldinger.AddAsync(meldingEntity);
+        var updatedEntity = await DbContext.Meldinger.AddAsync(meldingEntity, cancellationToken);
 
-        await DbContext.SaveChangesAsync();
-        await updatedEntity.ReloadAsync();
+        await DbContext.SaveChangesAsync(cancellationToken);
+        await updatedEntity.ReloadAsync(cancellationToken);
         return _mapper.Map<Melding>(updatedEntity.Entity);
     }
 
-    public async Task<Melding?> GetMeldingAsync(Guid meldingId)
+    public async Task<Melding?> GetMeldingAsync(Guid meldingId, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity("Get Melding");
         var entity = await DbContext
             .Meldinger.Include(m => m.Documents)
-            .FirstOrDefaultAsync(f => f.Id == meldingId);
+            .FirstOrDefaultAsync(f => f.Id == meldingId, cancellationToken);
         if (entity != null)
         {
             return _mapper.Map<Melding>(entity);

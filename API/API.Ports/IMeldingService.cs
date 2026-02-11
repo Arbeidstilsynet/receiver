@@ -4,16 +4,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Ports;
 
 public interface IMeldingService
 {
-    public Task<Melding?> EditMelding(
-        EditMeldingRequest editRequest,
-        CancellationToken cancellationToken
-    );
-    
     public Task<Melding> ProcessMelding(
         CreateMeldingRequest request,
         CancellationToken cancellationToken
     );
-    public Task<Melding?> GetMelding(GetMeldingRequest request);
+    public Task<Melding?> GetMelding(GetMeldingRequest request, CancellationToken cancellationToken);
 
     Task<API.Ports.PaginationResponse<Melding>> GetMeldinger(
         int? pageNumber = 1,

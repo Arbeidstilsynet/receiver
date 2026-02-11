@@ -73,9 +73,9 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
             ],
         };
         //act
-        var result = await _meldingRepository.CreateMelding(melding);
+        var result = await _meldingRepository.CreateMelding(melding, TestContext.Current.CancellationToken);
         //assert
-        var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id);
+        var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id, TestContext.Current.CancellationToken);
 
         savedMelding.ShouldBeEquivalentTo(result);
         await Verify(savedMelding, _verifySettings);
@@ -112,9 +112,9 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
             ],
         };
         //act
-        var result = await _meldingRepository.CreateMelding(melding);
+        var result = await _meldingRepository.CreateMelding(melding, TestContext.Current.CancellationToken);
         //assert
-        var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id);
+        var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id, TestContext.Current.CancellationToken);
 
         savedMelding.ShouldBeEquivalentTo(result);
         await Verify(savedMelding, _verifySettings);

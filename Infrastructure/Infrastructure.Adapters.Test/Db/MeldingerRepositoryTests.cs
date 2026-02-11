@@ -95,7 +95,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         //arrange
         var existingMeldingGuid = Seed.First().Id;
         //act
-        var result = await _meldingRepository.GetMeldingAsync(existingMeldingGuid);
+        var result = await _meldingRepository.GetMeldingAsync(existingMeldingGuid, TestContext.Current.CancellationToken);
         //assert
         await Verify(result, _verifySettings);
     }
@@ -106,7 +106,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         //arrange
         var nonExistingMeldingGuid = Guid.NewGuid();
         //act
-        var result = await _meldingRepository.GetMeldingAsync(nonExistingMeldingGuid);
+        var result = await _meldingRepository.GetMeldingAsync(nonExistingMeldingGuid, TestContext.Current.CancellationToken);
         //assert
         result.ShouldBeNull();
     }

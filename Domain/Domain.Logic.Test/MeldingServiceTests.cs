@@ -82,9 +82,9 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //arrange
         var request = new GetMeldingRequest { MeldingId = Guid.NewGuid() };
         //act
-        await _sut.GetMelding(request);
+        await _sut.GetMelding(request, TestContext.Current.CancellationToken);
         //assert
-        await _meldingRepository.Received(1).GetMeldingAsync(request.MeldingId);
+        await _meldingRepository.Received(1).GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -206,7 +206,8 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                     && i.StructuredData == structuredDataUploadResponse.PersistedDocument
                     && i.AttachmentData[0] == attachmentUploadResponse.PersistedDocument
                     && i.Tags == request.Metadata
-                )
+                ),
+                Arg.Any<CancellationToken>()
             );
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
@@ -220,15 +221,17 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             MeldingId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(existingRequest.MeldingId)
+            .GetMeldingAsync(existingRequest.MeldingId, Arg.Any<CancellationToken>())
             .Returns(Substitute.For<Melding>());
         //act
         await _sut.ProcessMelding(existingRequest, TestContext.Current.CancellationToken);
         //assert
         await _documentStorage
-            .DidNotReceive()
-            .Upload(Arg.Any<UploadRequest>(), Arg.Any<CancellationToken>());
-        await _meldingRepository.DidNotReceive().CreateMelding(Arg.Any<Infrastructure.Ports.Dto.CreateMeldingRequest>());
+            .DidNotReceiveWithAnyArgs()
+            .Upload(default!, default!);
+        await _meldingRepository
+            .DidNotReceiveWithAnyArgs()
+            .CreateMelding(default!, default!);
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
 
@@ -242,8 +245,8 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             .Throws(new Exception("Test exception"));
 
         _meldingRepository
-            .CreateMelding(Arg.Any<Infrastructure.Ports.Dto.CreateMeldingRequest>())
-            .Returns(TestData.CreateMeldingFaker().Generate());
+            .CreateMelding(default!, default!)
+            .ReturnsForAnyArgs(TestData.CreateMeldingFaker().Generate());
 
         _documentStorage
             .Upload(
@@ -294,7 +297,8 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                     && i.StructuredData == null
                     && i.AttachmentData.Count == 0
                     && i.Tags == request.Metadata
-                )
+                ),
+                Arg.Any<CancellationToken>()
             );
     }
 }
