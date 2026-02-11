@@ -22,11 +22,12 @@ public interface IMeldingerConsumer
     public int? PollInterval { get; }
 
     /// <summary>
-    /// Called when new <see cref="Melding"/> are available for this consumer.
+    /// Called when a <see cref="Melding"/> are available for this consumer.
     /// Throws an exception when a message could not be consumed.
     /// If an exception is thrown, the message may be re-driven later.
     /// </summary>
     /// <param name="newMelding">A thus far unhandled <see cref="Melding"/>.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <remarks>Assume that a melding with the same <see cref="Melding.Id"/> can be resubmitted.</remarks>
     public Task ConsumeMelding(Melding newMelding);
 }
