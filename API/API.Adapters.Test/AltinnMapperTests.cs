@@ -36,7 +36,7 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         await Verify(result, _verifySettings);
     }
@@ -47,7 +47,7 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         result.MainContent.ShouldNotBeNull();
         result.MainContent.InputStream.ShouldBeSameAs(summary.SkjemaAsPdf.DocumentContent);
@@ -59,7 +59,7 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         result.StructuredData.ShouldNotBeNull();
         result.StructuredData.InputStream.ShouldBeSameAs(summary.StructuredData!.DocumentContent);
@@ -71,7 +71,7 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         result.Attachments.ShouldHaveSingleItem();
         result.Attachments[0].InputStream.ShouldBeSameAs(summary.Attachments[0].DocumentContent);
@@ -83,7 +83,7 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary(FileScanResult.Infected);
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         await Verify(result, _verifySettings);
     }

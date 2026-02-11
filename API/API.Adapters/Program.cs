@@ -6,6 +6,7 @@ using Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
+using FluentValidation;
 using Quartz;
 using IAssemblyInfo = Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo;
 
@@ -47,6 +48,8 @@ services.AddAltinnAdapter(
     appSettings.InfrastructureConfig.AltinnConfiguration
 );
 services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.ConnectionString, env);
+services.AddValidatorsFromAssemblyContaining<Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo>();
+
 var app = builder.Build();
 
 if (env.IsDevelopment())

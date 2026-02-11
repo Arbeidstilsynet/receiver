@@ -10,12 +10,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Extensions;
 
 internal static class AltinnMappingExtensions
 {
-    public static PostMeldingRequest MapAltinnSummaryToPostMeldingRequest(
-        this AltinnInstanceSummary altinnInstanceSummary,
-        DateTime meldingReceivedAt
+    public static CreateMeldingRequest MapAltinnSummaryToPostMeldingRequest(
+        this AltinnInstanceSummary altinnInstanceSummary
     )
     {
-        return new PostMeldingRequest
+        return new CreateMeldingRequest
         {
             MeldingId = altinnInstanceSummary.Metadata.InstanceGuid ?? Guid.NewGuid(),
             Source = MessageSource.Altinn,
@@ -24,7 +23,6 @@ internal static class AltinnMappingExtensions
                 ?? throw new ArgumentException(
                     "Could not find app name in metadata. This is required in order to succeed."
                 ),
-            MeldingReceivedAt = meldingReceivedAt,
             Metadata = altinnInstanceSummary.ToMetadataDictionary(),
             MainContent = altinnInstanceSummary.SkjemaAsPdf.ToUploadDocumentRequest().AsClean(),
             StructuredData = altinnInstanceSummary

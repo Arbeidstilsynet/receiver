@@ -32,11 +32,10 @@ public static class TestData
             .RuleFor(f => f.ScanResult, f => DocumentScanResult.Clean)
             .RuleFor(f => f.InputStream, f => f.CreateStream(f.Random.Int(100, 1000)));
 
-    public static Faker<PostMeldingRequest> CreatePostMeldingRequestFaker() =>
-        CreateFaker<PostMeldingRequest>()
+    public static Faker<CreateMeldingRequest> CreatePostMeldingRequestFaker() =>
+        CreateFaker<CreateMeldingRequest>()
             .UseSeed(1337)
             .RuleFor(r => r.Source, f => f.PickRandom<MessageSource>())
-            .RuleFor(r => r.MeldingReceivedAt, f => DateTime.Now)
             .RuleFor(
                 r => r.Attachments,
                 f => f.Make(f.Random.Int(1, 5), () => CreateUploadDocumentRequestFaker().Generate())

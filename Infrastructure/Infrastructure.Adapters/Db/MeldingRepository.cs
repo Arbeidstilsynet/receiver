@@ -13,7 +13,6 @@ internal class MeldingRepository : IMeldingRepository
     private readonly InfrastructureAdaptersDbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly ILogger<MeldingRepository> _logger;
-    private readonly Dictionary<Guid, Melding> _meldinger = new();
 
     public MeldingRepository(
         InfrastructureAdaptersDbContext dbContext,
@@ -35,9 +34,31 @@ internal class MeldingRepository : IMeldingRepository
         }
     }
 
-    public async Task<Melding> SaveMelding(CreateMeldingRequest createMeldingRequest)
+    public async Task<Melding?> UpdateMelding(Melding melding)
     {
-        using var activity = Tracer.Source.StartActivity("Persist Melding");
+        using var activity = Tracer.Source.StartActivity();
+        
+        var existingEntity = await DbContext.Meldinger.FindAsync(melding.Id);
+        
+        if (existingEntity != null)
+        {
+            _mapper.Map(melding, existingEntity);
+        }
+        else
+        {
+            return null;
+        }
+
+        await DbContext.SaveChangesAsync();
+        
+        await DbContext.Entry(existingEntity).ReloadAsync();
+        
+        return _mapper.Map<Melding>(existingEntity);
+    }
+
+    public async Task<Melding> CreateMelding(CreateMeldingRequest createMeldingRequest)
+    {
+        using var activity = Tracer.Source.StartActivity();
 
         var meldingEntity = createMeldingRequest.ToMeldingEntity();
 

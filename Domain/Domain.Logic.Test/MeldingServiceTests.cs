@@ -10,17 +10,17 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
+using CreateMeldingRequest = Arbeidstilsynet.MeldingerReceiver.API.Ports.CreateMeldingRequest;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test;
 
 public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
 {
-    private static readonly PostMeldingRequest SampleMeldingRequest = new()
+    private static readonly CreateMeldingRequest SampleMeldingRequest = new()
     {
         MeldingId = Guid.NewGuid(),
         Source = MessageSource.Altinn,
         ApplicationReference = "test-app",
-        MeldingReceivedAt = DateTime.Now,
         MainContent = new UploadDocumentRequest
         {
             FileMetadata = new FileMetadata
@@ -144,7 +144,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             {
                 DocumentId = Guid.NewGuid(),
                 InternalDocumentReference = "/a/b/c",
-                FileName = request.MainContent.FileMetadata.FileName,
+                FileName = request.MainContent!.FileMetadata.FileName,
                 ContentType = request.MainContent.FileMetadata.ContentType,
                 ScanResult = request.MainContent.ScanResult,
             },
@@ -197,8 +197,8 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             .Upload(Arg.Any<UploadRequest>(), Arg.Any<CancellationToken>());
         await _meldingRepository
             .Received(1)
-            .SaveMelding(
-                Arg.Is<CreateMeldingRequest>(i =>
+            .CreateMelding(
+                Arg.Is<Infrastructure.Ports.Dto.CreateMeldingRequest>(i =>
                     i.Id == request.MeldingId
                     && i.ApplicationId == request.ApplicationReference
                     && i.Source == request.Source
@@ -228,7 +228,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         await _documentStorage
             .DidNotReceive()
             .Upload(Arg.Any<UploadRequest>(), Arg.Any<CancellationToken>());
-        await _meldingRepository.DidNotReceive().SaveMelding(Arg.Any<CreateMeldingRequest>());
+        await _meldingRepository.DidNotReceive().CreateMelding(Arg.Any<Infrastructure.Ports.Dto.CreateMeldingRequest>());
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
 
@@ -242,12 +242,12 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             .Throws(new Exception("Test exception"));
 
         _meldingRepository
-            .SaveMelding(Arg.Any<CreateMeldingRequest>())
+            .CreateMelding(Arg.Any<Infrastructure.Ports.Dto.CreateMeldingRequest>())
             .Returns(TestData.CreateMeldingFaker().Generate());
 
         _documentStorage
             .Upload(
-                Arg.Is<UploadRequest>(i => i.InputStream == request.MainContent.InputStream),
+                Arg.Is<UploadRequest>(i => i.InputStream == request.MainContent!.InputStream),
                 Arg.Any<CancellationToken>()
             )
             .Returns(
@@ -257,7 +257,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                     {
                         DocumentId = Guid.NewGuid(),
                         InternalDocumentReference = "/a/b/c",
-                        ContentType = SampleMeldingRequest.MainContent.FileMetadata.ContentType,
+                        ContentType = SampleMeldingRequest.MainContent!.FileMetadata.ContentType,
                         FileName = SampleMeldingRequest.MainContent.FileMetadata.FileName,
                         ScanResult = SampleMeldingRequest.MainContent.ScanResult,
                     },
@@ -285,8 +285,8 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //assert
         await _meldingRepository
             .Received(1)
-            .SaveMelding(
-                Arg.Is<CreateMeldingRequest>(i =>
+            .CreateMelding(
+                Arg.Is<Infrastructure.Ports.Dto.CreateMeldingRequest>(i =>
                     i.Id == request.MeldingId
                     && i.ApplicationId == request.ApplicationReference
                     && i.Source == request.Source

@@ -77,7 +77,7 @@ internal static class RecoveryJobExtensions
             }
 
             apiMeters.MeldingReceived(MessageSource.Altinn, appId);
-            var request = instance.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+            var request = instance.MapAltinnSummaryToPostMeldingRequest();
             var melding = await meldingService.ProcessMelding(request, cancellationToken);
             apiMeters.MeldingProcessed(melding);
             apiMeters.RegisterMeldingDuration(melding);

@@ -18,7 +18,7 @@ internal class DocumentService(
     {
         var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
 
-        if (!melding.ContainsDocument(request.DocumentId))
+        if (melding == null || !melding.ContainsDocument(request.DocumentId))
             return null;
 
         var document = await documentRepository.GetDocumentAsync(request.DocumentId);

@@ -73,7 +73,7 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
             ],
         };
         //act
-        var result = await _meldingRepository.SaveMelding(melding);
+        var result = await _meldingRepository.CreateMelding(melding);
         //assert
         var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id);
 
@@ -112,7 +112,7 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
             ],
         };
         //act
-        var result = await _meldingRepository.SaveMelding(melding);
+        var result = await _meldingRepository.CreateMelding(melding);
         //assert
         var savedMelding = await _meldingRepository.GetMeldingAsync(melding.Id);
 

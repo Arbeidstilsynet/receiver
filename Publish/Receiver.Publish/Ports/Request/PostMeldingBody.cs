@@ -19,11 +19,13 @@ public record PostMeldingBody
 
     /// <summary>
     /// Main content file for the melding. This is usually a human-readable document (e.g. PDF).
+    /// <br/>
+    /// Allowed content types: Anything except application/json, which is reserved for the <see cref="StructuredData"/> property.
     /// </summary>
     public IFormFile? MainContent { get; init; }
 
     /// <summary>
-    /// Optional structured data file (e.g. JSON matching the contract of the consumer).
+    /// Optional structured data file. The only allowed type is: application/json
     /// </summary>
     public IFormFile? StructuredData { get; init; }
 

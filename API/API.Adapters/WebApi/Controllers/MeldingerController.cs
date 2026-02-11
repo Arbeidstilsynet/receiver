@@ -5,6 +5,7 @@ using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Controllers;
@@ -15,14 +16,17 @@ public class MeldingerController : ControllerBase
 {
     private readonly IDocumentService _documentService;
     private readonly ApiMeters _apiMeters;
+    private readonly IValidator<PostMeldingBody> _postMeldingValidator;
     private readonly IMeldingService _meldingService;
 
     public MeldingerController(
+        IValidator<PostMeldingBody> postMeldingValidator,
         IMeldingService meldingService,
         IDocumentService documentService,
         ApiMeters apiMeters
     )
     {
+        _postMeldingValidator = postMeldingValidator;
         _meldingService = meldingService;
         _documentService = documentService;
         _apiMeters = apiMeters;
@@ -35,14 +39,19 @@ public class MeldingerController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var meldingReceivedAt = DateTime.Now;
+        var validationResult = await _postMeldingValidator.ValidateAsync(model, cancellationToken);
+        
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToString());
+        }
+        
         _apiMeters.MeldingReceived(MessageSource.Api, model.ApplicationId);
-        var postMeldingRequest = new PostMeldingRequest
+        var postMeldingRequest = new CreateMeldingRequest
         {
             MeldingId = Guid.NewGuid(),
             Source = MessageSource.Api,
             ApplicationReference = model.ApplicationId,
-            MeldingReceivedAt = meldingReceivedAt,
             MainContent = model.MainContent?.ToUploadDocumentRequest(),
             StructuredData = model.StructuredData?.ToUploadDocumentRequest(),
             Attachments = model.Attachments.Select(a => a.ToUploadDocumentRequest()).ToList(),
@@ -53,6 +62,27 @@ public class MeldingerController : ControllerBase
         _apiMeters.MeldingProcessed(melding);
         _apiMeters.RegisterMeldingDuration(melding);
         return new PostMeldingResponse { MeldingId = melding.Id };
+    }
+    
+    [HttpPost("{meldingId:guid}/edit")]
+    public async Task<ActionResult<Melding>> PostMeldingEdit(
+        Guid meldingId, 
+        [FromBody]PostEditMeldingBody model,
+        CancellationToken cancellationToken
+    )
+    {
+        var editRequest = new EditMeldingRequest
+        {
+            MeldingId = meldingId,
+            MainContentId = model.MainContentId,
+            StructuredDataId = model.StructuredDataId,
+            AttachmentReferenceIds = model.AttachmentReferenceIds,
+            MetadataUpdates = model.Metadata,
+        };
+        
+        var melding = await _meldingService.EditMelding(editRequest, cancellationToken);
+        
+        return melding != null ? melding : NotFound();
     }
 
     [HttpGet]

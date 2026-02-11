@@ -1,12 +1,12 @@
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using CreateMeldingRequest = Arbeidstilsynet.MeldingerReceiver.API.Ports.CreateMeldingRequest;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic;
 
@@ -39,8 +39,39 @@ internal class MeldingService : IMeldingService
         _logger = logger;
     }
 
+    public async Task<Melding?> EditMelding(EditMeldingRequest editRequest, CancellationToken cancellationToken)
+    {
+        var existingMelding = await _meldingRepository.GetMeldingAsync(editRequest.MeldingId);
+        if (existingMelding == null)
+            return null;
+
+
+        var hangingDocReferences = editRequest.AllDocumentIds().Where(id => !existingMelding.AllDocumentIds().Contains(id)).ToList();
+        
+        if (hangingDocReferences.Count != 0)
+        {
+            throw new InvalidOperationException(
+                $"The edit request contains document references that are not part of the existing melding. Hanging document references: {string.Join(", ", hangingDocReferences)}"
+            );
+        }
+
+        var editedTags = editRequest.MetadataUpdates != null
+            ? existingMelding.Tags.Merge(editRequest.MetadataUpdates)
+            : existingMelding.Tags;
+
+        var editedMelding = existingMelding with
+        {
+            MainContentId = editRequest.MainContentId ?? existingMelding.MainContentId,
+            StructuredDataId = editRequest.StructuredDataId ?? existingMelding.StructuredDataId,
+            AttachmentIds = editRequest.AttachmentReferenceIds ?? existingMelding.AttachmentIds,
+            Tags = editedTags,
+        };
+
+        return await _meldingRepository.UpdateMelding(editedMelding);
+    }
+
     public async Task<Melding> ProcessMelding(
-        PostMeldingRequest request,
+        CreateMeldingRequest request,
         CancellationToken cancellationToken
     )
     {
@@ -73,18 +104,18 @@ internal class MeldingService : IMeldingService
             await UploadDocuments(meldingId, request, cancellationToken);
 
         // create and persist melding
-        var createMeldingRequest = new CreateMeldingRequest
+        var createMeldingRequest = new Infrastructure.Ports.Dto.CreateMeldingRequest
         {
             Id = meldingId,
             Source = request.Source,
             ApplicationId = request.ApplicationReference,
-            ReceivedAt = request.MeldingReceivedAt,
+            ReceivedAt = DateTime.UtcNow,
             MainDocumentData = mainDocumentUpload?.PersistedDocument,
             StructuredData = structuredDocumentUpload?.PersistedDocument,
             AttachmentData = attachmentUploads.Select(a => a.PersistedDocument).ToList(),
             Tags = request.Metadata,
         };
-        var melding = await _meldingRepository.SaveMelding(createMeldingRequest);
+        var melding = await _meldingRepository.CreateMelding(createMeldingRequest);
 
         await RunPostActions(melding);
         return melding;
@@ -111,7 +142,7 @@ internal class MeldingService : IMeldingService
         List<UploadResponse> attachmentUploads
     )> UploadDocuments(
         Guid meldingId,
-        PostMeldingRequest request,
+        CreateMeldingRequest request,
         CancellationToken cancellationToken
     )
     {
