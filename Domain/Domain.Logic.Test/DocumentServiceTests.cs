@@ -68,7 +68,9 @@ public class DocumentServiceTests
         //act
         await _sut.GetDocument(request, CancellationToken.None);
         //assert
-        await _documentRepository.Received(1).GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>());
+        await _documentRepository
+            .Received(1)
+            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -93,7 +95,9 @@ public class DocumentServiceTests
         //act
         await _sut.GetDocument(request, CancellationToken.None);
         //assert
-        await _documentRepository.Received(1).GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>());
+        await _documentRepository
+            .Received(1)
+            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>());
     }
 
     [Fact]

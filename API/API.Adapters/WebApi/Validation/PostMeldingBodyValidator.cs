@@ -20,7 +20,7 @@ internal class PostMeldingBodyValidator : AbstractValidator<PostMeldingBody>
             .WithMessage(
                 $"{nameof(PostMeldingBody.MainContent)} must NOT have content type application/json"
             );
-        
+
         RuleFor(x => x)
             .Must(x => x.MainContent != null || x.StructuredData != null)
             .WithMessage(

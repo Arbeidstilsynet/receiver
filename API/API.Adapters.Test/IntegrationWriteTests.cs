@@ -38,7 +38,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
             jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
         });
     }
-    
+
     [Fact]
     public async Task PostMelding_NoStructuredDataOrMainContent_ReturnsBadRequest()
     {
@@ -57,13 +57,17 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task PostMelding_StructuredDataIsNotJson_ReturnsBadRequest()
     {
         var postMeldingBody = Extensions.CreatePostMeldingBody() with
         {
-            StructuredData = CreateFormFile("structuredData.txt", "This is not JSON.. but it should be", contentType: "text/plain"),
+            StructuredData = CreateFormFile(
+                "structuredData.txt",
+                "This is not JSON.. but it should be",
+                contentType: "text/plain"
+            ),
         };
 
         var httpResponse = await _client.PostAsync(
@@ -74,13 +78,17 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
 
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task PostMelding_MainContentIsJson_ReturnsBadRequest()
     {
         var postMeldingBody = Extensions.CreatePostMeldingBody() with
         {
-            MainContent = CreateFormFile("mainContent.json", "{ \"key\": \"value\" }", contentType: "application/json"),
+            MainContent = CreateFormFile(
+                "mainContent.json",
+                "{ \"key\": \"value\" }",
+                contentType: "application/json"
+            ),
         };
 
         var httpResponse = await _client.PostAsync(
@@ -102,23 +110,38 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
                 { "key1", "value1" },
                 { "key2", "value2" },
             },
-            MainContent = CreateFormFile("mainContent.txt", "Hello World", contentType: "text/plain"),
-            StructuredData = CreateFormFile("structuredData.json", "{ \"structuredKey\": \"structuredValue\" }", contentType: "application/json"),
+            MainContent = CreateFormFile(
+                "mainContent.txt",
+                "Hello World",
+                contentType: "text/plain"
+            ),
+            StructuredData = CreateFormFile(
+                "structuredData.json",
+                "{ \"structuredKey\": \"structuredValue\" }",
+                contentType: "application/json"
+            ),
             Attachments =
             [
-                CreateFormFile("attachment1.txt", "Attachment 1 content", contentType: "text/plain"),
-                CreateFormFile("attachment2.txt", "Attachment 2 content", contentType: "text/plain"),
+                CreateFormFile(
+                    "attachment1.txt",
+                    "Attachment 1 content",
+                    contentType: "text/plain"
+                ),
+                CreateFormFile(
+                    "attachment2.txt",
+                    "Attachment 2 content",
+                    contentType: "text/plain"
+                ),
             ],
         };
 
-
         var httpResponse = await _client.PostAsync(
-                "/meldinger",
-                postMeldingBody.ToMultipartFormDataContent(),
-                TestContext.Current.CancellationToken
-            );
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
         httpResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-            
+
         var postMeldingResponse = await httpResponse.Content.ReadFromJsonAsync<PostMeldingResponse>(
             cancellationToken: TestContext.Current.CancellationToken
         );
@@ -260,7 +283,11 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         postMeldingResponse?.MeldingId.ShouldNotBe(Guid.Empty);
     }
 
-    private static IFormFile CreateFormFile(string name, string content, string contentType="text/plain")
+    private static IFormFile CreateFormFile(
+        string name,
+        string content,
+        string contentType = "text/plain"
+    )
     {
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         return new FormFile(stream, 0, content.Length, name, name)
@@ -280,7 +307,7 @@ file static class Extensions
             ApplicationId = ApplicationFixture.KnownApplicationId,
         };
     }
-    
+
     public static MultipartFormDataContent ToMultipartFormDataContent(this PostMeldingBody body)
     {
         var content = new MultipartFormDataContent();
@@ -299,9 +326,13 @@ file static class Extensions
         if (body.MainContent is { } mainContentFile)
         {
             var mainContent = mainContentFile.ToStreamContent();
-            content.Add(mainContent, nameof(PostMeldingBody.MainContent), body.MainContent.FileName);
+            content.Add(
+                mainContent,
+                nameof(PostMeldingBody.MainContent),
+                body.MainContent.FileName
+            );
         }
-        
+
         // Add StructuredData
         if (body.StructuredData is { } structuredDataFile)
         {

@@ -84,7 +84,9 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //act
         await _sut.GetMelding(request, TestContext.Current.CancellationToken);
         //assert
-        await _meldingRepository.Received(1).GetMelding(request.MeldingId, Arg.Any<CancellationToken>());
+        await _meldingRepository
+            .Received(1)
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -226,12 +228,8 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //act
         await _sut.ProcessMelding(existingRequest, TestContext.Current.CancellationToken);
         //assert
-        await _documentStorage
-            .DidNotReceiveWithAnyArgs()
-            .Upload(default!, default!);
-        await _meldingRepository
-            .DidNotReceiveWithAnyArgs()
-            .CreateMelding(default!, default!);
+        await _documentStorage.DidNotReceiveWithAnyArgs().Upload(default!, default!);
+        await _meldingRepository.DidNotReceiveWithAnyArgs().CreateMelding(default!, default!);
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
 

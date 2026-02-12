@@ -17,20 +17,27 @@ internal class AdHocMigrateMainDocument : IAdHocMigrateMainDocument
         _dbContext = dbContext;
         _mapper = mapper;
     }
-    
-    public async Task<Melding?> MigrateMainDocument(Guid meldingId, Guid mainDocument, Guid structuredData, IEnumerable<Guid> attachments,
-        CancellationToken cancellationToken)
+
+    public async Task<Melding?> MigrateMainDocument(
+        Guid meldingId,
+        Guid mainDocument,
+        Guid structuredData,
+        IEnumerable<Guid> attachments,
+        CancellationToken cancellationToken
+    )
     {
-        var melding = await _dbContext.Meldinger.Include(x =>  x.Documents).FirstOrDefaultAsync(m => m.Id == meldingId, cancellationToken);
+        var melding = await _dbContext
+            .Meldinger.Include(x => x.Documents)
+            .FirstOrDefaultAsync(m => m.Id == meldingId, cancellationToken);
         if (melding == null)
         {
             return null;
         }
-        
+
         var attachementIds = attachments.ToList();
-        
+
         var eachId = attachementIds.Append(mainDocument).Append(structuredData).ToList();
-        
+
         if (eachId.Any(id => id == Guid.Empty))
         {
             throw new InvalidOperationException(
@@ -46,7 +53,7 @@ internal class AdHocMigrateMainDocument : IAdHocMigrateMainDocument
         }
 
         var hangingDocRefs = eachId.Except(melding.Documents.Select(d => d.Id)).ToList();
-        
+
         if (hangingDocRefs.Count != 0)
         {
             throw new InvalidOperationException(
@@ -71,7 +78,7 @@ internal class AdHocMigrateMainDocument : IAdHocMigrateMainDocument
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-        
+
         return _mapper.Map<Melding>(melding);
     }
 }

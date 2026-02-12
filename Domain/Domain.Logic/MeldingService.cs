@@ -84,13 +84,19 @@ internal class MeldingService : IMeldingService
             AttachmentData = attachmentUploads.Select(a => a.PersistedDocument).ToList(),
             Tags = request.Metadata,
         };
-        var melding = await _meldingRepository.CreateMelding(createMeldingRequest, cancellationToken);
+        var melding = await _meldingRepository.CreateMelding(
+            createMeldingRequest,
+            cancellationToken
+        );
 
         await RunPostActions(melding);
         return melding;
     }
 
-    public async Task<Melding?> GetMelding(GetMeldingRequest request, CancellationToken cancellationToken)
+    public async Task<Melding?> GetMelding(
+        GetMeldingRequest request,
+        CancellationToken cancellationToken
+    )
     {
         return await _meldingRepository.GetMelding(request.MeldingId, cancellationToken);
     }

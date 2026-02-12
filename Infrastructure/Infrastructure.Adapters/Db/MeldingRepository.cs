@@ -34,7 +34,10 @@ internal class MeldingRepository : IMeldingRepository
         }
     }
 
-    public async Task<Melding> CreateMelding(CreateMeldingRequest createMeldingRequest, CancellationToken cancellationToken)
+    public async Task<Melding> CreateMelding(
+        CreateMeldingRequest createMeldingRequest,
+        CancellationToken cancellationToken
+    )
     {
         using var activity = Tracer.Source.StartActivity();
 
@@ -60,10 +63,7 @@ internal class MeldingRepository : IMeldingRepository
         return null;
     }
 
-    public async Task<PaginationResponse<Melding>> GetMeldinger(
-        int pageSize,
-        int pageNumber = 1
-    )
+    public async Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1)
     {
         using var activity = Tracer.Source.StartActivity();
         var baseQuery = DbContext.Meldinger.Select(s => new { s.Id, s.ReceivedAt });

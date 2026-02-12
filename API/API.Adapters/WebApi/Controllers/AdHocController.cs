@@ -15,20 +15,26 @@ public class AdHocController : ControllerBase
     {
         _adHocMigrate = adHocMigrate;
     }
-    
+
     [HttpPost("/editMelding")]
     public async Task<ActionResult<Melding>> PostMeldingEdit(
         [FromBody] PostEditMeldingBody model,
         CancellationToken cancellationToken
     )
     {
-        var result = await _adHocMigrate.MigrateMainDocument(model.MeldingId, model.MainContentId, model.StructuredDataId, model.AttachmentReferenceIds, cancellationToken);
+        var result = await _adHocMigrate.MigrateMainDocument(
+            model.MeldingId,
+            model.MainContentId,
+            model.StructuredDataId,
+            model.AttachmentReferenceIds,
+            cancellationToken
+        );
 
         if (result == null)
         {
             return NotFound();
         }
-        
+
         return Ok(result);
     }
 }

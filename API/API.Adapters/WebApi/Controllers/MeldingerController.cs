@@ -88,7 +88,8 @@ public class MeldingerController : ControllerBase
     )
     {
         var melding = await _meldingService.GetMelding(
-            new GetMeldingRequest { MeldingId = meldingId }, cancellationToken
+            new GetMeldingRequest { MeldingId = meldingId },
+            cancellationToken
         );
 
         if (melding == null)

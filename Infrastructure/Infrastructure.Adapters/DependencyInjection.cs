@@ -73,7 +73,7 @@ public static class DependencyInjection
     )
     {
         services.AddScoped<IAdHocMigrateMainDocument, AdHocMigrateMainDocument>(); // TODO: Remove
-        
+
         services.AddScoped<IMeldingRepository, MeldingRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInternalDocumentRepository, DocumentRepository>();

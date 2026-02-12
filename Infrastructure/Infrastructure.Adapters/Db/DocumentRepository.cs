@@ -7,7 +7,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 
 internal interface IInternalDocumentRepository
 {
-    Task<string?> GetInternalDocumentReferenceAsync(Guid documentId, CancellationToken cancellationToken);
+    Task<string?> GetInternalDocumentReferenceAsync(
+        Guid documentId,
+        CancellationToken cancellationToken
+    );
 }
 
 internal class DocumentRepository : IDocumentRepository, IInternalDocumentRepository
@@ -30,7 +33,10 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
         }
     }
 
-    public async Task<List<Document>> GetAllDocumentsForMelding(Guid meldingId, CancellationToken cancellationToken)
+    public async Task<List<Document>> GetAllDocumentsForMelding(
+        Guid meldingId,
+        CancellationToken cancellationToken
+    )
     {
         return await DbContext
             .Documents.Where(d => d.MeldingId == meldingId)
@@ -39,14 +45,25 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
     }
 
     // internal method, should not be exposed via interface
-    public async Task<string?> GetInternalDocumentReferenceAsync(Guid documentId, CancellationToken cancellationToken)
+    public async Task<string?> GetInternalDocumentReferenceAsync(
+        Guid documentId,
+        CancellationToken cancellationToken
+    )
     {
-        return (await DbContext.Documents.FindAsync([documentId], cancellationToken: cancellationToken))?.InternalDocumentReference;
+        return (
+            await DbContext.Documents.FindAsync([documentId], cancellationToken: cancellationToken)
+        )?.InternalDocumentReference;
     }
 
-    public async Task<Document?> GetDocumentAsync(Guid documentId, CancellationToken cancellationToken)
+    public async Task<Document?> GetDocumentAsync(
+        Guid documentId,
+        CancellationToken cancellationToken
+    )
     {
-        var entity = await DbContext.Documents.FindAsync([documentId], cancellationToken: cancellationToken);
+        var entity = await DbContext.Documents.FindAsync(
+            [documentId],
+            cancellationToken: cancellationToken
+        );
         if (entity != null)
         {
             return _mapper.Map<Document>(entity);

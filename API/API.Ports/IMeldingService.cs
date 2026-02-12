@@ -8,7 +8,10 @@ public interface IMeldingService
         CreateMeldingRequest request,
         CancellationToken cancellationToken
     );
-    public Task<Melding?> GetMelding(GetMeldingRequest request, CancellationToken cancellationToken);
+    public Task<Melding?> GetMelding(
+        GetMeldingRequest request,
+        CancellationToken cancellationToken
+    );
 
     Task<API.Ports.PaginationResponse<Melding>> GetMeldinger(
         int? pageNumber = 1,
