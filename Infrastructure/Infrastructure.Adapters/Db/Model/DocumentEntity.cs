@@ -14,6 +14,7 @@ internal class DocumentEntity : BaseEntity
 
     public required string InternalDocumentReference { get; set; }
 
+    [Column(TypeName = "varchar(24)")]
     public required DocumentType DocumentType { get; set; }
 
     public Dictionary<string, string> Tags { get; set; } = [];
