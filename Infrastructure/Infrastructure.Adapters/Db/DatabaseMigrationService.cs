@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 
 internal class DatabaseMigrationService(
-    InfrastructureAdaptersDbContext dbContext,
+    ReceiverDbContext dbContext,
     ILogger<DatabaseMigrationService> logger
 ) : IDatabaseMigrationService
 {

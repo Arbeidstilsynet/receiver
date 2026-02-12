@@ -104,10 +104,10 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
                 }
             );
             services.AddSingleton(infraConfig);
-            services.RemoveAll<InfrastructureAdaptersDbContext>();
-            services.RemoveAll<DbContextOptions<InfrastructureAdaptersDbContext>>();
+            services.RemoveAll<ReceiverDbContext>();
+            services.RemoveAll<DbContextOptions<ReceiverDbContext>>();
 
-            services.AddDbContext<InfrastructureAdaptersDbContext>(opt =>
+            services.AddDbContext<ReceiverDbContext>(opt =>
             {
                 opt.UseNpgsql(_postgresDbDemoFixture.ConnectionString);
             });

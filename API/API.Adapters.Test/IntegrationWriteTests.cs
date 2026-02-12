@@ -38,33 +38,88 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
             jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
         });
     }
+    
+    [Fact]
+    public async Task PostMelding_NoStructuredDataOrMainContent_ReturnsBadRequest()
+    {
+        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        {
+            MainContent = null,
+            StructuredData = null,
+            Attachments = [CreateFormFile("attachment1.txt", "Attachment 1 content")],
+        };
+
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+    
+    [Fact]
+    public async Task PostMelding_StructuredDataIsNotJson_ReturnsBadRequest()
+    {
+        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        {
+            StructuredData = CreateFormFile("structuredData.txt", "This is not JSON.. but it should be", contentType: "text/plain"),
+        };
+
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+    
+    [Fact]
+    public async Task PostMelding_MainContentIsJson_ReturnsBadRequest()
+    {
+        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        {
+            MainContent = CreateFormFile("mainContent.json", "{ \"key\": \"value\" }", contentType: "application/json"),
+        };
+
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
 
     [Fact]
     public async Task PostMelding_ThenGetMelding_ReturnsMelding()
     {
-        var postMeldingBody = TestData.CreatePostMeldingBodyFaker().Generate() with
+        var postMeldingBody = Extensions.CreatePostMeldingBody() with
         {
-            ApplicationId = ApplicationFixture.KnownApplicationId,
             Metadata = new Dictionary<string, string>
             {
                 { "key1", "value1" },
                 { "key2", "value2" },
             },
-            MainContent = CreateFormFile("mainContent.txt", "Hello World"),
+            MainContent = CreateFormFile("mainContent.txt", "Hello World", contentType: "text/plain"),
+            StructuredData = CreateFormFile("structuredData.json", "{ \"structuredKey\": \"structuredValue\" }", contentType: "application/json"),
             Attachments =
             [
-                CreateFormFile("attachment1.txt", "Attachment 1 content"),
-                CreateFormFile("attachment2.txt", "Attachment 2 content"),
+                CreateFormFile("attachment1.txt", "Attachment 1 content", contentType: "text/plain"),
+                CreateFormFile("attachment2.txt", "Attachment 2 content", contentType: "text/plain"),
             ],
         };
 
-        var postMeldingResponse = await (
-            await _client.PostAsync(
+
+        var httpResponse = await _client.PostAsync(
                 "/meldinger",
                 postMeldingBody.ToMultipartFormDataContent(),
                 TestContext.Current.CancellationToken
-            )
-        ).Content.ReadFromJsonAsync<PostMeldingResponse>(
+            );
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+            
+        var postMeldingResponse = await httpResponse.Content.ReadFromJsonAsync<PostMeldingResponse>(
             cancellationToken: TestContext.Current.CancellationToken
         );
 
@@ -79,6 +134,8 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         var melding = getMeldingResponse.ShouldNotBeNull().Melding.ShouldNotBeNull();
 
         melding.ApplicationId.ShouldBe(postMeldingBody.ApplicationId);
+        melding.MainContentId.ShouldNotBeNull();
+        melding.StructuredDataId.ShouldNotBeNull();
         melding.AttachmentIds.Count.ShouldBe(postMeldingBody.Attachments.Count);
         melding.Tags.ShouldBe(postMeldingBody.Metadata);
     }
@@ -203,19 +260,27 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         postMeldingResponse?.MeldingId.ShouldNotBe(Guid.Empty);
     }
 
-    private static IFormFile CreateFormFile(string name, string content)
+    private static IFormFile CreateFormFile(string name, string content, string contentType="text/plain")
     {
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         return new FormFile(stream, 0, content.Length, name, name)
         {
             Headers = new HeaderDictionary(),
-            ContentType = "text/plain",
+            ContentType = contentType,
         };
     }
 }
 
 file static class Extensions
 {
+    public static PostMeldingBody CreatePostMeldingBody()
+    {
+        return TestData.CreatePostMeldingBodyFaker().Generate() with
+        {
+            ApplicationId = ApplicationFixture.KnownApplicationId,
+        };
+    }
+    
     public static MultipartFormDataContent ToMultipartFormDataContent(this PostMeldingBody body)
     {
         var content = new MultipartFormDataContent();
@@ -231,27 +296,27 @@ file static class Extensions
             );
 
         // Add MainContent
-        var mainContentStream = new MemoryStream();
-        body.MainContent.CopyTo(mainContentStream);
-        mainContentStream.Position = 0; // Reset stream position
-
-        var mainContent = new StreamContent(mainContentStream);
-        mainContent.Headers.ContentType = new MediaTypeHeaderValue(
-            body.MainContent.ContentType ?? "application/octet-stream"
-        );
-        content.Add(mainContent, nameof(PostMeldingBody.MainContent), body.MainContent.FileName);
+        if (body.MainContent is { } mainContentFile)
+        {
+            var mainContent = mainContentFile.ToStreamContent();
+            content.Add(mainContent, nameof(PostMeldingBody.MainContent), body.MainContent.FileName);
+        }
+        
+        // Add StructuredData
+        if (body.StructuredData is { } structuredDataFile)
+        {
+            var structuredDataContent = structuredDataFile.ToStreamContent();
+            content.Add(
+                structuredDataContent,
+                nameof(PostMeldingBody.StructuredData),
+                body.StructuredData.FileName
+            );
+        }
 
         // Add Attachments
         foreach (var attachment in body.Attachments)
         {
-            var attachmentStream = new MemoryStream();
-            attachment.CopyTo(attachmentStream);
-            attachmentStream.Position = 0; // Reset stream position
-
-            var attachmentContent = new StreamContent(attachmentStream);
-            attachmentContent.Headers.ContentType = new MediaTypeHeaderValue(
-                attachment.ContentType ?? "application/octet-stream"
-            );
+            var attachmentContent = attachment.ToStreamContent();
             content.Add(
                 attachmentContent,
                 nameof(PostMeldingBody.Attachments),
@@ -259,6 +324,19 @@ file static class Extensions
             );
         }
 
+        return content;
+    }
+
+    private static StreamContent ToStreamContent(this IFormFile file)
+    {
+        var stream = new MemoryStream();
+        file.CopyTo(stream);
+        stream.Position = 0; // Reset stream position
+
+        var content = new StreamContent(stream);
+        content.Headers.ContentType = new MediaTypeHeaderValue(
+            file.ContentType ?? "application/octet-stream"
+        );
         return content;
     }
 }

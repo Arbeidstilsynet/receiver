@@ -12,16 +12,16 @@ internal interface IInternalDocumentRepository
 
 internal class DocumentRepository : IDocumentRepository, IInternalDocumentRepository
 {
-    private readonly InfrastructureAdaptersDbContext _dbContext;
+    private readonly ReceiverDbContext _dbContext;
     private readonly IMapper _mapper;
 
-    public DocumentRepository(InfrastructureAdaptersDbContext dbContext, IMapper mapper)
+    public DocumentRepository(ReceiverDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;
     }
 
-    private InfrastructureAdaptersDbContext DbContext
+    private ReceiverDbContext DbContext
     {
         get
         {

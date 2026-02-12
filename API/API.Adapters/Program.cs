@@ -48,7 +48,7 @@ services.AddAltinnAdapter(
     appSettings.InfrastructureConfig.AltinnConfiguration
 );
 services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.ConnectionString, env);
-services.AddValidatorsFromAssemblyContaining<Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo>();
+services.AddValidatorsFromAssemblyContaining<Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo>(includeInternalTypes: true);
 
 var app = builder.Build();
 

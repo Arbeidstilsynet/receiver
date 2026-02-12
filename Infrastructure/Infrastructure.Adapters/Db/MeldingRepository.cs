@@ -10,12 +10,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 
 internal class MeldingRepository : IMeldingRepository
 {
-    private readonly InfrastructureAdaptersDbContext _dbContext;
+    private readonly ReceiverDbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly ILogger<MeldingRepository> _logger;
 
     public MeldingRepository(
-        InfrastructureAdaptersDbContext dbContext,
+        ReceiverDbContext dbContext,
         IMapper mapper,
         ILogger<MeldingRepository> logger
     )
@@ -25,7 +25,7 @@ internal class MeldingRepository : IMeldingRepository
         _logger = logger;
     }
 
-    private InfrastructureAdaptersDbContext DbContext
+    private ReceiverDbContext DbContext
     {
         get
         {
@@ -47,9 +47,9 @@ internal class MeldingRepository : IMeldingRepository
         return _mapper.Map<Melding>(updatedEntity.Entity);
     }
 
-    public async Task<Melding?> GetMeldingAsync(Guid meldingId, CancellationToken cancellationToken)
+    public async Task<Melding?> GetMelding(Guid meldingId, CancellationToken cancellationToken)
     {
-        using var activity = Tracer.Source.StartActivity("Get Melding");
+        using var activity = Tracer.Source.StartActivity();
         var entity = await DbContext
             .Meldinger.Include(m => m.Documents)
             .FirstOrDefaultAsync(f => f.Id == meldingId, cancellationToken);
@@ -60,12 +60,12 @@ internal class MeldingRepository : IMeldingRepository
         return null;
     }
 
-    public async Task<PaginationResponse<Melding>> GetMeldingerAsync(
+    public async Task<PaginationResponse<Melding>> GetMeldinger(
         int pageSize,
         int pageNumber = 1
     )
     {
-        using var activity = Tracer.Source.StartActivity("Get Meldinger");
+        using var activity = Tracer.Source.StartActivity();
         var baseQuery = DbContext.Meldinger.Select(s => new { s.Id, s.ReceivedAt });
         int totalRecords = await baseQuery.CountAsync();
         int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);

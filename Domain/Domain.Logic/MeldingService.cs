@@ -61,7 +61,7 @@ internal class MeldingService : IMeldingService
                 """
             );
         }
-        var existingMelding = await _meldingRepository.GetMeldingAsync(meldingId, cancellationToken);
+        var existingMelding = await _meldingRepository.GetMelding(meldingId, cancellationToken);
         if (existingMelding != null)
         {
             await RunPostActions(existingMelding);
@@ -92,7 +92,7 @@ internal class MeldingService : IMeldingService
 
     public async Task<Melding?> GetMelding(GetMeldingRequest request, CancellationToken cancellationToken)
     {
-        return await _meldingRepository.GetMeldingAsync(request.MeldingId, cancellationToken);
+        return await _meldingRepository.GetMelding(request.MeldingId, cancellationToken);
     }
 
     public async Task<API.Ports.PaginationResponse<Melding>> GetMeldinger(
@@ -101,7 +101,7 @@ internal class MeldingService : IMeldingService
     )
     {
         return _mapper.Map<API.Ports.PaginationResponse<Melding>>(
-            await _meldingRepository.GetMeldingerAsync(pageSize ?? 10, pageNumber ?? 1)
+            await _meldingRepository.GetMeldinger(pageSize ?? 10, pageNumber ?? 1)
         );
     }
 

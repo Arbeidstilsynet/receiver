@@ -57,7 +57,7 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(
                 SampleMelding with
                 {
@@ -82,7 +82,7 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(
                 SampleMelding with
                 {
@@ -107,7 +107,7 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(SampleMelding with { Id = request.MeldingId });
         //act
         var result = await _sut.GetDocument(request, CancellationToken.None);
@@ -126,7 +126,7 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(SampleMelding with { MainContentId = request.DocumentId });
         //act
         var result = await _sut.GetDocument(request, CancellationToken.None);
@@ -148,7 +148,7 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(
                 SampleMelding with
                 {
@@ -199,7 +199,7 @@ public class DocumentServiceTests
         };
 
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(SampleMelding with { Id = request.MeldingId });
         _documentRepository
             .GetAllDocumentsForMelding(request.MeldingId, Arg.Any<CancellationToken>())

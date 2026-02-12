@@ -10,10 +10,10 @@ using Microsoft.VisualBasic;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 
-internal class SubscriptionsRepository(InfrastructureAdaptersDbContext dbContext, IMapper mapper)
+internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapper)
     : ISubscriptionsRepository
 {
-    private InfrastructureAdaptersDbContext DbContext
+    private ReceiverDbContext DbContext
     {
         get
         {

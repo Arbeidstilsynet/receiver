@@ -10,7 +10,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.Db;
 public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTestFixtureWithDb>
 {
     private IDocumentRepository _documentRepository;
-    private InfrastructureAdaptersDbContext _dbContext;
+    private ReceiverDbContext _dbContext;
     private readonly VerifySettings _verifySettings = new();
 
     public DocumentRepositoryTests(
@@ -20,7 +20,7 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
         : base(testOutputHelper, fixtureWithDb)
     {
         _documentRepository = fixtureWithDb.GetService<IDocumentRepository>(testOutputHelper)!;
-        _dbContext = fixtureWithDb.GetService<InfrastructureAdaptersDbContext>(testOutputHelper)!;
+        _dbContext = fixtureWithDb.GetService<ReceiverDbContext>(testOutputHelper)!;
 
         _verifySettings.UseDirectory("Snapshots");
         _verifySettings.AddExtraSettings(jsonSettings =>

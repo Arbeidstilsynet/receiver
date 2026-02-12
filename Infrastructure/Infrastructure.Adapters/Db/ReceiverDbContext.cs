@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 
-internal class InfrastructureAdaptersDbContext(
-    DbContextOptions<InfrastructureAdaptersDbContext> dbContextOption
+internal class ReceiverDbContext(
+    DbContextOptions<ReceiverDbContext> dbContextOption
 ) : DbContext(dbContextOption)
 {
     public DbSet<MeldingEntity> Meldinger { get; set; }

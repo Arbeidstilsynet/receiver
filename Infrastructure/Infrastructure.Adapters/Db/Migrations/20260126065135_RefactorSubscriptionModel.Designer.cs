@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migrations
 {
-    [DbContext(typeof(InfrastructureAdaptersDbContext))]
+    [DbContext(typeof(ReceiverDbContext))]
     [Migration("20260126065135_RefactorSubscriptionModel")]
     partial class RefactorSubscriptionModel
     {

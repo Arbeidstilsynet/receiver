@@ -37,10 +37,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.Db
         public async Task Migration_Sets_DocumentType_Correctly()
         {
             // Migrate up to just before AddStructuredData
-            var options = new DbContextOptionsBuilder<InfrastructureAdaptersDbContext>()
+            var options = new DbContextOptionsBuilder<ReceiverDbContext>()
                 .UseNpgsql(_connStr)
                 .Options;
-            await using (var db = new InfrastructureAdaptersDbContext(options))
+            await using (var db = new ReceiverDbContext(options))
             {
                 await db.Database.MigrateAsync(
                     "20260126065135_RefactorSubscriptionModel",
@@ -91,7 +91,7 @@ VALUES
             }
 
             // Migrate to latest (applies AddStructuredData)
-            await using (var db = new InfrastructureAdaptersDbContext(options))
+            await using (var db = new ReceiverDbContext(options))
             {
                 await db.Database.MigrateAsync(
                     cancellationToken: TestContext.Current.CancellationToken
@@ -99,10 +99,10 @@ VALUES
             }
 
             // Assert using EF Core
-            var options2 = new DbContextOptionsBuilder<InfrastructureAdaptersDbContext>()
+            var options2 = new DbContextOptionsBuilder<ReceiverDbContext>()
                 .UseNpgsql(_connStr)
                 .Options;
-            await using (var db2 = new InfrastructureAdaptersDbContext(options2))
+            await using (var db2 = new ReceiverDbContext(options2))
             {
                 var docs = await db2.Documents.ToListAsync(
                     cancellationToken: TestContext.Current.CancellationToken

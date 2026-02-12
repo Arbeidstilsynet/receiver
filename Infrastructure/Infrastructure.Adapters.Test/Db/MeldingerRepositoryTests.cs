@@ -95,7 +95,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         //arrange
         var existingMeldingGuid = Seed.First().Id;
         //act
-        var result = await _meldingRepository.GetMeldingAsync(existingMeldingGuid, TestContext.Current.CancellationToken);
+        var result = await _meldingRepository.GetMelding(existingMeldingGuid, TestContext.Current.CancellationToken);
         //assert
         await Verify(result, _verifySettings);
     }
@@ -106,7 +106,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         //arrange
         var nonExistingMeldingGuid = Guid.NewGuid();
         //act
-        var result = await _meldingRepository.GetMeldingAsync(nonExistingMeldingGuid, TestContext.Current.CancellationToken);
+        var result = await _meldingRepository.GetMelding(nonExistingMeldingGuid, TestContext.Current.CancellationToken);
         //assert
         result.ShouldBeNull();
     }
@@ -130,7 +130,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
     {
         //arrange
         //act
-        var result = await _meldingRepository.GetMeldingerAsync(pageSize, pageNumber);
+        var result = await _meldingRepository.GetMeldinger(pageSize, pageNumber);
         //assert
         result.PageSize.ShouldBe(pageSize);
         result.TotalPages.ShouldBe(expectedTotalPages);
@@ -144,7 +144,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
     {
         //arrange
         //act
-        var result = await _meldingRepository.GetMeldingerAsync(10);
+        var result = await _meldingRepository.GetMeldinger(10);
         //assert
         Seed.OrderByDescending(s => s.ReceivedAt)
             .ThenBy(s => s.Id)

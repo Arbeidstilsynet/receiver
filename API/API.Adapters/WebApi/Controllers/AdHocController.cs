@@ -1,6 +1,5 @@
-using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.AdHoc;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +9,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Controllers;
 [Route("[controller]")]
 public class AdHocController : ControllerBase
 {
-    private readonly IMeldingRepository _meldingRepository;
+    private readonly IAdHocMigrateMainDocument _adHocMigrate;
 
-    public AdHocController(IMeldingRepository meldingRepository)
+    public AdHocController(IAdHocMigrateMainDocument adHocMigrate)
     {
-        _meldingRepository = meldingRepository;
+        _adHocMigrate = adHocMigrate;
     }
     
     [HttpPost("/editMelding")]
@@ -23,53 +22,13 @@ public class AdHocController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var melding = await _meldingRepository.GetMeldingAsync(model.MeldingId, cancellationToken);
-        if (melding == null)
+        var result = await _adHocMigrate.MigrateMainDocument(model.MeldingId, model.MainContentId, model.StructuredDataId, model.AttachmentReferenceIds, cancellationToken);
+
+        if (result == null)
         {
             return NotFound();
         }
-
-        var hangingDocRefs = model.DocumentIds().Except(melding.AllDocumentIds()).ToList();
         
-        if (hangingDocRefs.Count != 0)
-        {
-            return BadRequest(
-                $"The following document references do not exist on the melding and cannot be added: {string.Join(", ", hangingDocRefs)}"
-            );
-        }
-
-        var editedMelding = melding with
-        {
-            MainContentId = model.MainContentId ?? melding.MainContentId,
-            StructuredDataId = model.StructuredDataId ?? melding.StructuredDataId,
-            AttachmentIds = model.AttachmentReferenceIds ?? melding.AttachmentIds,
-        };
-        
-        // TODO: Update the melding (document ids) and each document (document type)
-        TODO
-
-        return Ok(editedMelding);
+        return Ok(result);
     }
 }
-
-file static class Extensions
-{
-    public static IEnumerable<Guid> DocumentIds(this PostEditMeldingBody editRequest)
-    {
-        var documentIds = new List<Guid>();
-        if (editRequest.MainContentId != null)
-        {
-            documentIds.Add(editRequest.MainContentId.Value);
-        }
-        if (editRequest.StructuredDataId != null)
-        {
-            documentIds.Add(editRequest.StructuredDataId.Value);
-        }
-        if (editRequest.AttachmentReferenceIds != null)
-        {
-            documentIds.AddRange(editRequest.AttachmentReferenceIds);
-        }
-
-        return documentIds;
-    }
-} 

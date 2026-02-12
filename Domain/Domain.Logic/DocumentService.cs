@@ -16,7 +16,7 @@ internal class DocumentService(
 {
     public async Task<Document?> GetDocument(GetDocumentRequest request, CancellationToken cancellationToken)
     {
-        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId, cancellationToken);
+        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
 
         if (melding == null || !melding.ContainsDocument(request.DocumentId))
             return null;
@@ -37,7 +37,7 @@ internal class DocumentService(
 
     public async Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request, CancellationToken cancellationToken)
     {
-        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId, cancellationToken);
+        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
         if (melding != null)
         {
             var documents = await documentRepository.GetAllDocumentsForMelding(request.MeldingId, cancellationToken);

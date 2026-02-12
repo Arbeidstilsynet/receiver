@@ -1,12 +1,14 @@
 using System.Reflection;
 using Arbeidstilsynet.Common.Altinn.DependencyInjection;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.AdHoc;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Notification;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Storage;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.VirusScan;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.AdHoc;
 using Google.Cloud.Storage.V1;
 using Mapster;
 using MapsterMapper;
@@ -70,6 +72,8 @@ public static class DependencyInjection
         InfrastructureConfiguration infrastructureConfiguration
     )
     {
+        services.AddScoped<IAdHocMigrateMainDocument, AdHocMigrateMainDocument>(); // TODO: Remove
+        
         services.AddScoped<IMeldingRepository, MeldingRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInternalDocumentRepository, DocumentRepository>();
@@ -99,7 +103,7 @@ public static class DependencyInjection
             services.AddScoped<IMeldingNotificationService, DummyMeldingNotificationService>();
         }
 
-        services.AddDbContext<InfrastructureAdaptersDbContext>(opt =>
+        services.AddDbContext<ReceiverDbContext>(opt =>
         {
             opt.UseNpgsql(
                 infrastructureConfiguration.PostgresConfiguration.ConnectionString,
@@ -128,7 +132,7 @@ public static class DependencyInjection
     )
     {
         return healthCheckBuilder
-            .AddDbContextCheck<InfrastructureAdaptersDbContext>("DbContextCheck")
+            .AddDbContextCheck<ReceiverDbContext>("DbContextCheck")
             .AddCheck<CloudStorageHealthCheck>("CloudStorageCheck")
             .AddCheck<ValkeyHealthCheck>("ValkeyCheck");
     }

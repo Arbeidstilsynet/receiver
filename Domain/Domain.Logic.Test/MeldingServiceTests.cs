@@ -84,7 +84,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //act
         await _sut.GetMelding(request, TestContext.Current.CancellationToken);
         //assert
-        await _meldingRepository.Received(1).GetMeldingAsync(request.MeldingId, Arg.Any<CancellationToken>());
+        await _meldingRepository.Received(1).GetMelding(request.MeldingId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
     {
         //arrange
         _meldingRepository
-            .GetMeldingerAsync(10)
+            .GetMeldinger(10)
             .Returns(
                 new Infrastructure.Ports.Dto.PaginationResponse<Melding>
                 {
@@ -106,7 +106,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //act
         var result = await _sut.GetMeldinger();
         //assert
-        await _meldingRepository.Received(1).GetMeldingerAsync(10);
+        await _meldingRepository.Received(1).GetMeldinger(10);
         result.ShouldBeEquivalentTo(
             new API.Ports.PaginationResponse<Melding>
             {
@@ -221,7 +221,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             MeldingId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(existingRequest.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(existingRequest.MeldingId, Arg.Any<CancellationToken>())
             .Returns(Substitute.For<Melding>());
         //act
         await _sut.ProcessMelding(existingRequest, TestContext.Current.CancellationToken);
