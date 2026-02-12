@@ -8,7 +8,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AdHocController(IAdHocMigrateMainDocument adHocMigrate, IMeldingNotificationService meldingNotificationService) : ControllerBase
+public class AdHocController(
+    IAdHocMigrateMainDocument adHocMigrate,
+    IMeldingNotificationService meldingNotificationService
+) : ControllerBase
 {
     [HttpPost("editMelding")]
     public async Task<ActionResult<Melding>> PostMeldingEdit(

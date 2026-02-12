@@ -47,14 +47,22 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
             .GetSummary(default!)
             .ReturnsForAnyArgs(TestData.CreateAltinnInstanceSummaryFaker().Generate());
 
-        _virusScanServiceMock.ScanForVirus(default!, default!).ReturnsForAnyArgs(DocumentScanResult.Clean);
+        _virusScanServiceMock
+            .ScanForVirus(default!, default!)
+            .ReturnsForAnyArgs(DocumentScanResult.Clean);
     }
-    
-    
-    public IMeldingNotificationService NotificationServiceMock { get; } = Substitute.For<IMeldingNotificationService>();
+
+    public IMeldingNotificationService NotificationServiceMock { get; } =
+        Substitute.For<IMeldingNotificationService>();
 
     public static string[] KnownApplicationIds =>
-        [KnownApplicationId, SafeToDeleteApplicationId, "applikasjon-2", "applikasjon-3", AdHocApplicationId];
+        [
+            KnownApplicationId,
+            SafeToDeleteApplicationId,
+            "applikasjon-2",
+            "applikasjon-3",
+            AdHocApplicationId,
+        ];
 
     public const string AdHocApplicationId = "my-adhoc-app";
     public const string KnownApplicationId = "ulykkesvarsel";

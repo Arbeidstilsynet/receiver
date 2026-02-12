@@ -284,7 +284,6 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         postMeldingResponse?.MeldingId.ShouldNotBe(Guid.Empty);
     }
 
-    
     private static PostMeldingBody CreatePostMeldingBody()
     {
         return TestData.CreatePostMeldingBodyFaker().Generate() with

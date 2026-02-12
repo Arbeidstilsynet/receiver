@@ -74,9 +74,8 @@ internal class VirusScanService : IVirusScanService
             {
                 return DocumentScanResult.Infected;
             }
-            
+
             return DocumentScanResult.Unknown;
-            
         }
         catch (Exception ex)
         {
@@ -87,7 +86,7 @@ internal class VirusScanService : IVirusScanService
                 uploadResponse.PersistedDocument.InternalDocumentReference
             );
         }
-        
+
         return DocumentScanResult.Unknown;
     }
 

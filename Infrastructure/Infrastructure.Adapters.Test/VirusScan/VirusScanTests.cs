@@ -142,7 +142,10 @@ public class VirusScanTests
             });
 
         //act
-        var scanResult = await _sut.ScanForVirus(uploadResponse, TestContext.Current.CancellationToken);
+        var scanResult = await _sut.ScanForVirus(
+            uploadResponse,
+            TestContext.Current.CancellationToken
+        );
         //assert
         scanResult.ShouldBe(expectedStatus);
     }

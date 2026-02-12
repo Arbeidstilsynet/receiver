@@ -5,5 +5,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 
 public interface IVirusScanService
 {
-    Task<DocumentScanResult> ScanForVirus(UploadResponse persistedDocument, CancellationToken cancellationToken);
+    Task<DocumentScanResult> ScanForVirus(
+        UploadResponse persistedDocument,
+        CancellationToken cancellationToken
+    );
 }

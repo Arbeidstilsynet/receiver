@@ -89,7 +89,7 @@ public static class TestData
 
         return cloudEvent;
     }
-    
+
     public static IFormFile CreateFormFile(
         string name,
         string content,
