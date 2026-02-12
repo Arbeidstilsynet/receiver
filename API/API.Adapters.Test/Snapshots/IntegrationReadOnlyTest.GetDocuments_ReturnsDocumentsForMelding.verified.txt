@@ -4,6 +4,16 @@
       DocumentId: Guid_1,
       MeldingId: Guid_2,
       FileMetadata: {
+        FileName: hello-underworld.txt,
+        ContentType: text/plain
+      },
+      ScanResult: Clean,
+      Tags: null
+    },
+    {
+      DocumentId: Guid_3,
+      MeldingId: Guid_2,
+      FileMetadata: {
         FileName: hello-world.txt,
         ContentType: text/plain
       },
@@ -21,7 +31,7 @@
       Tags: null
     },
     {
-      DocumentId: Guid_3,
+      DocumentId: Guid_4,
       MeldingId: Guid_2,
       FileMetadata: {
         FileName: structured-data.json,

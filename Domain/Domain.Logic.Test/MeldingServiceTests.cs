@@ -264,6 +264,46 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                     },
                 }
             );
+        _documentStorage
+            .Upload(
+                Arg.Is<UploadRequest>(i => i.InputStream == request.StructuredData!.InputStream),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                new UploadResponse
+                {
+                    PersistedDocument = new DocumentStorageDto
+                    {
+                        DocumentId = Guid.NewGuid(),
+                        InternalDocumentReference = "/a/b/structured",
+                        ContentType = SampleMeldingRequest.StructuredData!.FileMetadata.ContentType,
+                        FileName = SampleMeldingRequest.StructuredData.FileMetadata.FileName,
+                        ScanResult = SampleMeldingRequest.StructuredData.ScanResult,
+                    },
+                }
+            );
+
+        foreach (var attachement in request.Attachments)
+        {
+            _documentStorage
+                .Upload(
+                    Arg.Is<UploadRequest>(i => i.InputStream == attachement.InputStream),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    new UploadResponse
+                    {
+                        PersistedDocument = new DocumentStorageDto
+                        {
+                            DocumentId = Guid.NewGuid(),
+                            InternalDocumentReference = "/a/b/d",
+                            ContentType = attachement.FileMetadata.ContentType,
+                            FileName = attachement.FileMetadata.FileName,
+                            ScanResult = attachement.ScanResult,
+                        },
+                    }
+                );
+        }
 
         // Act & Assert
         _ = _sut.ProcessMelding(request, TestContext.Current.CancellationToken).ShouldNotThrow();
