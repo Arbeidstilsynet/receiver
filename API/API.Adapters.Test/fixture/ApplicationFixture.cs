@@ -26,6 +26,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.fixture;
 public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLifetime
 {
     private readonly IAltinnAdapter _altinnAdapterMock = Substitute.For<IAltinnAdapter>();
+    private readonly IVirusScanService _virusScanServiceMock = Substitute.For<IVirusScanService>();
 
     private readonly PostgresDbDemoFixture _postgresDbDemoFixture = new();
     private readonly StorageFixture _storageFixture = new();
@@ -45,11 +46,17 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
         _altinnAdapterMock
             .GetSummary(default!)
             .ReturnsForAnyArgs(TestData.CreateAltinnInstanceSummaryFaker().Generate());
+
+        _virusScanServiceMock.ScanForVirus(default!, default!).ReturnsForAnyArgs(DocumentScanResult.Clean);
     }
+    
+    
+    public IMeldingNotificationService NotificationServiceMock { get; } = Substitute.For<IMeldingNotificationService>();
 
     public static string[] KnownApplicationIds =>
-        [KnownApplicationId, SafeToDeleteApplicationId, "applikasjon-2", "applikasjon-3"];
+        [KnownApplicationId, SafeToDeleteApplicationId, "applikasjon-2", "applikasjon-3", AdHocApplicationId];
 
+    public const string AdHocApplicationId = "my-adhoc-app";
     public const string KnownApplicationId = "ulykkesvarsel";
     public const string SafeToDeleteApplicationId = "flip-flop-varsel";
     public static Guid KnownMeldingId { get; } = Guid.Parse("22222222-2222-2222-2222-222222222222");
@@ -80,8 +87,8 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
         builder.ConfigureTestServices(services =>
         {
             services.Replace<ISchedulerFactory>();
-            services.Replace<IVirusScanService>();
-            services.Replace<IMeldingNotificationService>();
+            services.Replace<IVirusScanService>(_ => _virusScanServiceMock);
+            services.Replace<IMeldingNotificationService>(_ => NotificationServiceMock);
             services.Replace<IAltinnAdapter>(_ => _altinnAdapterMock);
 
             services.RemoveAll<IHostedService>();

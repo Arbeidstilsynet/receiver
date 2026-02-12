@@ -20,9 +20,7 @@ internal class AdHocMigrateMainDocument : IAdHocMigrateMainDocument
 
     public async Task<Melding?> MigrateMainDocument(
         Guid meldingId,
-        Guid mainDocument,
-        Guid structuredData,
-        IEnumerable<Guid> attachments,
+        Guid newMainContent,
         CancellationToken cancellationToken
     )
     {
@@ -34,46 +32,19 @@ internal class AdHocMigrateMainDocument : IAdHocMigrateMainDocument
             return null;
         }
 
-        var attachementIds = attachments.ToList();
-
-        var eachId = attachementIds.Append(mainDocument).Append(structuredData).ToList();
-
-        if (eachId.Any(id => id == Guid.Empty))
+        if (newMainContent == Guid.Empty || melding.Documents.All(d => d.Id != newMainContent))
         {
-            throw new InvalidOperationException(
-                "One or more provided document references are empty. Please ensure all document references are valid."
-            );
-        }
-
-        if (eachId.Distinct().Count() != eachId.Count)
-        {
-            throw new InvalidOperationException(
-                "The provided document references contain duplicates. Please ensure all document references are unique."
-            );
-        }
-
-        var hangingDocRefs = eachId.Except(melding.Documents.Select(d => d.Id)).ToList();
-
-        if (hangingDocRefs.Count != 0)
-        {
-            throw new InvalidOperationException(
-                $"The following document references do not exist on the melding and cannot be added: {string.Join(", ", hangingDocRefs)}"
+            throw new ArgumentException(
+                "The provided new main content ID is invalid or does not exist in the melding.",
+                nameof(newMainContent)
             );
         }
 
         foreach (var doc in melding.Documents)
         {
-            if (doc.Id == mainDocument)
+            if (doc.Id == newMainContent)
             {
                 doc.DocumentType = DocumentType.MainContent;
-            }
-            else if (doc.Id == structuredData)
-            {
-                doc.DocumentType = DocumentType.StructuredData;
-            }
-            else if (attachementIds.Contains(doc.Id))
-            {
-                doc.DocumentType = DocumentType.Attachment;
             }
         }
 

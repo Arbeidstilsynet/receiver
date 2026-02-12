@@ -142,8 +142,8 @@ public class VirusScanTests
             });
 
         //act
-        await _sut.ScanForVirus(uploadResponse, TestContext.Current.CancellationToken);
+        var scanResult = await _sut.ScanForVirus(uploadResponse, TestContext.Current.CancellationToken);
         //assert
-        uploadResponse.PersistedDocument.ScanResult.ShouldBe(expectedStatus);
+        scanResult.ShouldBe(expectedStatus);
     }
 }

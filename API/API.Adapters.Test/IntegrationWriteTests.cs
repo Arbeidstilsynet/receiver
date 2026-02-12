@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
@@ -42,11 +43,11 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     [Fact]
     public async Task PostMelding_NoStructuredDataOrMainContent_ReturnsBadRequest()
     {
-        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        var postMeldingBody = CreatePostMeldingBody() with
         {
             MainContent = null,
             StructuredData = null,
-            Attachments = [CreateFormFile("attachment1.txt", "Attachment 1 content")],
+            Attachments = [TestData.CreateFormFile("attachment1.txt", "Attachment 1 content")],
         };
 
         var httpResponse = await _client.PostAsync(
@@ -61,9 +62,9 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     [Fact]
     public async Task PostMelding_StructuredDataIsNotJson_ReturnsBadRequest()
     {
-        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        var postMeldingBody = CreatePostMeldingBody() with
         {
-            StructuredData = CreateFormFile(
+            StructuredData = TestData.CreateFormFile(
                 "structuredData.txt",
                 "This is not JSON.. but it should be",
                 contentType: "text/plain"
@@ -82,9 +83,9 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     [Fact]
     public async Task PostMelding_MainContentIsJson_ReturnsBadRequest()
     {
-        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        var postMeldingBody = CreatePostMeldingBody() with
         {
-            MainContent = CreateFormFile(
+            MainContent = TestData.CreateFormFile(
                 "mainContent.json",
                 "{ \"key\": \"value\" }",
                 contentType: "application/json"
@@ -103,31 +104,31 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     [Fact]
     public async Task PostMelding_ThenGetMelding_ReturnsMelding()
     {
-        var postMeldingBody = Extensions.CreatePostMeldingBody() with
+        var postMeldingBody = CreatePostMeldingBody() with
         {
             Metadata = new Dictionary<string, string>
             {
                 { "key1", "value1" },
                 { "key2", "value2" },
             },
-            MainContent = CreateFormFile(
+            MainContent = TestData.CreateFormFile(
                 "mainContent.txt",
                 "Hello World",
                 contentType: "text/plain"
             ),
-            StructuredData = CreateFormFile(
+            StructuredData = TestData.CreateFormFile(
                 "structuredData.json",
                 "{ \"structuredKey\": \"structuredValue\" }",
                 contentType: "application/json"
             ),
             Attachments =
             [
-                CreateFormFile(
+                TestData.CreateFormFile(
                     "attachment1.txt",
                     "Attachment 1 content",
                     contentType: "text/plain"
                 ),
-                CreateFormFile(
+                TestData.CreateFormFile(
                     "attachment2.txt",
                     "Attachment 2 content",
                     contentType: "text/plain"
@@ -283,91 +284,12 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         postMeldingResponse?.MeldingId.ShouldNotBe(Guid.Empty);
     }
 
-    private static IFormFile CreateFormFile(
-        string name,
-        string content,
-        string contentType = "text/plain"
-    )
-    {
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-        return new FormFile(stream, 0, content.Length, name, name)
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = contentType,
-        };
-    }
-}
-
-file static class Extensions
-{
-    public static PostMeldingBody CreatePostMeldingBody()
+    
+    private static PostMeldingBody CreatePostMeldingBody()
     {
         return TestData.CreatePostMeldingBodyFaker().Generate() with
         {
             ApplicationId = ApplicationFixture.KnownApplicationId,
         };
-    }
-
-    public static MultipartFormDataContent ToMultipartFormDataContent(this PostMeldingBody body)
-    {
-        var content = new MultipartFormDataContent();
-
-        // Add ApplicationId
-        content.Add(new StringContent(body.ApplicationId), nameof(PostMeldingBody.ApplicationId));
-
-        // Add Metadata
-        foreach (var kvp in body.Metadata)
-            content.Add(
-                new StringContent(kvp.Value),
-                $"{nameof(PostMeldingBody.Metadata)}[{kvp.Key}]"
-            );
-
-        // Add MainContent
-        if (body.MainContent is { } mainContentFile)
-        {
-            var mainContent = mainContentFile.ToStreamContent();
-            content.Add(
-                mainContent,
-                nameof(PostMeldingBody.MainContent),
-                body.MainContent.FileName
-            );
-        }
-
-        // Add StructuredData
-        if (body.StructuredData is { } structuredDataFile)
-        {
-            var structuredDataContent = structuredDataFile.ToStreamContent();
-            content.Add(
-                structuredDataContent,
-                nameof(PostMeldingBody.StructuredData),
-                body.StructuredData.FileName
-            );
-        }
-
-        // Add Attachments
-        foreach (var attachment in body.Attachments)
-        {
-            var attachmentContent = attachment.ToStreamContent();
-            content.Add(
-                attachmentContent,
-                nameof(PostMeldingBody.Attachments),
-                attachment.FileName
-            );
-        }
-
-        return content;
-    }
-
-    private static StreamContent ToStreamContent(this IFormFile file)
-    {
-        var stream = new MemoryStream();
-        file.CopyTo(stream);
-        stream.Position = 0; // Reset stream position
-
-        var content = new StreamContent(stream);
-        content.Headers.ContentType = new MediaTypeHeaderValue(
-            file.ContentType ?? "application/octet-stream"
-        );
-        return content;
     }
 }

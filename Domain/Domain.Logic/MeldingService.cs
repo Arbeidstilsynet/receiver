@@ -172,7 +172,9 @@ internal class MeldingService : IMeldingService
         );
         if (uploadRequest.Document.ScanResult != DocumentScanResult.Clean)
         {
-            await _virusScanService.ScanForVirus(uploadResult, cancellationToken);
+            var scanResult = await _virusScanService.ScanForVirus(uploadResult, cancellationToken);
+
+            uploadResult.PersistedDocument.ScanResult = scanResult;
         }
 
         return uploadResult;

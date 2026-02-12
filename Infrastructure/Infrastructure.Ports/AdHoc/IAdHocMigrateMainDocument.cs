@@ -6,9 +6,7 @@ public interface IAdHocMigrateMainDocument
 {
     public Task<Melding?> MigrateMainDocument(
         Guid meldingId,
-        Guid mainDocument,
-        Guid structuredData,
-        IEnumerable<Guid> attachments,
+        Guid newMainContent,
         CancellationToken cancellationToken
     );
 }

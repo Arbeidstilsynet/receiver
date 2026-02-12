@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
@@ -6,6 +7,7 @@ using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Bogus;
+using Microsoft.AspNetCore.Http;
 using static Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test.Extensions.FakerExtensions;
 using FileMetadata = Arbeidstilsynet.Common.Altinn.Model.Adapter.FileMetadata;
 
@@ -86,5 +88,19 @@ public static class TestData
         customize?.Invoke(cloudEvent);
 
         return cloudEvent;
+    }
+    
+    public static IFormFile CreateFormFile(
+        string name,
+        string content,
+        string contentType = "text/plain"
+    )
+    {
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        return new FormFile(stream, 0, content.Length, name, name)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = contentType,
+        };
     }
 }
