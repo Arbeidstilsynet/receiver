@@ -11,13 +11,13 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // 1. Add DocumentType column with default value
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "DocumentType",
                 schema: "public",
                 table: "documents",
-                type: "integer",
+                type: "varchar(24)",
                 nullable: false,
-                defaultValue: 0
+                defaultValue:"Attachment"
             );
 
             // 2. Migrate IsAttachment data to DocumentType with logic. MainDocument will need to be moved manually
@@ -26,8 +26,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 UPDATE ""public"".""documents"" d
                 SET ""DocumentType"" =
                     CASE
-                        WHEN d.""IsAttachment"" = FALSE THEN 2 -- StructuredData
-                        ELSE 0 -- Attachment 
+                        WHEN d.""IsAttachment"" = FALSE THEN 'StructuredData'
+                        ELSE 'Attachment'
                     END
                 FROM ""public"".""meldinger"" m
                 WHERE d.""MeldingId"" = m.""Id"";
@@ -51,9 +51,9 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 defaultValue: false
             );
 
-            // 2. Migrate DocumentType data back to IsAttachment (example: DocumentType = 2 => IsAttachment = true)
+            // 2. Migrate DocumentType data back to IsAttachment (example: DocumentType = 'StructuredData' => IsAttachment = false)
             migrationBuilder.Sql(
-                @"UPDATE ""public"".""documents"" SET ""IsAttachment"" = CASE WHEN ""DocumentType"" = 2 THEN TRUE ELSE FALSE END;"
+                @"UPDATE ""public"".""documents"" SET ""IsAttachment"" = CASE WHEN ""DocumentType"" = 'StructuredData' THEN FALSE ELSE TRUE END;"
             );
 
             // 3. Drop DocumentType column

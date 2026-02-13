@@ -534,8 +534,9 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("DocumentType")
-                        .HasColumnType("integer");
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("varchar(24)");
 
                     b.Property<string>("FileName")
                         .HasColumnType("text");
