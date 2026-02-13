@@ -17,7 +17,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                 table: "documents",
                 type: "varchar(24)",
                 nullable: false,
-                defaultValue:"Attachment"
+                defaultValue: "Attachment"
             );
 
             // 2. Migrate IsAttachment data to DocumentType with logic. MainDocument will need to be moved manually
