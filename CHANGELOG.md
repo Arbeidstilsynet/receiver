@@ -21,13 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.1.0
 
-### Added
+### Changed
 
 - Differentiate between MainContent and StructuredData on Melding
 - Add Tags to Documents
 - Add GetMeldinger to IMeldingerClient
 - Treat structured data and main content as clean when coming from Altinn (since they are both generated based on the DataModel of the instance)
-- Consumers should assume a melding can be resubmitted, and should update their internals if they get another melding with the same meldingId.
+- Consumers should assume a melding can be republished, and should update their internals if they get another melding with the same meldingId.
+
+### Added
+
 - Added adhoc function to set the main document, and re-publish the melding. This is necessary due to incomplete info in the db-layer during normal database migration.
 
 ## 1.0.0
