@@ -3,7 +3,7 @@
     <ProjectReference Include="..\..\Domain\Domain.Data\Domain.Data.csproj" />
     <PackageReference
       Include="Arbeidstilsynet.Common.Altinn"
-      Version="2.4.0-alpha.9"
+      Version="2.4.0"
     ></PackageReference>
   </ItemGroup>
   <PropertyGroup>
