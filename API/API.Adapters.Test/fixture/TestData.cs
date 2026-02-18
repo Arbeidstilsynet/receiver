@@ -96,7 +96,7 @@ public static class TestData
         string contentType = "text/plain"
     )
     {
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         return new FormFile(stream, 0, content.Length, name, name)
         {
             Headers = new HeaderDictionary(),
