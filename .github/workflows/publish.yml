@@ -14,6 +14,7 @@ jobs:
     uses: ./.github/workflows/publish-template.yml
     secrets: inherit
     permissions:
+      id-token: write
       contents: write
       actions: read
       packages: write

@@ -11,7 +11,7 @@ jobs:
       contents: write
       actions: read
       packages: write
-
+      id-token: write
   check:
     needs: [build_receiver]
     runs-on: ubuntu-latest
