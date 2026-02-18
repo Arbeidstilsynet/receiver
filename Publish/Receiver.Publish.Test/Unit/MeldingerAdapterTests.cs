@@ -162,7 +162,7 @@ public class MeldingerAdapterTests
         _meldingerClient.GetDocument(melding.Id, melding.StructuredDataId!.Value).Returns(document);
         _meldingerClient
             .DownloadDocument(melding.Id, melding.StructuredDataId!.Value)
-            .Returns(new MemoryStream());
+            .Returns(Substitute.For<MemoryStream>());
 
         // Act
         var result = await _sut.FetchStructuredData<TestStructuredData>(melding);
@@ -189,7 +189,7 @@ public class MeldingerAdapterTests
         _meldingerClient.GetDocument(melding.Id, melding.StructuredDataId!.Value).Returns(document);
 
         var invalidJson = "{ invalid json }";
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(invalidJson));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(invalidJson));
         _meldingerClient
             .DownloadDocument(melding.Id, melding.StructuredDataId!.Value)
             .Returns(stream);
@@ -219,7 +219,7 @@ public class MeldingerAdapterTests
         _meldingerClient.GetDocument(melding.Id, melding.StructuredDataId!.Value).Returns(document);
 
         var nullJson = "null";
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(nullJson));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(nullJson));
         _meldingerClient
             .DownloadDocument(melding.Id, melding.StructuredDataId!.Value)
             .Returns(stream);
@@ -256,7 +256,7 @@ public class MeldingerAdapterTests
         _meldingerClient.GetDocument(melding.Id, melding.StructuredDataId!.Value).Returns(document);
 
         var jsonData = JsonSerializer.Serialize(expectedData);
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonData));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(jsonData));
         _meldingerClient
             .DownloadDocument(melding.Id, melding.StructuredDataId!.Value)
             .Returns(stream);
