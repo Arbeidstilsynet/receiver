@@ -50,7 +50,8 @@ public static class DependencyInjectionExtensions
         this IServiceCollection services,
         ValkeyConfiguration valkeyConfiguration,
         MeldingerReceiverApiConfiguration meldingerReceiverApiConfiguration
-    ) where T : class, IMeldingerConsumer
+    )
+        where T : class, IMeldingerConsumer
     {
         services.AddScoped<IMeldingerConsumer, T>();
         services.AddHostedService<ReceiverListener>();
