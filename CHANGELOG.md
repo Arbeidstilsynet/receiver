@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security <!-- in case of vulnerabilities. -->
 
+## 1.1.1
+
+### Fixed
+
+- Nothing changed from 1.1.0, just fixed a pipeline issue which caused the publish workflow to fail.
+
 ## 1.1.0
 
 ### Changed
