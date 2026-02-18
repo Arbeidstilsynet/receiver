@@ -1,18 +1,11 @@
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test.fixtures;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
-using Domain.Logic.Test.fixtures;
-using MapsterMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
-using Xunit.Microsoft.DependencyInjection.Abstracts;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test;
 

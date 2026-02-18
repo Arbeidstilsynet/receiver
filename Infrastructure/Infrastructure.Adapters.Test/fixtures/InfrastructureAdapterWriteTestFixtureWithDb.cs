@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit.Microsoft.DependencyInjection;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
-using Xunit.v3;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.fixtures;
 

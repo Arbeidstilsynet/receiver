@@ -1,8 +1,6 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Microsoft.AspNetCore.Mvc;

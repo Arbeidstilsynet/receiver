@@ -1,12 +1,9 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using MapsterMapper;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 

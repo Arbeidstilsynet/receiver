@@ -1,5 +1,4 @@
 using System.Text;
-using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;

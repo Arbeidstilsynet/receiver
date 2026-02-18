@@ -1,4 +1,3 @@
-using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;

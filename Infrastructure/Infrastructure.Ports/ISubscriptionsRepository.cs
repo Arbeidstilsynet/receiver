@@ -1,4 +1,3 @@
-using Arbeidstilsynet.Common.Altinn.Model.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 

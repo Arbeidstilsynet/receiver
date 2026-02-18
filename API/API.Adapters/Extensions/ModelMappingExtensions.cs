@@ -1,4 +1,3 @@
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 

@@ -1,7 +1,5 @@
-using System.Data;
 using Arbeidstilsynet.Receiver.Model.Request;
 using FluentValidation;
-using FluentValidation.Results;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Validation;
 

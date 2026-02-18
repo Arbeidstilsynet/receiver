@@ -9,7 +9,6 @@ using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
 using NSubstitute;
-using Org.BouncyCastle.Pqc.Crypto.Lms;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test;

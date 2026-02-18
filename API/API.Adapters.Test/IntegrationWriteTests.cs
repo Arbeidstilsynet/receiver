@@ -1,11 +1,8 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
@@ -13,7 +10,6 @@ using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
 using Argon;
-using Microsoft.AspNetCore.Http;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test;

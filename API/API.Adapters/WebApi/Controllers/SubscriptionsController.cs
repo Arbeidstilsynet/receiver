@@ -1,8 +1,5 @@
-using Arbeidstilsynet.Common.Altinn.Model.Adapter;
-using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Controllers;

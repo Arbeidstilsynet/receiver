@@ -1,12 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.fixtures;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Shouldly;
-using Xunit;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.Db
 {

@@ -7,7 +7,6 @@ using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using FluentValidation;
-using Quartz;
 using IAssemblyInfo = Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo;
 
 var builder = WebApplication.CreateBuilder(args);

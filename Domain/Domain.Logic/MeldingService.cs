@@ -5,7 +5,6 @@ using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using CreateMeldingRequest = Arbeidstilsynet.MeldingerReceiver.API.Ports.CreateMeldingRequest;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic;

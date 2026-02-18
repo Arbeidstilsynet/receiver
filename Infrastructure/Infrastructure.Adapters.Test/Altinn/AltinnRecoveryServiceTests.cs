@@ -1,16 +1,10 @@
-using Arbeidstilsynet.Common.Altinn.DependencyInjection;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Bogus;
-using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shouldly;
 

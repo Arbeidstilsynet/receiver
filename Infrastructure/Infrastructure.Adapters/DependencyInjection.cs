@@ -1,6 +1,5 @@
 using System.Reflection;
 using Arbeidstilsynet.Common.Altinn.DependencyInjection;
-using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.AdHoc;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;

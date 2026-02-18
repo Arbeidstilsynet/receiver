@@ -1,10 +1,7 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
 
