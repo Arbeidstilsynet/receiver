@@ -13,11 +13,9 @@ public static IServiceCollection AddServices
         this IServiceCollection services,
         DatabaseConfiguration databaseConfiguration
     ) {
-        services.AddScoped<IMeldingerConsumer, MyMeldingConsumer>();
-        services.AddMeldingerReceiverWithBackgroundService(
+        services.AddMeldingerReceiverWithBackgroundService<MyMeldingerConsumer>(
             new ValkeyConfiguration { ... },
-            new MeldingerReceiverApiConfiguration { ... },
-            serviceProvider => serviceProvider.GetRequiredService<IMeldingerConsumer>()
+            new MeldingerReceiverApiConfiguration { ... }
         );
         return services;
     }
