@@ -25,7 +25,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
 
       - name: Check if package version exists
         id: nuget_version_check
@@ -40,7 +40,7 @@ jobs:
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@8d282653fd85f9a26e80d4f6a4c660eb5d6c8896 # v2
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
           nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
 
       - name: Docker meta
@@ -87,7 +87,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
 
       - name: Check if package version exists
         id: nuget_version_check
@@ -102,7 +102,7 @@ jobs:
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@8d282653fd85f9a26e80d4f6a4c660eb5d6c8896 # v2
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
           nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
 
       - name: Docker meta
@@ -159,7 +159,7 @@ jobs:
       - name: Extract changelog section for current version
         if: steps.nuget_version_check.outputs.published == 'false'
         id: changelog
-        working-directory: ./
+        working-directory: ./src/
         run: |
           VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           if [ -f CHANGELOG.md ]; then
