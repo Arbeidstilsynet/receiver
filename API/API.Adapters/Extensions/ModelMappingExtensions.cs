@@ -17,4 +17,13 @@ public static class ModelMappingExtensions
             InputStream = file.OpenReadStream(),
         };
     }
+
+    public static UploadDocumentRequest AsCleanFile(this UploadDocumentRequest request)
+    {
+        return new UploadDocumentRequest()
+        {
+            FileMetadata = request.FileMetadata,
+            InputStream = request.InputStream,
+        };
+    }
 }

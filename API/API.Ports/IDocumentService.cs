@@ -7,9 +7,15 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Ports;
 /// </summary>
 public interface IDocumentService
 {
-    public Task<Document?> GetDocument(GetDocumentRequest request);
+    public Task<Document?> GetDocument(
+        GetDocumentRequest request,
+        CancellationToken cancellationToken
+    );
 
-    public Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request);
+    public Task<IEnumerable<Document>?> GetAllDocuments(
+        GetAllDocumentsRequest request,
+        CancellationToken cancellationToken
+    );
 
     public Task DownloadDocument(
         Document document,

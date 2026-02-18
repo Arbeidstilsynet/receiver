@@ -5,7 +5,8 @@
   ReceivedAt: DateTime_1,
   Tags: null,
   InternalTags: null,
-  ContentId: Guid_2,
+  MainContentId: Guid_2,
+  StructuredDataId: null,
   AttachmentIds: [
     Guid_3,
     Guid_4

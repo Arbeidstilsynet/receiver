@@ -13,6 +13,9 @@ public class AltinnMapperTests
     private const string TestOrg = "dat";
     private const string TestOwnerPartyid = "123123";
     private const string TestInstanceId = "11827765-ed99-44a4-a88b-54a32f7627b6";
+    private const string MainContentId = "abcd1234-5678-90ab-cdef-1234567890ab";
+    private const string StructuredDataId = "da158178-b7e1-44a1-bd20-7de5ef2fbc7a";
+    private const string AttachmentId = "a013a210-e65d-46cb-8eb8-d41d41756be6";
 
     private readonly VerifySettings _verifySettings = new();
 
@@ -33,7 +36,7 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         await Verify(result, _verifySettings);
     }
@@ -44,9 +47,22 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
-        result.MainContent.InputStream.ShouldBeSameAs(summary.AltinnSkjema.DocumentContent);
+        result.MainContent.ShouldNotBeNull();
+        result.MainContent.InputStream.ShouldBeSameAs(summary.SkjemaAsPdf.DocumentContent);
+    }
+
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenCalledWithCompleteAltinnSummary_MapsStructuredData()
+    {
+        //arrange
+        var summary = GetCompleteAltinnSummary();
+        //act
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
+        //assert
+        result.StructuredData.ShouldNotBeNull();
+        result.StructuredData.InputStream.ShouldBeSameAs(summary.StructuredData!.DocumentContent);
     }
 
     [Fact]
@@ -55,13 +71,26 @@ public class AltinnMapperTests
         //arrange
         var summary = GetCompleteAltinnSummary();
         //act
-        var result = summary.MapAltinnSummaryToPostMeldingRequest(DateTime.Now);
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
         //assert
         result.Attachments.ShouldHaveSingleItem();
         result.Attachments[0].InputStream.ShouldBeSameAs(summary.Attachments[0].DocumentContent);
     }
 
-    private static AltinnInstanceSummary GetCompleteAltinnSummary()
+    [Fact]
+    public async Task MapAltinnSummaryToPostMeldingRequest_AllDocumentsAreInfected_TreatStructuredDataAndMainContentAsClean()
+    {
+        //arrange
+        var summary = GetCompleteAltinnSummary(FileScanResult.Infected);
+        //act
+        var result = summary.MapAltinnSummaryToPostMeldingRequest();
+        //assert
+        await Verify(result, _verifySettings);
+    }
+
+    private static AltinnInstanceSummary GetCompleteAltinnSummary(
+        FileScanResult fileScanResult = FileScanResult.Clean
+    )
     {
         return new AltinnInstanceSummary
         {
@@ -73,16 +102,28 @@ public class AltinnMapperTests
                 InstanceOwnerPartyId = TestOwnerPartyid,
             },
 
-            AltinnSkjema = new AltinnDocument
+            StructuredData = new AltinnDocument
             {
-                DocumentContent = new MemoryStream("mainDocumentContent"u8.ToArray()),
-                IsMainDocument = true,
+                DocumentContent = new MemoryStream("{ \"key\": \"value\" }"u8.ToArray()),
                 FileMetadata = new AltinnFileMetadata
                 {
+                    AltinnId = new Guid(StructuredDataId),
                     ContentType = "application/json",
-                    DataType = "structured-data",
+                    AltinnDataType = "structured-data",
                     Filename = "structured-data.json",
-                    FileScanResult = FileScanResult.Clean,
+                    FileScanResult = fileScanResult,
+                },
+            },
+            SkjemaAsPdf = new AltinnDocument()
+            {
+                DocumentContent = new MemoryStream("maincContent"u8.ToArray()),
+                FileMetadata = new AltinnFileMetadata
+                {
+                    AltinnId = new Guid(MainContentId),
+                    ContentType = "application/pdf",
+                    AltinnDataType = "ref-data-as-pdf",
+                    Filename = "main-data.pdf",
+                    FileScanResult = fileScanResult,
                 },
             },
             Attachments =
@@ -90,13 +131,13 @@ public class AltinnMapperTests
                 new AltinnDocument
                 {
                     DocumentContent = new MemoryStream("attachmentContent"u8.ToArray()),
-                    IsMainDocument = false,
                     FileMetadata = new AltinnFileMetadata
                     {
+                        AltinnId = new Guid(AttachmentId),
                         ContentType = "application/pdf",
-                        DataType = "ref-data-as-pdf",
+                        AltinnDataType = "some-type",
                         Filename = "etellerannet.pdf",
-                        FileScanResult = FileScanResult.Clean,
+                        FileScanResult = fileScanResult,
                     },
                 },
             ],

@@ -8,10 +8,9 @@ namespace Arbeidstilsynet.Receiver.Ports;
 public interface IMeldingerAdapter
 {
     /// <summary>
-    /// Retrieves the main Altinn document for the specified melding.
+    /// Downloads and deserializes the structured data, if any, associated with the specified melding.
     /// </summary>
-    /// <typeparam name="T">The type of the document to retrieve.</typeparam>
+    /// <typeparam name="TStructuredData">The type of the structured data.</typeparam>
     /// <param name="melding">The melding for which to retrieve the document.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the main Altinn document of type <typeparamref name="T"/>.</returns>
-    Task<T> GetMainAltinnDocument<T>(Melding melding);
+    Task<TStructuredData?> FetchStructuredData<TStructuredData>(Melding melding);
 }

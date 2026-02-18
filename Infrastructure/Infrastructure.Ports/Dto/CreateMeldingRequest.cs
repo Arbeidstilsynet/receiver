@@ -14,7 +14,8 @@ public record CreateMeldingRequest
     public Dictionary<string, string> Tags { get; init; } = [];
     public Dictionary<string, string> InternalTags { get; init; } = [];
 
-    public required DocumentStorageDto MainDocumentData { get; init; }
+    public DocumentStorageDto? MainDocumentData { get; init; }
+    public DocumentStorageDto? StructuredData { get; init; }
     public required List<DocumentStorageDto> AttachmentData { get; init; }
 }
 
@@ -27,4 +28,5 @@ public record DocumentStorageDto
     public required string FileName { get; init; }
 
     public required DocumentScanResult ScanResult { get; set; }
+    public Dictionary<string, string> Tags { get; init; } = [];
 }

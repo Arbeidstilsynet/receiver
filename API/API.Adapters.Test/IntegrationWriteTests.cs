@@ -1,18 +1,15 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
 using Argon;
-using Microsoft.AspNetCore.Http;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Test;
@@ -40,31 +37,109 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     }
 
     [Fact]
+    public async Task PostMelding_NoStructuredDataOrMainContent_ReturnsBadRequest()
+    {
+        var postMeldingBody = CreatePostMeldingBody() with
+        {
+            MainContent = null,
+            StructuredData = null,
+            Attachments = [TestData.CreateFormFile("attachment1.txt", "Attachment 1 content")],
+        };
+
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task PostMelding_StructuredDataIsNotJson_ReturnsBadRequest()
+    {
+        var postMeldingBody = CreatePostMeldingBody() with
+        {
+            StructuredData = TestData.CreateFormFile(
+                "structuredData.txt",
+                "This is not JSON.. but it should be",
+                contentType: "text/plain"
+            ),
+        };
+
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task PostMelding_MainContentIsJson_ReturnsBadRequest()
+    {
+        var postMeldingBody = CreatePostMeldingBody() with
+        {
+            MainContent = TestData.CreateFormFile(
+                "mainContent.json",
+                "{ \"key\": \"value\" }",
+                contentType: "application/json"
+            ),
+        };
+
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task PostMelding_ThenGetMelding_ReturnsMelding()
     {
-        var postMeldingBody = TestData.CreatePostMeldingBodyFaker().Generate() with
+        var postMeldingBody = CreatePostMeldingBody() with
         {
-            ApplicationId = ApplicationFixture.KnownApplicationId,
             Metadata = new Dictionary<string, string>
             {
                 { "key1", "value1" },
                 { "key2", "value2" },
             },
-            MainContent = CreateFormFile("mainContent.txt", "Hello World"),
+            MainContent = TestData.CreateFormFile(
+                "mainContent.txt",
+                "Hello World",
+                contentType: "text/plain"
+            ),
+            StructuredData = TestData.CreateFormFile(
+                "structuredData.json",
+                "{ \"structuredKey\": \"structuredValue\" }",
+                contentType: "application/json"
+            ),
             Attachments =
             [
-                CreateFormFile("attachment1.txt", "Attachment 1 content"),
-                CreateFormFile("attachment2.txt", "Attachment 2 content"),
+                TestData.CreateFormFile(
+                    "attachment1.txt",
+                    "Attachment 1 content",
+                    contentType: "text/plain"
+                ),
+                TestData.CreateFormFile(
+                    "attachment2.txt",
+                    "Attachment 2 content",
+                    contentType: "text/plain"
+                ),
             ],
         };
 
-        var postMeldingResponse = await (
-            await _client.PostAsync(
-                "/meldinger",
-                postMeldingBody.ToMultipartFormDataContent(),
-                TestContext.Current.CancellationToken
-            )
-        ).Content.ReadFromJsonAsync<PostMeldingResponse>(
+        var httpResponse = await _client.PostAsync(
+            "/meldinger",
+            postMeldingBody.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+        httpResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var postMeldingResponse = await httpResponse.Content.ReadFromJsonAsync<PostMeldingResponse>(
             cancellationToken: TestContext.Current.CancellationToken
         );
 
@@ -79,6 +154,8 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         var melding = getMeldingResponse.ShouldNotBeNull().Melding.ShouldNotBeNull();
 
         melding.ApplicationId.ShouldBe(postMeldingBody.ApplicationId);
+        melding.MainContentId.ShouldNotBeNull();
+        melding.StructuredDataId.ShouldNotBeNull();
         melding.AttachmentIds.Count.ShouldBe(postMeldingBody.Attachments.Count);
         melding.Tags.ShouldBe(postMeldingBody.Metadata);
     }
@@ -203,62 +280,11 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         postMeldingResponse?.MeldingId.ShouldNotBe(Guid.Empty);
     }
 
-    private static IFormFile CreateFormFile(string name, string content)
+    private static PostMeldingBody CreatePostMeldingBody()
     {
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-        return new FormFile(stream, 0, content.Length, name, name)
+        return TestData.CreatePostMeldingBodyFaker().Generate() with
         {
-            Headers = new HeaderDictionary(),
-            ContentType = "text/plain",
+            ApplicationId = ApplicationFixture.KnownApplicationId,
         };
-    }
-}
-
-file static class Extensions
-{
-    public static MultipartFormDataContent ToMultipartFormDataContent(this PostMeldingBody body)
-    {
-        var content = new MultipartFormDataContent();
-
-        // Add ApplicationId
-        content.Add(new StringContent(body.ApplicationId), nameof(PostMeldingBody.ApplicationId));
-
-        // Add Metadata
-        foreach (var kvp in body.Metadata)
-            content.Add(
-                new StringContent(kvp.Value),
-                $"{nameof(PostMeldingBody.Metadata)}[{kvp.Key}]"
-            );
-
-        // Add MainContent
-        var mainContentStream = new MemoryStream();
-        body.MainContent.CopyTo(mainContentStream);
-        mainContentStream.Position = 0; // Reset stream position
-
-        var mainContent = new StreamContent(mainContentStream);
-        mainContent.Headers.ContentType = new MediaTypeHeaderValue(
-            body.MainContent.ContentType ?? "application/octet-stream"
-        );
-        content.Add(mainContent, nameof(PostMeldingBody.MainContent), body.MainContent.FileName);
-
-        // Add Attachments
-        foreach (var attachment in body.Attachments)
-        {
-            var attachmentStream = new MemoryStream();
-            attachment.CopyTo(attachmentStream);
-            attachmentStream.Position = 0; // Reset stream position
-
-            var attachmentContent = new StreamContent(attachmentStream);
-            attachmentContent.Headers.ContentType = new MediaTypeHeaderValue(
-                attachment.ContentType ?? "application/octet-stream"
-            );
-            content.Add(
-                attachmentContent,
-                nameof(PostMeldingBody.Attachments),
-                attachment.FileName
-            );
-        }
-
-        return content;
     }
 }

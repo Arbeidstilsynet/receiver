@@ -1,8 +1,6 @@
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.fixtures;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Argon;
 using Bogus;
@@ -49,7 +47,15 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
             Id = Guid.NewGuid(),
             MeldingId = meldingId,
             InternalDocumentReference = "internal-id",
-            IsAttachment = false,
+            DocumentType = DocumentType.MainContent,
+            ScanResult = DocumentScanResult.Clean,
+        };
+        var structuredDocumentEntity = new DocumentEntity
+        {
+            Id = Guid.NewGuid(),
+            MeldingId = meldingId,
+            InternalDocumentReference = "internal-structured-id",
+            DocumentType = DocumentType.StructuredData,
             ScanResult = DocumentScanResult.Clean,
         };
         var attachmentEntity = new DocumentEntity
@@ -57,7 +63,7 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
             Id = Guid.NewGuid(),
             MeldingId = meldingId,
             InternalDocumentReference = "internal-attachment-id",
-            IsAttachment = true,
+            DocumentType = DocumentType.Attachment,
             ScanResult = DocumentScanResult.Clean,
         };
         var meldingEntity = new MeldingEntity
@@ -72,7 +78,7 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
                 { "internalTag1", "internalValue1" },
                 { "internalTag2", "internalValue2" },
             },
-            Documents = [mainDocumentEntity, attachmentEntity],
+            Documents = [mainDocumentEntity, structuredDocumentEntity, attachmentEntity],
         };
         //act
         var result = _mapper.Map<Melding>(meldingEntity);
@@ -87,10 +93,10 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         {
             Id = Guid.NewGuid(),
             MeldingId = Guid.NewGuid(),
-            ContentType = "application/json",
-            FileName = "test.json",
+            ContentType = "application/pdf",
+            FileName = "main-content.pdf",
             InternalDocumentReference = "internal-id",
-            IsAttachment = false,
+            DocumentType = DocumentType.MainContent,
             ScanResult = DocumentScanResult.Clean,
         };
         //act

@@ -2,7 +2,6 @@ using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.fixtures;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Argon;
-using MapsterMapper;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 

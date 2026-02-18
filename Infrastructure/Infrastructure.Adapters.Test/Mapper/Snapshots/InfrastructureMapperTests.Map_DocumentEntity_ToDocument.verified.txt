@@ -2,9 +2,9 @@
   DocumentId: Guid_1,
   MeldingId: Guid_2,
   FileMetadata: {
-    FileName: test.json,
-    ContentType: application/json
+    FileName: main-content.pdf,
+    ContentType: application/pdf
   },
   ScanResult: Clean,
-  IsDocumentSafeToUse: true
+  Tags: null
 }

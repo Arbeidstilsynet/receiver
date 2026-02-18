@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migrations
 {
-    [DbContext(typeof(InfrastructureAdaptersDbContext))]
+    [DbContext(typeof(ReceiverDbContext))]
     [Migration("20250729083054_AddMessageSourceEnum")]
     partial class AddMessageSourceEnum
     {

@@ -7,16 +7,36 @@
       ContentType: null
     },
     ScanResult: Clean,
-    IsDocumentSafeToUse: true
+    Tags: {
+      AltinnDataType: ref-data-as-pdf,
+      AltinnId: Guid_3,
+      key1: value1
+    }
   },
   {
-    DocumentId: Guid_3,
+    DocumentId: Guid_4,
     MeldingId: Guid_2,
     FileMetadata: {
       FileName: null,
       ContentType: null
     },
     ScanResult: Clean,
-    IsDocumentSafeToUse: true
+    Tags: {
+      AltinnDataType: vedlegg,
+      AltinnId: Guid_5
+    }
+  },
+  {
+    DocumentId: Guid_6,
+    MeldingId: Guid_2,
+    FileMetadata: {
+      FileName: null,
+      ContentType: null
+    },
+    ScanResult: Clean,
+    Tags: {
+      AltinnDataType: skjema,
+      AltinnId: Guid_7
+    }
   }
 ]

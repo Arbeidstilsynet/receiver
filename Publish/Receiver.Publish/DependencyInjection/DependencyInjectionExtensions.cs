@@ -45,16 +45,15 @@ public static class DependencyInjectionExtensions
     /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
     /// <param name="valkeyConfiguration">Configuration for Valkey (Redis) connection.</param>
     /// <param name="meldingerReceiverApiConfiguration">Configuration for MeldingerReceiver API endpoint.</param>
-    /// <param name="meldingerConsumerProvider">Factory for creating <see cref="IMeldingerConsumer" /> instances.</param>
     /// <returns>The <see cref="IServiceCollection" /> for chaining.</returns>
-    public static IServiceCollection AddMeldingerReceiverWithBackgroundService(
+    public static IServiceCollection AddMeldingerReceiverWithBackgroundService<T>(
         this IServiceCollection services,
         ValkeyConfiguration valkeyConfiguration,
-        MeldingerReceiverApiConfiguration meldingerReceiverApiConfiguration,
-        Func<ServiceProvider, IMeldingerConsumer> meldingerConsumerProvider
+        MeldingerReceiverApiConfiguration meldingerReceiverApiConfiguration
     )
+        where T : class, IMeldingerConsumer
     {
-        services.AddSingleton(meldingerConsumerProvider);
+        services.AddScoped<IMeldingerConsumer, T>();
         services.AddHostedService<ReceiverListener>();
         services.AddMeldingerReceiver(valkeyConfiguration, meldingerReceiverApiConfiguration);
         return services;

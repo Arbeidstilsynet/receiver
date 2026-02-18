@@ -28,8 +28,7 @@ public class WebhookController(
         {
             return Ok();
         }
-        var meldingReceivedAt = DateTime.Now;
-        var postMeldingRequest = await GetAltinnInstanceData(cloudEvent, meldingReceivedAt);
+        var postMeldingRequest = await GetAltinnInstanceData(cloudEvent);
         apiMeters.MeldingReceived(
             postMeldingRequest.Source,
             postMeldingRequest.ApplicationReference
@@ -40,16 +39,10 @@ public class WebhookController(
         return Ok(new PostMeldingResponse { MeldingId = melding.Id });
     }
 
-    private async Task<PostMeldingRequest> GetAltinnInstanceData(
-        AltinnCloudEvent cloudEvent,
-        DateTime meldingReceivedAt
-    )
+    private async Task<CreateMeldingRequest> GetAltinnInstanceData(AltinnCloudEvent cloudEvent)
     {
         using var activity = Tracer.Source.StartActivity();
-        var altinnSummary = await altinnAdapter.GetSummary(
-            cloudEvent,
-            options.Value.AltinnAppConfiguration
-        );
-        return altinnSummary.MapAltinnSummaryToPostMeldingRequest(meldingReceivedAt);
+        var altinnSummary = await altinnAdapter.GetSummary(cloudEvent);
+        return altinnSummary.MapAltinnSummaryToPostMeldingRequest();
     }
 }

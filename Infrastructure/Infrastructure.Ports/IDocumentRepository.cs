@@ -4,7 +4,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 
 public interface IDocumentRepository
 {
-    Task<Document?> GetDocumentAsync(Guid documentId);
+    Task<Document?> GetDocumentAsync(Guid documentId, CancellationToken cancellationToken);
 
-    Task<List<Document>> GetAllDocumentsForMelding(Guid meldingId);
+    Task<List<Document>> GetAllDocumentsForMelding(
+        Guid meldingId,
+        CancellationToken cancellationToken
+    );
 }

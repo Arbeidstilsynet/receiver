@@ -2,14 +2,11 @@ using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.Altinn;
@@ -53,7 +50,7 @@ public class AltinnRegistrationServiceTests
             .Received(1)
             .SubscribeForCompletedProcessEvents(
                 Arg.Is<SubscriptionRequestDto>(s =>
-                    s.AltinnAppIdentifier == newAppId
+                    s.AltinnAppId == newAppId
                     && s.CallbackUrl
                         == new Uri(new Uri(DummyCallbackUrl), "webhook/receive-altinn-cloudevent")
                 )

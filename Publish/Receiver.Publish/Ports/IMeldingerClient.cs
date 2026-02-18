@@ -10,6 +10,13 @@ namespace Arbeidstilsynet.Receiver.Ports;
 public interface IMeldingerClient
 {
     /// <summary>
+    /// Retrieves a specific <see cref="Melding"/> from the receiver application using its unique identifier.
+    /// </summary>
+    /// <param name="meldingId"></param>
+    /// <returns>A <see cref="Melding"/> object if found; otherwise, null.</returns>
+    Task<Melding?> GetMelding(Guid meldingId);
+
+    /// <summary>
     /// Retrieves metadata for a specific document associated with a message from the receiver application.
     /// </summary>
     /// <param name="meldingId">The unique identifier of the message.</param>
@@ -32,5 +39,10 @@ public interface IMeldingerClient
     /// <returns>A <see cref="GetAllDocumentsResponse"/> containing metadata for all documents.</returns>
     Task<GetAllDocumentsResponse> GetDocuments(Guid meldingId);
 
+    /// <summary>
+    /// Subscribes a consumer to receive messages from the MeldingerReceiver application.
+    /// </summary>
+    /// <param name="consumerManifest"></param>
+    /// <returns></returns>
     Task<ConsumerManifest> SubscribeConsumer(ConsumerManifest consumerManifest);
 }

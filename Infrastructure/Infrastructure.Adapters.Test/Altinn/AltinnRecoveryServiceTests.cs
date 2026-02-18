@@ -1,15 +1,10 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Bogus;
-using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shouldly;
 
@@ -49,22 +44,9 @@ public class AltinnRecoveryServiceTests
         SubscriptionId = 7654321,
     };
 
-    private static AltinnAppConfiguration DefaultAltinnConfig = new AltinnAppConfiguration
-    {
-        AltinnOrgIdentifier = "dat",
-        MainDocumentDataTypeName = "structured-data",
-    };
-
     public AltinnRecoveryServiceTests()
     {
-        var infraConfig = Substitute.For<InfrastructureConfiguration>();
-        infraConfig.AltinnAppConfiguration.Returns(DefaultAltinnConfig);
-        _sut = new AltinnRecoveryService(
-            _altinnAdapter,
-            _subscriptionsRepository,
-            _logger,
-            Options.Create(infraConfig)
-        );
+        _sut = new AltinnRecoveryService(_altinnAdapter, _subscriptionsRepository, _logger);
     }
 
     [Theory]
@@ -84,18 +66,10 @@ public class AltinnRecoveryServiceTests
             .GetAllActiveAltinnSubscriptions()
             .Returns([SampleTestAppRegistration, SampleTestAppRegistration2]);
         _altinnAdapter
-            .GetNonCompletedInstances(
-                SampleTestAppRegistration.AltinnAppId,
-                true,
-                DefaultAltinnConfig
-            )
+            .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
             .Returns(GetDummyInstances(nonCompletedInstancesForFirstAppCount));
         _altinnAdapter
-            .GetNonCompletedInstances(
-                SampleTestAppRegistration2.AltinnAppId,
-                true,
-                DefaultAltinnConfig
-            )
+            .GetNonCompletedInstances(SampleTestAppRegistration2.AltinnAppId, true)
             .Returns(GetDummyInstances(nonCompletedInstancesForSecondAppCount));
         //act
         var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps();

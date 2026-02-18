@@ -21,23 +21,7 @@ internal class InfrastructureMapper : IRegister
             .NewConfig<SubscriptionEntity, ConsumerManifest>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.ConsumerName, src => src.ConsumerName)
-            .Map(
-                target => target.AppRegistrations,
-                src =>
-                    src.RegisteredAltinnApps.Select(a => new AppRegistration
-                        {
-                            AppId = a.AppIdentifier,
-                            MessageSource = MessageSource.Altinn,
-                        })
-                        .Concat(
-                            src.RegisteredApiApps.Select(a => new AppRegistration
-                            {
-                                AppId = a.AppIdentifier,
-                                MessageSource = MessageSource.Api,
-                            })
-                        )
-                        .ToList()
-            );
+            .Map(target => target.AppRegistrations, src => src.ToAppRegistrations());
 
         config
             .NewConfig<AltinnSubscription, AltinnEventsSubscription>()
@@ -52,24 +36,60 @@ internal class InfrastructureMapper : IRegister
         config
             .NewConfig<MeldingEntity, Domain.Data.Melding>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
-            .Map(target => target.ContentId, src => src.Documents.First(d => !d.IsAttachment).Id)
-            .Map(
-                target => target.AttachmentIds,
-                src => src.Documents.Where(d => d.IsAttachment).Select(s => s.Id).ToList()
-            );
+            .Map(target => target.MainContentId, src => src.GetMainContentId())
+            .Map(target => target.StructuredDataId, src => src.GetStructuredDataId())
+            .Map(target => target.AttachmentIds, src => src.GetAttachmentIds());
 
         config
             .NewConfig<DocumentEntity, Domain.Data.Document>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.DocumentId, src => src.Id)
-            .Map(target => target.FileMetadata, src => src.Adapt<FileMetadata>())
-            .Map(
-                target => target.IsDocumentSafeToUse,
-                src => src.ScanResult == DocumentScanResult.Clean
-            );
+            .Map(target => target.FileMetadata, src => src.Adapt<FileMetadata>());
 
         config
             .NewConfig<DocumentEntity, FileMetadata>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible);
+    }
+}
+
+file static class MappingExtensions
+{
+    public static List<AppRegistration> ToAppRegistrations(this SubscriptionEntity subscription)
+    {
+        var altinnApps = subscription.RegisteredAltinnApps.Select(a => new AppRegistration
+        {
+            AppId = a.AppIdentifier,
+            MessageSource = MessageSource.Altinn,
+        });
+
+        var apiApps = subscription.RegisteredApiApps.Select(a => new AppRegistration
+        {
+            AppId = a.AppIdentifier,
+            MessageSource = MessageSource.Api,
+        });
+
+        return altinnApps.Concat(apiApps).ToList();
+    }
+
+    public static Guid? GetMainContentId(this MeldingEntity melding)
+    {
+        return melding
+            .Documents.FirstOrDefault(d => d.DocumentType == DocumentType.MainContent)
+            ?.Id;
+    }
+
+    public static Guid? GetStructuredDataId(this MeldingEntity melding)
+    {
+        return melding
+            .Documents.FirstOrDefault(d => d.DocumentType == DocumentType.StructuredData)
+            ?.Id;
+    }
+
+    public static List<Guid> GetAttachmentIds(this MeldingEntity melding)
+    {
+        return melding
+            .Documents.Where(d => d.DocumentType == DocumentType.Attachment)
+            .Select(d => d.Id)
+            .ToList();
     }
 }

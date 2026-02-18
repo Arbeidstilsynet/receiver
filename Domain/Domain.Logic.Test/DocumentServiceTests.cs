@@ -57,12 +57,20 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId)
-            .Returns(SampleMelding with { Id = request.MeldingId, ContentId = request.DocumentId });
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
+            .Returns(
+                SampleMelding with
+                {
+                    Id = request.MeldingId,
+                    MainContentId = request.DocumentId,
+                }
+            );
         //act
-        await _sut.GetDocument(request);
+        await _sut.GetDocument(request, CancellationToken.None);
         //assert
-        await _documentRepository.Received(1).GetDocumentAsync(request.DocumentId);
+        await _documentRepository
+            .Received(1)
+            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -76,7 +84,7 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId)
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(
                 SampleMelding with
                 {
@@ -85,9 +93,11 @@ public class DocumentServiceTests
                 }
             );
         //act
-        await _sut.GetDocument(request);
+        await _sut.GetDocument(request, CancellationToken.None);
         //assert
-        await _documentRepository.Received(1).GetDocumentAsync(request.DocumentId);
+        await _documentRepository
+            .Received(1)
+            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -101,10 +111,10 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId)
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(SampleMelding with { Id = request.MeldingId });
         //act
-        var result = await _sut.GetDocument(request);
+        var result = await _sut.GetDocument(request, CancellationToken.None);
         //assert
         result.ShouldBeNull();
     }
@@ -120,10 +130,10 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId)
-            .Returns(SampleMelding with { ContentId = request.DocumentId });
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
+            .Returns(SampleMelding with { MainContentId = request.DocumentId });
         //act
-        var result = await _sut.GetDocument(request);
+        var result = await _sut.GetDocument(request, CancellationToken.None);
         //assert
         result.ShouldBeNull();
     }
@@ -142,10 +152,16 @@ public class DocumentServiceTests
             DocumentId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId)
-            .Returns(SampleMelding with { Id = request.MeldingId, ContentId = request.DocumentId });
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
+            .Returns(
+                SampleMelding with
+                {
+                    Id = request.MeldingId,
+                    MainContentId = request.DocumentId,
+                }
+            );
         _documentRepository
-            .GetDocumentAsync(request.DocumentId)
+            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>())
             .Returns(
                 SampleDocument with
                 {
@@ -156,7 +172,7 @@ public class DocumentServiceTests
             );
 
         //act
-        var act = async () => await _sut.GetDocument(request);
+        var act = async () => await _sut.GetDocument(request, CancellationToken.None);
 
         //assert
         await act.ShouldThrowAsync<DocumentNotSafeToUseException>();
@@ -187,14 +203,14 @@ public class DocumentServiceTests
         };
 
         _meldingRepository
-            .GetMeldingAsync(request.MeldingId)
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(SampleMelding with { Id = request.MeldingId });
         _documentRepository
-            .GetAllDocumentsForMelding(request.MeldingId)
+            .GetAllDocumentsForMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns([safeDocument, unsafeDocument]);
 
         //act
-        var documents = (await _sut.GetAllDocuments(request))?.ToList();
+        var documents = (await _sut.GetAllDocuments(request, CancellationToken.None))?.ToList();
 
         //assert
         documents.ShouldNotBeNull().ShouldBe([safeDocument]);
@@ -206,7 +222,7 @@ public class DocumentServiceTests
         //arrange
         var request = new GetAllDocumentsRequest { MeldingId = Guid.NewGuid() };
         //act
-        var result = await _sut.GetAllDocuments(request);
+        var result = await _sut.GetAllDocuments(request, CancellationToken.None);
         //assert
     }
 }

@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
@@ -6,6 +7,7 @@ using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Bogus;
+using Microsoft.AspNetCore.Http;
 using static Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test.Extensions.FakerExtensions;
 using FileMetadata = Arbeidstilsynet.Common.Altinn.Model.Adapter.FileMetadata;
 
@@ -32,17 +34,17 @@ public static class TestData
             .RuleFor(f => f.ScanResult, f => DocumentScanResult.Clean)
             .RuleFor(f => f.InputStream, f => f.CreateStream(f.Random.Int(100, 1000)));
 
-    public static Faker<PostMeldingRequest> CreatePostMeldingRequestFaker() =>
-        CreateFaker<PostMeldingRequest>()
+    public static Faker<CreateMeldingRequest> CreatePostMeldingRequestFaker() =>
+        CreateFaker<CreateMeldingRequest>()
             .UseSeed(1337)
             .RuleFor(r => r.Source, f => f.PickRandom<MessageSource>())
-            .RuleFor(r => r.MeldingReceivedAt, f => DateTime.Now)
             .RuleFor(
                 r => r.Attachments,
                 f => f.Make(f.Random.Int(1, 5), () => CreateUploadDocumentRequestFaker().Generate())
             )
             .RuleFor(r => r.Metadata, f => f.CreateDictionary())
-            .RuleFor(r => r.MainContent, f => CreateUploadDocumentRequestFaker().Generate());
+            .RuleFor(r => r.MainContent, f => CreateUploadDocumentRequestFaker().Generate())
+            .RuleFor(r => r.StructuredData, f => CreateUploadDocumentRequestFaker().Generate());
 
     public static Faker<AltinnSubscription> CreateSubscriptionFaker() =>
         CreateFaker<AltinnSubscription>().UseSeed(1337);
@@ -63,7 +65,8 @@ public static class TestData
         CreateFaker<AltinnInstanceSummary>()
             .UseSeed(1337)
             .RuleFor(s => s.Metadata, f => CreateFaker<AltinnMetadata>().Generate())
-            .RuleFor(s => s.AltinnSkjema, f => CreateAltinnDocumentFaker().Generate())
+            .RuleFor(s => s.SkjemaAsPdf, f => CreateAltinnDocumentFaker().Generate())
+            .RuleFor(s => s.StructuredData, f => CreateAltinnDocumentFaker().Generate())
             .RuleFor(
                 s => s.Attachments,
                 f => f.Make(f.Random.Int(1, 5), () => CreateAltinnDocumentFaker().Generate())
@@ -85,5 +88,19 @@ public static class TestData
         customize?.Invoke(cloudEvent);
 
         return cloudEvent;
+    }
+
+    public static IFormFile CreateFormFile(
+        string name,
+        string content,
+        string contentType = "text/plain"
+    )
+    {
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        return new FormFile(stream, 0, content.Length, name, name)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = contentType,
+        };
     }
 }

@@ -49,13 +49,12 @@ internal class AltinnRegistrationService(
         var subscription = await altinnAdapter.SubscribeForCompletedProcessEvents(
             new Common.Altinn.Model.Adapter.SubscriptionRequestDto
             {
-                AltinnAppIdentifier = appId,
+                AltinnAppId = appId,
                 CallbackUrl = new Uri(
                     new Uri(options.Value.AppDomain),
                     "webhook/receive-altinn-cloudevent"
                 ),
-            },
-            options.Value.AltinnAppConfiguration
+            }
         );
         return mapper.Map<AltinnEventsSubscription>(subscription);
     }

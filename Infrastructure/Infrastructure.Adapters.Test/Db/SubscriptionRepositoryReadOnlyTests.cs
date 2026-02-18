@@ -1,12 +1,9 @@
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.fixtures;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Argon;
 using Bogus;
-using MapsterMapper;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 

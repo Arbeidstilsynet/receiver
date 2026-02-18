@@ -5,6 +5,7 @@ using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.WebApi.Controllers;
@@ -15,14 +16,17 @@ public class MeldingerController : ControllerBase
 {
     private readonly IDocumentService _documentService;
     private readonly ApiMeters _apiMeters;
+    private readonly IValidator<PostMeldingBody> _postMeldingValidator;
     private readonly IMeldingService _meldingService;
 
     public MeldingerController(
+        IValidator<PostMeldingBody> postMeldingValidator,
         IMeldingService meldingService,
         IDocumentService documentService,
         ApiMeters apiMeters
     )
     {
+        _postMeldingValidator = postMeldingValidator;
         _meldingService = meldingService;
         _documentService = documentService;
         _apiMeters = apiMeters;
@@ -35,15 +39,21 @@ public class MeldingerController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var meldingReceivedAt = DateTime.Now;
+        var validationResult = await _postMeldingValidator.ValidateAsync(model, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToString());
+        }
+
         _apiMeters.MeldingReceived(MessageSource.Api, model.ApplicationId);
-        var postMeldingRequest = new PostMeldingRequest
+        var postMeldingRequest = new CreateMeldingRequest
         {
             MeldingId = Guid.NewGuid(),
             Source = MessageSource.Api,
             ApplicationReference = model.ApplicationId,
-            MeldingReceivedAt = meldingReceivedAt,
-            MainContent = model.MainContent.ToUploadDocumentRequest(),
+            MainContent = model.MainContent?.ToUploadDocumentRequest(),
+            StructuredData = model.StructuredData?.ToUploadDocumentRequest(),
             Attachments = model.Attachments.Select(a => a.ToUploadDocumentRequest()).ToList(),
             Metadata = model.Metadata,
         };
@@ -73,11 +83,13 @@ public class MeldingerController : ControllerBase
 
     [HttpGet("{meldingId:guid}")]
     public async Task<ActionResult<GetMeldingResponse>> GetMelding(
-        [Required] [FromRoute] Guid meldingId
+        [Required] [FromRoute] Guid meldingId,
+        CancellationToken cancellationToken
     )
     {
         var melding = await _meldingService.GetMelding(
-            new GetMeldingRequest { MeldingId = meldingId }
+            new GetMeldingRequest { MeldingId = meldingId },
+            cancellationToken
         );
 
         if (melding == null)
@@ -89,12 +101,13 @@ public class MeldingerController : ControllerBase
     [HttpGet("{meldingId:guid}/documents/{documentId:guid}")]
     public async Task<ActionResult<Document>> GetDocument(
         [Required] [FromRoute] Guid meldingId,
-        [Required] [FromRoute] Guid documentId
+        [Required] [FromRoute] Guid documentId,
+        CancellationToken cancellationToken
     )
     {
         var request = new GetDocumentRequest { MeldingId = meldingId, DocumentId = documentId };
 
-        var document = await _documentService.GetDocument(request);
+        var document = await _documentService.GetDocument(request, cancellationToken);
 
         if (document == null)
             return NotFound();
@@ -110,7 +123,7 @@ public class MeldingerController : ControllerBase
     {
         var request = new GetDocumentRequest { MeldingId = meldingId, DocumentId = documentId };
 
-        var document = await _documentService.GetDocument(request);
+        var document = await _documentService.GetDocument(request, cancellationToken);
 
         if (document == null)
             return NotFound();
@@ -129,12 +142,13 @@ public class MeldingerController : ControllerBase
 
     [HttpGet("{meldingId:guid}/documents")]
     public async Task<ActionResult<GetAllDocumentsResponse>> GetAllDocuments(
-        [Required] [FromRoute] Guid meldingId
+        [Required] [FromRoute] Guid meldingId,
+        CancellationToken cancellationToken
     )
     {
         var request = new GetAllDocumentsRequest { MeldingId = meldingId };
 
-        var documents = await _documentService.GetAllDocuments(request);
+        var documents = await _documentService.GetAllDocuments(request, cancellationToken);
 
         if (documents == null)
             return NotFound();

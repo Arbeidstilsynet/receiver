@@ -1,47 +1,88 @@
 using System.Text.Json;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Ports;
+using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.Receiver.Implementation;
 
-internal class MeldingerAdapter(IMeldingerClient meldingerClient) : IMeldingerAdapter
+internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<MeldingerAdapter> logger)
+    : IMeldingerAdapter
 {
-    public async Task<T> GetMainAltinnDocument<T>(Melding melding)
+    public async Task<TStructuredData?> FetchStructuredData<TStructuredData>(Melding melding)
     {
-        if (melding.Source != MessageSource.Altinn)
+        if (melding.StructuredDataId is not { } structuredDataId)
+            return default(TStructuredData);
+
+        var mainDocumentMetadata = await meldingerClient.GetDocument(melding.Id, structuredDataId);
+
+        if (mainDocumentMetadata == null)
         {
-            throw new InvalidOperationException(
-                $"This method is intended to be used by messages which come from Altinn. The message's source was '{melding.Source}' (Id: {melding.Id})"
+            logger.LogError(
+                "Could not retrieve the message's structured data metadata. Id: {MeldingId}, DocumentId: {DocumentId}",
+                melding.Id,
+                melding.StructuredDataId
             );
+            return default(TStructuredData);
         }
-        var mainDocumentMetadata =
-            await meldingerClient.GetDocument(melding.Id, melding.ContentId)
-            ?? throw new InvalidOperationException(
-                $"Could not get the message's document metadata. Id: {melding.Id}, ContentId: {melding.ContentId}"
-            );
+
         if (!mainDocumentMetadata.IsDocumentSafeToUse)
         {
-            throw new InvalidOperationException(
-                $"The message's document is not safe to use based on anti virus scan result. We do not proceed here, process this message manually. Id: {melding.Id}, ContentId: {melding.ContentId}"
+            logger.LogError(
+                "The message's structured data is not safe to use based on anti virus scan result. Id: {MeldingId}, DocumentId: {DocumentId}",
+                melding.Id,
+                melding.StructuredDataId
             );
+            return default(TStructuredData);
         }
 
         if (mainDocumentMetadata.FileMetadata.ContentType != "application/json")
         {
-            throw new InvalidOperationException(
-                $"We only support application/json altinn documents. The provided content type {mainDocumentMetadata.FileMetadata.ContentType} is not supported."
+            logger.LogError(
+                "The message's structured data has an unsupported content type. Id: {MeldingId}, DocumentId: {DocumentId}, ContentType: {ContentType}",
+                melding.Id,
+                melding.StructuredDataId,
+                mainDocumentMetadata.FileMetadata.ContentType
             );
+            return default(TStructuredData);
         }
 
-        var document =
-            await meldingerClient.DownloadDocument(melding.Id, melding.ContentId)
-            ?? throw new InvalidOperationException(
-                $"Could not download the message's main document. Id: {melding.Id}, ContentId: {melding.ContentId}"
-            );
+        var document = await meldingerClient.DownloadDocument(melding.Id, structuredDataId);
 
-        return JsonSerializer.Deserialize<T>(document)
-            ?? throw new InvalidOperationException(
-                $"Could not xml deserialize the message's main document to type {typeof(T)}. Correlated Message Id: {melding.Id}"
+        if (document is not { Length: > 0 })
+        {
+            logger.LogError(
+                "The message's structured data could not be downloaded or is empty. Id: {MeldingId}, DocumentId: {DocumentId}",
+                melding.Id,
+                melding.StructuredDataId
             );
+            return default(TStructuredData);
+        }
+
+        try
+        {
+            var structuredData = JsonSerializer.Deserialize<TStructuredData>(document);
+
+            if (structuredData == null)
+            {
+                logger.LogError(
+                    "The message's structured data could not be deserialized. Id: {MeldingId}, DocumentId: {DocumentId}",
+                    melding.Id,
+                    melding.StructuredDataId
+                );
+                return default(TStructuredData);
+            }
+
+            return structuredData;
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(
+                ex,
+                "The message's structured data could not be deserialized due to a JSON exception. Id: {MeldingId}, DocumentId: {DocumentId}",
+                melding.Id,
+                melding.StructuredDataId
+            );
+            return default(TStructuredData);
+        }
     }
 }

@@ -64,7 +64,7 @@ public class InfrastructureAdapterReadOnlyTestFixtureWithDb : TestBedFixture, IA
 
     private async Task SeedDatabase()
     {
-        var dbContext = GetService<InfrastructureAdaptersDbContext>(_testOutputHelper)!;
+        var dbContext = GetService<ReceiverDbContext>(_testOutputHelper)!;
 
         await dbContext.Database.EnsureCreatedAsync();
         await dbContext.Meldinger.AddRangeAsync(MeldingerRepositoryTests.Seed);

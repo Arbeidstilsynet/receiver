@@ -1,6 +1,7 @@
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Microsoft.Extensions.Logging;
 
@@ -13,40 +14,45 @@ internal class DocumentService(
     ILogger<DocumentService> logger
 ) : IDocumentService
 {
-    public async Task<Document?> GetDocument(GetDocumentRequest request)
+    public async Task<Document?> GetDocument(
+        GetDocumentRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
-        if (
-            melding != null
-            && (
-                melding.ContentId == request.DocumentId
-                || melding.AttachmentIds.Contains(request.DocumentId)
-            )
-        )
+        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
+
+        if (melding == null || !melding.ContainsDocument(request.DocumentId))
+            return null;
+
+        var document = await documentRepository.GetDocumentAsync(
+            request.DocumentId,
+            cancellationToken
+        );
+
+        if (document == null)
         {
-            var document = await documentRepository.GetDocumentAsync(request.DocumentId);
-
-            if (document == null)
-            {
-                return null;
-            }
-
-            if (!document.IsDocumentSafeToUse)
-            {
-                throw new DocumentNotSafeToUseException(document);
-            }
-            return document;
+            return null;
         }
 
-        return null;
+        if (!document.IsDocumentSafeToUse)
+        {
+            throw new DocumentNotSafeToUseException(document);
+        }
+        return document;
     }
 
-    public async Task<IEnumerable<Document>?> GetAllDocuments(GetAllDocumentsRequest request)
+    public async Task<IEnumerable<Document>?> GetAllDocuments(
+        GetAllDocumentsRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        var melding = await meldingRepository.GetMeldingAsync(request.MeldingId);
+        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
         if (melding != null)
         {
-            var documents = await documentRepository.GetAllDocumentsForMelding(request.MeldingId);
+            var documents = await documentRepository.GetAllDocumentsForMelding(
+                request.MeldingId,
+                cancellationToken
+            );
 
             var unsafeDocuments = new List<Document>();
             var safeDocuments = new List<Document>();
@@ -82,10 +88,6 @@ internal class DocumentService(
         CancellationToken cancellationToken
     )
     {
-        await documentStorage.Download(
-            document,
-            outputStream,
-            cancellationToken: cancellationToken
-        );
+        await documentStorage.Download(document, outputStream, cancellationToken);
     }
 }

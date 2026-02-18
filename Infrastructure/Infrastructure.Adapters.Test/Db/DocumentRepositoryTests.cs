@@ -10,7 +10,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Test.Db;
 public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTestFixtureWithDb>
 {
     private IDocumentRepository _documentRepository;
-    private InfrastructureAdaptersDbContext _dbContext;
+    private ReceiverDbContext _dbContext;
     private readonly VerifySettings _verifySettings = new();
 
     public DocumentRepositoryTests(
@@ -20,7 +20,7 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
         : base(testOutputHelper, fixtureWithDb)
     {
         _documentRepository = fixtureWithDb.GetService<IDocumentRepository>(testOutputHelper)!;
-        _dbContext = fixtureWithDb.GetService<InfrastructureAdaptersDbContext>(testOutputHelper)!;
+        _dbContext = fixtureWithDb.GetService<ReceiverDbContext>(testOutputHelper)!;
 
         _verifySettings.UseDirectory("Snapshots");
         _verifySettings.AddExtraSettings(jsonSettings =>
@@ -36,7 +36,10 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
         //arrange
         var meldingId = MeldingerRepositoryTests.Seed.First().Id;
         //act
-        var result = await _documentRepository.GetAllDocumentsForMelding(meldingId);
+        var result = await _documentRepository.GetAllDocumentsForMelding(
+            meldingId,
+            TestContext.Current.CancellationToken
+        );
         //assert
         await Verify(result, _verifySettings);
     }
@@ -47,7 +50,10 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
         //arrange
         var meldingId = Guid.NewGuid();
         //act
-        var result = await _documentRepository.GetAllDocumentsForMelding(meldingId);
+        var result = await _documentRepository.GetAllDocumentsForMelding(
+            meldingId,
+            TestContext.Current.CancellationToken
+        );
         //assert
         result.ShouldBeEmpty();
     }
@@ -58,7 +64,10 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
         //arrange
         var documentId = MeldingerRepositoryTests.Seed.First().Documents[0].Id;
         //act
-        var result = await _documentRepository.GetDocumentAsync(documentId);
+        var result = await _documentRepository.GetDocumentAsync(
+            documentId,
+            TestContext.Current.CancellationToken
+        );
         //assert
         await Verify(result, _verifySettings);
     }
@@ -69,7 +78,10 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
         //arrange
         var documentId = Guid.NewGuid();
         //act
-        var result = await _documentRepository.GetDocumentAsync(documentId);
+        var result = await _documentRepository.GetDocumentAsync(
+            documentId,
+            TestContext.Current.CancellationToken
+        );
         //assert
         result.ShouldBeNull();
     }

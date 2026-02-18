@@ -15,7 +15,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
 
     private static readonly Faker<MeldingEntity> MeldingEntityFaker = new Faker<MeldingEntity>()
         .UseSeed(1337)
-        .RuleForType(typeof(Guid), faker => Guid.NewGuid())
+        .RuleForType(typeof(Guid), faker => faker.Random.Guid())
         .RuleFor(x => x.Source, faker => faker.PickRandom(MessageSource.Altinn, MessageSource.Api))
         .RuleForType(
             typeof(DateTime),
@@ -28,19 +28,43 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
                 [
                     new DocumentEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = faker.Random.Guid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
-                        IsAttachment = false,
+                        DocumentType = DocumentType.MainContent,
                         ScanResult = DocumentScanResult.Clean,
+                        Tags = new Dictionary<string, string>()
+                        {
+                            { "key1", "value1" },
+                            { "AltinnId", faker.Random.Guid().ToString() },
+                            { "AltinnDataType", "ref-data-as-pdf" },
+                        },
+                    },
+                    new DocumentEntity()
+                    {
+                        Id = faker.Random.Guid(),
+                        MeldingId = current.Id,
+                        InternalDocumentReference = "",
+                        DocumentType = DocumentType.StructuredData,
+                        ScanResult = DocumentScanResult.Clean,
+                        Tags = new Dictionary<string, string>()
+                        {
+                            { "AltinnId", faker.Random.Guid().ToString() },
+                            { "AltinnDataType", "skjema" },
+                        },
                     },
                     new DocumentEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = faker.Random.Guid(),
                         MeldingId = current.Id,
                         InternalDocumentReference = "",
-                        IsAttachment = true,
+                        DocumentType = DocumentType.Attachment,
                         ScanResult = DocumentScanResult.Clean,
+                        Tags = new Dictionary<string, string>()
+                        {
+                            { "AltinnId", faker.Random.Guid().ToString() },
+                            { "AltinnDataType", "vedlegg" },
+                        },
                     },
                 ]
         );
@@ -71,7 +95,10 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         //arrange
         var existingMeldingGuid = Seed.First().Id;
         //act
-        var result = await _meldingRepository.GetMeldingAsync(existingMeldingGuid);
+        var result = await _meldingRepository.GetMelding(
+            existingMeldingGuid,
+            TestContext.Current.CancellationToken
+        );
         //assert
         await Verify(result, _verifySettings);
     }
@@ -82,7 +109,10 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         //arrange
         var nonExistingMeldingGuid = Guid.NewGuid();
         //act
-        var result = await _meldingRepository.GetMeldingAsync(nonExistingMeldingGuid);
+        var result = await _meldingRepository.GetMelding(
+            nonExistingMeldingGuid,
+            TestContext.Current.CancellationToken
+        );
         //assert
         result.ShouldBeNull();
     }
@@ -106,7 +136,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
     {
         //arrange
         //act
-        var result = await _meldingRepository.GetMeldingerAsync(pageSize, pageNumber);
+        var result = await _meldingRepository.GetMeldinger(pageSize, pageNumber);
         //assert
         result.PageSize.ShouldBe(pageSize);
         result.TotalPages.ShouldBe(expectedTotalPages);
@@ -120,7 +150,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
     {
         //arrange
         //act
-        var result = await _meldingRepository.GetMeldingerAsync(10);
+        var result = await _meldingRepository.GetMeldinger(10);
         //assert
         Seed.OrderByDescending(s => s.ReceivedAt)
             .ThenBy(s => s.Id)

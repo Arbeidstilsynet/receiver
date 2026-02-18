@@ -1,8 +1,6 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.API.Adapters.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +48,7 @@ public class AltinnController(
         var activeAltinnId = await subscriptionService.GetActiveAltinnSubscriptionId(appId);
         if (activeAltinnId == null)
             return NotFound(
-                $"We did not find an internal reference to an altinn subscription for the appId {appId}."
+                $"We did not find an internal reference to an Altinn subscription for the appId {appId}."
             );
         var altinnSubscription = await altinnRegistrationService.GetAltinnRegistrationById(
             (int)activeAltinnId
@@ -58,7 +56,7 @@ public class AltinnController(
         return altinnSubscription != null
             ? Ok(altinnSubscription)
             : NotFound(
-                $"We did not got any subscrition details from altinn for the provided altinnId `{activeAltinnId}`."
+                $"We did not got any subscription details from Altinn for the provided AltinnId `{activeAltinnId}`."
             );
     }
 

@@ -18,6 +18,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          ref: ${{ github.ref }}
 
       - name: Get version and name from csproj file
         id: get_metadata_from_csprojectfile

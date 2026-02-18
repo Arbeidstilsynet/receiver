@@ -1,11 +1,11 @@
 using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using CreateMeldingRequest = Arbeidstilsynet.MeldingerReceiver.API.Ports.CreateMeldingRequest;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic;
 
@@ -39,7 +39,7 @@ internal class MeldingService : IMeldingService
     }
 
     public async Task<Melding> ProcessMelding(
-        PostMeldingRequest request,
+        CreateMeldingRequest request,
         CancellationToken cancellationToken
     )
     {
@@ -60,7 +60,7 @@ internal class MeldingService : IMeldingService
                 """
             );
         }
-        var existingMelding = await _meldingRepository.GetMeldingAsync(meldingId);
+        var existingMelding = await _meldingRepository.GetMelding(meldingId, cancellationToken);
         if (existingMelding != null)
         {
             await RunPostActions(existingMelding);
@@ -68,32 +68,36 @@ internal class MeldingService : IMeldingService
         }
 
         // upload documents
-        var (mainDocumentUpload, attachmentUploads) = await UploadDocuments(
-            meldingId,
-            request,
-            cancellationToken
-        );
+        var (mainDocumentUpload, structuredDocumentUpload, attachmentUploads) =
+            await UploadDocuments(meldingId, request, cancellationToken);
 
         // create and persist melding
-        var createMeldingRequest = new CreateMeldingRequest
+        var createMeldingRequest = new Infrastructure.Ports.Dto.CreateMeldingRequest
         {
             Id = meldingId,
             Source = request.Source,
             ApplicationId = request.ApplicationReference,
-            ReceivedAt = request.MeldingReceivedAt,
-            MainDocumentData = mainDocumentUpload.PersistedDocument,
+            ReceivedAt = DateTime.UtcNow,
+            MainDocumentData = mainDocumentUpload?.PersistedDocument,
+            StructuredData = structuredDocumentUpload?.PersistedDocument,
             AttachmentData = attachmentUploads.Select(a => a.PersistedDocument).ToList(),
             Tags = request.Metadata,
         };
-        var melding = await _meldingRepository.SaveMelding(createMeldingRequest);
+        var melding = await _meldingRepository.CreateMelding(
+            createMeldingRequest,
+            cancellationToken
+        );
 
         await RunPostActions(melding);
         return melding;
     }
 
-    public async Task<Melding?> GetMelding(GetMeldingRequest request)
+    public async Task<Melding?> GetMelding(
+        GetMeldingRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        return await _meldingRepository.GetMeldingAsync(request.MeldingId);
+        return await _meldingRepository.GetMelding(request.MeldingId, cancellationToken);
     }
 
     public async Task<API.Ports.PaginationResponse<Melding>> GetMeldinger(
@@ -102,25 +106,33 @@ internal class MeldingService : IMeldingService
     )
     {
         return _mapper.Map<API.Ports.PaginationResponse<Melding>>(
-            await _meldingRepository.GetMeldingerAsync(pageSize ?? 10, pageNumber ?? 1)
+            await _meldingRepository.GetMeldinger(pageSize ?? 10, pageNumber ?? 1)
         );
     }
 
     private async Task<(
-        UploadResponse mainDocumentUpload,
+        UploadResponse? mainDocumentUpload,
+        UploadResponse? structuredDocumentUpload,
         List<UploadResponse> attachmentUploads
     )> UploadDocuments(
         Guid meldingId,
-        PostMeldingRequest request,
+        CreateMeldingRequest request,
         CancellationToken cancellationToken
     )
     {
         using var activity = Tracer.Source.StartActivity();
-        var mainContentUploadRequest = request.MainContent.ToUploadRequest(meldingId);
-        var mainDocumentUpload = await ProcessUploadRequest(
-            mainContentUploadRequest,
-            cancellationToken
-        );
+        var mainContentUploadRequest = request.MainContent?.ToUploadRequest(meldingId);
+        var mainDocumentUpload =
+            mainContentUploadRequest == null
+                ? null
+                : await ProcessUploadRequest(mainContentUploadRequest, cancellationToken);
+
+        var structuredDataUploadRequest = request.StructuredData?.ToUploadRequest(meldingId);
+        var structuredDocumentUpload =
+            structuredDataUploadRequest == null
+                ? null
+                : await ProcessUploadRequest(structuredDataUploadRequest, cancellationToken);
+
         List<UploadResponse> attachmentUploads = [];
         // Process attachments one at a time to avoid loading all streams into memory at once
         foreach (var attachment in request.Attachments)
@@ -129,7 +141,7 @@ internal class MeldingService : IMeldingService
             var uploadResponse = await ProcessUploadRequest(uploadRequest, cancellationToken);
             attachmentUploads.Add(uploadResponse);
         }
-        return (mainDocumentUpload, attachmentUploads);
+        return (mainDocumentUpload, structuredDocumentUpload, attachmentUploads);
     }
 
     private async Task RunPostActions(Melding melding)
@@ -159,7 +171,9 @@ internal class MeldingService : IMeldingService
         );
         if (uploadRequest.Document.ScanResult != DocumentScanResult.Clean)
         {
-            await _virusScanService.ScanForVirus(uploadResult, cancellationToken);
+            var scanResult = await _virusScanService.ScanForVirus(uploadResult, cancellationToken);
+
+            uploadResult.PersistedDocument.ScanResult = scanResult;
         }
 
         return uploadResult;

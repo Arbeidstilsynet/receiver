@@ -1,0 +1,10 @@
+﻿{
+  DocumentId: Guid_1,
+  MeldingId: Guid_1,
+  FileMetadata: {
+    FileName: main-content.txt,
+    ContentType: text/plain
+  },
+  ScanResult: Clean,
+  Tags: null
+}

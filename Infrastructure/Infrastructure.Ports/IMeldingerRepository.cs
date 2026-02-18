@@ -5,8 +5,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
 
 public interface IMeldingRepository
 {
-    Task<Melding> SaveMelding(CreateMeldingRequest request);
-    Task<Melding?> GetMeldingAsync(Guid meldingId);
+    Task<Melding> CreateMelding(CreateMeldingRequest request, CancellationToken cancellationToken);
+    Task<Melding?> GetMelding(Guid meldingId, CancellationToken cancellationToken);
 
-    Task<PaginationResponse<Melding>> GetMeldingerAsync(int pageSize, int pageNumber = 1);
+    Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1);
 }

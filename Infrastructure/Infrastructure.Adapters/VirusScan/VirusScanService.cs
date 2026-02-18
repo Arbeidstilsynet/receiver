@@ -33,7 +33,7 @@ internal class VirusScanService : IVirusScanService
         _httpClient.BaseAddress = new Uri(options.Value.VirusScanConfiguration.BaseUrl);
     }
 
-    public async Task ScanForVirus(
+    public async Task<DocumentScanResult> ScanForVirus(
         UploadResponse uploadResponse,
         CancellationToken cancellationToken
     )
@@ -68,16 +68,14 @@ internal class VirusScanService : IVirusScanService
                 ) ?? scanResponseArray?[0];
             if (scanResponse is { Result: Status.OK })
             {
-                uploadResponse.PersistedDocument.ScanResult = DocumentScanResult.Clean;
+                return DocumentScanResult.Clean;
             }
             else if (scanResponse is { Result: Status.FOUND })
             {
-                uploadResponse.PersistedDocument.ScanResult = DocumentScanResult.Infected;
+                return DocumentScanResult.Infected;
             }
-            else
-            {
-                uploadResponse.PersistedDocument.ScanResult = DocumentScanResult.Unknown;
-            }
+
+            return DocumentScanResult.Unknown;
         }
         catch (Exception ex)
         {
@@ -88,6 +86,8 @@ internal class VirusScanService : IVirusScanService
                 uploadResponse.PersistedDocument.InternalDocumentReference
             );
         }
+
+        return DocumentScanResult.Unknown;
     }
 
     private class DocumentDownloadHttpContent : HttpContent

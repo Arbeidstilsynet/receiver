@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migrations
 {
-    [DbContext(typeof(InfrastructureAdaptersDbContext))]
+    [DbContext(typeof(ReceiverDbContext))]
     partial class InfrastructureAdaptersDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -534,6 +534,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("varchar(24)");
+
                     b.Property<string>("FileName")
                         .HasColumnType("text");
 
@@ -541,15 +545,16 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db.Migration
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsAttachment")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("MeldingId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ScanResult")
                         .IsRequired()
                         .HasColumnType("varchar(24)");
+
+                    b.Property<Dictionary<string, string>>("Tags")
+                        .IsRequired()
+                        .HasColumnType("hstore");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

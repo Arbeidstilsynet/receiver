@@ -2,7 +2,7 @@ using Arbeidstilsynet.MeldingerReceiver.API.Ports;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.Dto;
 
-namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic;
+namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 
 internal static class MappingExtensions
 {
@@ -23,6 +23,7 @@ internal static class MappingExtensions
             MeldingId = meldingId,
             FileMetadata = request.FileMetadata,
             ScanResult = request.ScanResult,
+            Tags = request.Tags,
         };
     }
 }

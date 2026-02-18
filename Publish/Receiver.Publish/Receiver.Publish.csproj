@@ -8,10 +8,10 @@
     <Product>Arbeidstilsynet.Receiver</Product>
     <Authors>Digital Samhandling</Authors>
     <Company>Arbeidstilsynet</Company>
-    <Description></Description>
+    <Description>Receive meldinger with attachments and structured data</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
@@ -34,9 +34,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Abstract\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Domain/Domain.Data/Domain.Data.csproj">

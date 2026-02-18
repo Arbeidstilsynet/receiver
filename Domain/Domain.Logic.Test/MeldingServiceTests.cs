@@ -10,22 +10,31 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
+using CreateMeldingRequest = Arbeidstilsynet.MeldingerReceiver.API.Ports.CreateMeldingRequest;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test;
 
 public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
 {
-    private static readonly PostMeldingRequest SampleMeldingRequest = new()
+    private static readonly CreateMeldingRequest SampleMeldingRequest = new()
     {
         MeldingId = Guid.NewGuid(),
         Source = MessageSource.Altinn,
         ApplicationReference = "test-app",
-        MeldingReceivedAt = DateTime.Now,
         MainContent = new UploadDocumentRequest
         {
             FileMetadata = new FileMetadata
             {
-                FileName = "test.json",
+                FileName = "main-content.pdf",
+                ContentType = "application/pdf",
+            },
+            InputStream = new MemoryStream(),
+        },
+        StructuredData = new UploadDocumentRequest()
+        {
+            FileMetadata = new FileMetadata
+            {
+                FileName = "structured-data.json",
                 ContentType = "application/json",
             },
             InputStream = new MemoryStream(),
@@ -73,9 +82,11 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //arrange
         var request = new GetMeldingRequest { MeldingId = Guid.NewGuid() };
         //act
-        await _sut.GetMelding(request);
+        await _sut.GetMelding(request, TestContext.Current.CancellationToken);
         //assert
-        await _meldingRepository.Received(1).GetMeldingAsync(request.MeldingId);
+        await _meldingRepository
+            .Received(1)
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -83,7 +94,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
     {
         //arrange
         _meldingRepository
-            .GetMeldingerAsync(10)
+            .GetMeldinger(10)
             .Returns(
                 new Infrastructure.Ports.Dto.PaginationResponse<Melding>
                 {
@@ -97,7 +108,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //act
         var result = await _sut.GetMeldinger();
         //assert
-        await _meldingRepository.Received(1).GetMeldingerAsync(10);
+        await _meldingRepository.Received(1).GetMeldinger(10);
         result.ShouldBeEquivalentTo(
             new API.Ports.PaginationResponse<Melding>
             {
@@ -135,9 +146,20 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             {
                 DocumentId = Guid.NewGuid(),
                 InternalDocumentReference = "/a/b/c",
-                FileName = request.MainContent.FileMetadata.FileName,
+                FileName = request.MainContent!.FileMetadata.FileName,
                 ContentType = request.MainContent.FileMetadata.ContentType,
                 ScanResult = request.MainContent.ScanResult,
+            },
+        };
+        var structuredDataUploadResponse = new UploadResponse
+        {
+            PersistedDocument = new DocumentStorageDto
+            {
+                DocumentId = Guid.NewGuid(),
+                InternalDocumentReference = "/a/b/structured",
+                FileName = request.StructuredData!.FileMetadata.FileName,
+                ContentType = request.StructuredData.FileMetadata.ContentType,
+                ScanResult = request.StructuredData.ScanResult,
             },
         };
         var attachmentUploadResponse = new UploadResponse
@@ -159,6 +181,12 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             .Returns(mainContentUploadResponse);
         _documentStorage
             .Upload(
+                Arg.Is<UploadRequest>(i => i.InputStream == request.StructuredData.InputStream),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(structuredDataUploadResponse);
+        _documentStorage
+            .Upload(
                 Arg.Is<UploadRequest>(i => i.InputStream == request.Attachments[0].InputStream),
                 Arg.Any<CancellationToken>()
             )
@@ -167,19 +195,21 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         await _sut.ProcessMelding(request, TestContext.Current.CancellationToken);
         //assert
         await _documentStorage
-            .Received(2)
+            .Received(3)
             .Upload(Arg.Any<UploadRequest>(), Arg.Any<CancellationToken>());
         await _meldingRepository
             .Received(1)
-            .SaveMelding(
-                Arg.Is<CreateMeldingRequest>(i =>
+            .CreateMelding(
+                Arg.Is<Infrastructure.Ports.Dto.CreateMeldingRequest>(i =>
                     i.Id == request.MeldingId
                     && i.ApplicationId == request.ApplicationReference
                     && i.Source == request.Source
                     && i.MainDocumentData == mainContentUploadResponse.PersistedDocument
+                    && i.StructuredData == structuredDataUploadResponse.PersistedDocument
                     && i.AttachmentData[0] == attachmentUploadResponse.PersistedDocument
                     && i.Tags == request.Metadata
-                )
+                ),
+                Arg.Any<CancellationToken>()
             );
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
@@ -193,15 +223,13 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             MeldingId = Guid.NewGuid(),
         };
         _meldingRepository
-            .GetMeldingAsync(existingRequest.MeldingId)
+            .GetMelding(existingRequest.MeldingId, Arg.Any<CancellationToken>())
             .Returns(Substitute.For<Melding>());
         //act
         await _sut.ProcessMelding(existingRequest, TestContext.Current.CancellationToken);
         //assert
-        await _documentStorage
-            .DidNotReceive()
-            .Upload(Arg.Any<UploadRequest>(), Arg.Any<CancellationToken>());
-        await _meldingRepository.DidNotReceive().SaveMelding(Arg.Any<CreateMeldingRequest>());
+        await _documentStorage.DidNotReceiveWithAnyArgs().Upload(default!, default!);
+        await _meldingRepository.DidNotReceiveWithAnyArgs().CreateMelding(default!, default!);
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
     }
 
@@ -215,12 +243,12 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
             .Throws(new Exception("Test exception"));
 
         _meldingRepository
-            .SaveMelding(Arg.Any<CreateMeldingRequest>())
-            .Returns(TestData.CreateMeldingFaker().Generate());
+            .CreateMelding(default!, default!)
+            .ReturnsForAnyArgs(TestData.CreateMeldingFaker().Generate());
 
         _documentStorage
             .Upload(
-                Arg.Is<UploadRequest>(i => i.InputStream == request.MainContent.InputStream),
+                Arg.Is<UploadRequest>(i => i.InputStream == request.MainContent!.InputStream),
                 Arg.Any<CancellationToken>()
             )
             .Returns(
@@ -230,16 +258,85 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                     {
                         DocumentId = Guid.NewGuid(),
                         InternalDocumentReference = "/a/b/c",
-                        ContentType = SampleMeldingRequest.MainContent.FileMetadata.ContentType,
+                        ContentType = SampleMeldingRequest.MainContent!.FileMetadata.ContentType,
                         FileName = SampleMeldingRequest.MainContent.FileMetadata.FileName,
                         ScanResult = SampleMeldingRequest.MainContent.ScanResult,
                     },
                 }
             );
+        _documentStorage
+            .Upload(
+                Arg.Is<UploadRequest>(i => i.InputStream == request.StructuredData!.InputStream),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                new UploadResponse
+                {
+                    PersistedDocument = new DocumentStorageDto
+                    {
+                        DocumentId = Guid.NewGuid(),
+                        InternalDocumentReference = "/a/b/structured",
+                        ContentType = SampleMeldingRequest.StructuredData!.FileMetadata.ContentType,
+                        FileName = SampleMeldingRequest.StructuredData.FileMetadata.FileName,
+                        ScanResult = SampleMeldingRequest.StructuredData.ScanResult,
+                    },
+                }
+            );
+
+        foreach (var attachement in request.Attachments)
+        {
+            _documentStorage
+                .Upload(
+                    Arg.Is<UploadRequest>(i => i.InputStream == attachement.InputStream),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    new UploadResponse
+                    {
+                        PersistedDocument = new DocumentStorageDto
+                        {
+                            DocumentId = Guid.NewGuid(),
+                            InternalDocumentReference = "/a/b/d",
+                            ContentType = attachement.FileMetadata.ContentType,
+                            FileName = attachement.FileMetadata.FileName,
+                            ScanResult = attachement.ScanResult,
+                        },
+                    }
+                );
+        }
 
         // Act & Assert
         _ = _sut.ProcessMelding(request, TestContext.Current.CancellationToken).ShouldNotThrow();
 
         await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
+    }
+
+    [Fact]
+    public async Task ProcessMelding_WhenCalledWithNoContent_ShouldPersistMelding()
+    {
+        //arrange
+        var request = SampleMeldingRequest with
+        {
+            MainContent = null,
+            StructuredData = null,
+            Attachments = [],
+        };
+        //act
+        await _sut.ProcessMelding(request, TestContext.Current.CancellationToken);
+        //assert
+        await _meldingRepository
+            .Received(1)
+            .CreateMelding(
+                Arg.Is<Infrastructure.Ports.Dto.CreateMeldingRequest>(i =>
+                    i.Id == request.MeldingId
+                    && i.ApplicationId == request.ApplicationReference
+                    && i.Source == request.Source
+                    && i.MainDocumentData == null
+                    && i.StructuredData == null
+                    && i.AttachmentData.Count == 0
+                    && i.Tags == request.Metadata
+                ),
+                Arg.Any<CancellationToken>()
+            );
     }
 }

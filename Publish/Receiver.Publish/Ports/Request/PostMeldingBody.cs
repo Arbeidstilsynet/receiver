@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
 namespace Arbeidstilsynet.Receiver.Model.Request;
@@ -18,9 +19,16 @@ public record PostMeldingBody
     public Dictionary<string, string> Metadata { get; init; } = [];
 
     /// <summary>
-    /// Main content file for the melding.
+    /// Main content file for the melding. This is usually a human-readable document (e.g. PDF).
+    /// <br/>
+    /// Allowed content types: Anything except application/json, which is reserved for the <see cref="StructuredData"/> property.
     /// </summary>
-    public required IFormFile MainContent { get; init; }
+    public IFormFile? MainContent { get; init; }
+
+    /// <summary>
+    /// Optional structured data file. The only allowed type is: application/json
+    /// </summary>
+    public IFormFile? StructuredData { get; init; }
 
     /// <summary>
     /// Optional attachment files.

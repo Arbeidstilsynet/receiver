@@ -10,12 +10,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.API.Adapters.Extensions;
 
 internal static class AltinnMappingExtensions
 {
-    public static PostMeldingRequest MapAltinnSummaryToPostMeldingRequest(
-        this AltinnInstanceSummary altinnInstanceSummary,
-        DateTime meldingReceivedAt
+    public static CreateMeldingRequest MapAltinnSummaryToPostMeldingRequest(
+        this AltinnInstanceSummary altinnInstanceSummary
     )
     {
-        return new PostMeldingRequest
+        return new CreateMeldingRequest
         {
             MeldingId = altinnInstanceSummary.Metadata.InstanceGuid ?? Guid.NewGuid(),
             Source = MessageSource.Altinn,
@@ -24,9 +23,11 @@ internal static class AltinnMappingExtensions
                 ?? throw new ArgumentException(
                     "Could not find app name in metadata. This is required in order to succeed."
                 ),
-            MeldingReceivedAt = meldingReceivedAt,
             Metadata = altinnInstanceSummary.ToMetadataDictionary(),
-            MainContent = altinnInstanceSummary.AltinnSkjema.ToUploadDocumentRequest(),
+            MainContent = altinnInstanceSummary.SkjemaAsPdf.ToUploadDocumentRequest().AsClean(),
+            StructuredData = altinnInstanceSummary
+                .StructuredData?.ToUploadDocumentRequest()
+                .AsClean(),
             Attachments = altinnInstanceSummary
                 .Attachments.Select(attachment => attachment.ToUploadDocumentRequest())
                 .ToList(),
@@ -40,7 +41,13 @@ internal static class AltinnMappingExtensions
             FileMetadata = altinnDocument.FileMetadata.ToDocumentMetadata(),
             InputStream = altinnDocument.DocumentContent,
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),
+            Tags = altinnDocument.FileMetadata.ToDocumentTags(),
         };
+    }
+
+    private static UploadDocumentRequest AsClean(this UploadDocumentRequest uploadDocumentRequest)
+    {
+        return uploadDocumentRequest with { ScanResult = DocumentScanResult.Clean };
     }
 
     private static DocumentFileMetadata ToDocumentMetadata(this AltinnFileMetadata fileMetadata)
@@ -50,6 +57,23 @@ internal static class AltinnMappingExtensions
             ContentType = fileMetadata.ContentType ?? "application/octet-stream",
             FileName = fileMetadata.Filename ?? "unknown",
         };
+    }
+
+    private static Dictionary<string, string> ToDocumentTags(this AltinnFileMetadata fileMetadata)
+    {
+        var tags = new Dictionary<string, string>();
+
+        if (fileMetadata.AltinnId != Guid.Empty)
+        {
+            tags.Add("AltinnId", fileMetadata.AltinnId.ToString());
+        }
+
+        if (fileMetadata.AltinnDataType is { Length: > 0 } dataType)
+        {
+            tags.Add("AltinnDataType", dataType);
+        }
+
+        return tags;
     }
 
     private static DocumentScanResult MapToDocumentScanResult(this FileScanResult? fileScanResult)

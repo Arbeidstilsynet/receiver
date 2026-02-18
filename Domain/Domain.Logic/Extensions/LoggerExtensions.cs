@@ -1,7 +1,7 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Microsoft.Extensions.Logging;
 
-namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic;
+namespace Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
 
 internal static class LoggerExtensions
 {
