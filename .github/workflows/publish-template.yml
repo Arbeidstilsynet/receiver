@@ -96,6 +96,7 @@ jobs:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
           source-feed: AT.Public.NuGet
+          config-file: ./src/nuget.config
 
       - name: Publish package if not already published
         id: publish
@@ -104,6 +105,7 @@ jobs:
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
+          config-file: ./src/nuget.config
 
       - name: Docker meta
         if: steps.nuget_version_check.outputs.published == 'false'
