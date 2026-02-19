@@ -67,7 +67,7 @@ jobs:
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./src/
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -133,8 +133,8 @@ jobs:
         uses: nais/docker-build-push@v0
         with:
           team: meldinger
-          docker_context: .
-          dockerfile: Dockerfile
+          docker_context: ./src/
+          dockerfile: ./src/Dockerfile
           tag: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Push image to GHCR (from NAIS image)
