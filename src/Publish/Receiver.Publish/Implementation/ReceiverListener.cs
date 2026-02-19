@@ -65,7 +65,7 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
         {
             try
             {
-                var listeningTimeout = CancellationTokenSource.CreateLinkedTokenSource(
+                using var listeningTimeout = CancellationTokenSource.CreateLinkedTokenSource(
                     stoppingToken
                 );
                 listeningTimeout.CancelAfter(consumer.PollInterval ?? 10 * 60 * 1000);
