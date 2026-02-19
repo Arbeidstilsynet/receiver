@@ -108,7 +108,7 @@ jobs:
           config-file: ./src/nuget.config
 
       - name: Docker meta
-        if: steps.nuget_version_check.outputs.published == 'true'
+        if: steps.nuget_version_check.outputs.published == 'false'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -120,7 +120,7 @@ jobs:
             type=raw,value=${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Log in to GHCR
-        if: steps.nuget_version_check.outputs.published == 'true'
+        if: steps.nuget_version_check.outputs.published == 'false'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -128,7 +128,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push image to NAIS registry
-        if: steps.nuget_version_check.outputs.published == 'true'
+        if: steps.nuget_version_check.outputs.published == 'false'
         id: nais_build_push
         uses: nais/docker-build-push@v0
         with:
@@ -138,7 +138,7 @@ jobs:
           tag: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Push image to GHCR (from NAIS image)
-        if: steps.nuget_version_check.outputs.published == 'true'
+        if: steps.nuget_version_check.outputs.published == 'false'
         shell: bash
         run: |
           set -euo pipefail
@@ -159,7 +159,7 @@ jobs:
           docker buildx imagetools create "${args[@]}" "$src_image"
 
       - name: Extract changelog section for current version
-        if: steps.nuget_version_check.outputs.published == 'true'
+        if: steps.nuget_version_check.outputs.published == 'false'
         id: changelog
         working-directory: ./src/
         run: |
@@ -180,7 +180,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: steps.nuget_version_check.outputs.published == 'true'
+        if: steps.nuget_version_check.outputs.published == 'false'
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           tag_name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
