@@ -28,11 +28,9 @@ jobs:
         with:
           base-ref: origin/main
           include: |
-            ./
+            ./src
           exclude: |
-            .github/**
-            renovate.json
-            compose**.yaml
+            ./src/compose**.yaml
 
   build_dotnet:
     needs: [check_changes]
@@ -44,7 +42,7 @@ jobs:
       - name: Build and Test .NET solution
         uses: Arbeidstilsynet/action-dotnet-build@a1f3f50f263efb55f38a48fa615e2cf77c4297fa # v3
         with:
-          working-directory: ./
+          working-directory: ./src/
 
 
 
@@ -65,7 +63,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
       - name: Check if version is prerelease
         id: prerelease_check
         run: |
@@ -82,7 +80,7 @@ jobs:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
           source-feed: AT.Public.NuGet
-          config-file: ./nuget.config
+          config-file: ./src/nuget.config
       - name: Check if package version was updated
         if: needs.check_changes.outputs.backend == 'true'
         id: get_version
@@ -171,7 +169,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Fail if changelog is missing
-        working-directory: ./
+        working-directory: ./src/
         run: |
           if [ -f CHANGELOG.md ]; then
             echo "Changelog found."

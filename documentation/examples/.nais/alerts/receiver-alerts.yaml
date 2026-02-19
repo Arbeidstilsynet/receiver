@@ -1,0 +1,35 @@
+apiVersion: "monitoring.coreos.com/v1"
+kind: PrometheusRule
+metadata:
+  labels:
+    team: {{team}}
+  name: {{receiver.name}}-alerts
+  namespace: {{team}}
+spec:
+  groups:
+    - name: {{receiver.name}}-alerts
+      rules:
+        - alert: "[{{dotnet-env}}] {{receiver.name}} health check failed"
+          expr: up{app="{{receiver.name}}"} == 0
+          for: 5m
+          annotations:
+            summary: "{{receiver.name}} /healthz returned unhealthy status for more than 5 minutes."
+            consequence: "{{receiver.name}} is not accessible in [{{dotnet-env}}] cluster. "
+            action: "Find out which health check is failing and find out if it is a temporary/permanent issue."
+            runbook_url: "https://produkt.arbeidstilsynet.no/docs/Melding/Runbooks/{{receiver.alerts.health.runbook-uri}}"
+            message: "The {{receiver.name}} health check is currently failing."
+          labels:
+            namespace: {{team}}
+            severity: {{receiver.alerts.health.severity}}
+        - alert: "[{{dotnet-env}}] {{receiver.name}} recovery count"
+          expr: sum(max by(appId) (meldinger_receiver_recovery_counter_count)) > 0
+          for: 1m
+          annotations:
+            summary: "{{receiver.name}} recovery count is larger than 0."
+            consequence: "{{ alert-value-template }} altinn schemas have not been processed / forwarded."
+            action: "Rerun recovery or find the cause of the failure."
+            runbook_url: "https://produkt.arbeidstilsynet.no/docs/Melding/Runbooks/{{receiver.alerts.recovery.runbook-uri}}"
+            message: "The {{receiver.name}} recovery count currently has {{ alert-value-template }} item(s)."
+          labels:
+            namespace: {{team}}
+            severity: {{receiver.alerts.recovery.severity}}

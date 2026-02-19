@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security <!-- in case of vulnerabilities. -->
 
+## 1.1.2
+
+### Changed
+
+- Applied new file structure for this repository. All files which are required to build and run the receiver are now placed under `./src`. Also added documentation which can be found within the `./documentation` directory.
+
 ## 1.1.1
 
 ### Fixed

@@ -1,0 +1,92 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: {{receiver.name}}
+  namespace: {{team}}
+  labels:
+    team: {{team}}
+    logs.nais.io/flow-default: "false"
+spec:
+  image: europe-north1-docker.pkg.dev/nais-management-0c82/meldinger/receiver:1.1.1
+  ingresses:
+    {{#each receiver.ingresses as |url|}}
+    - {{url}}
+    {{/each}}
+  accessPolicy:
+    # inbound:
+    #   rules:
+    #     - application: "{{your-service-name.name}}"
+    #       namespace: "{{team}}"
+    inbound:
+      rules:
+        - application: "goldenpath-pilot-backend"
+    outbound:
+      rules:
+        - application: clamav
+          namespace: nais-system
+      external:
+        {{#each receiver.egresses as |url|}}
+        - host: {{url}}
+        {{/each}}
+  port: 8080
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: {{dotnet-env}}
+    - name: ASPNETCORE_HTTP_PORT
+      value: "8080"
+    - name: OTEL_LOGS_EXPORTER
+      value: none
+    - name: Infrastructure__MaskinportenConfiguration__IntegrationId
+      value: $(altinn-integration-id)
+    - name: Infrastructure__MaskinportenConfiguration__CertificatePrivateKey
+      value: $(altinn-pk)
+    - name: Infrastructure__MaskinportenConfiguration__CertificateChain
+      value: $(altinn-cert-chain)
+    - name: Infrastructure__PostgresConfiguration__ConnectionString
+      value: Host=$(DB_HOST);Port=$(DB_PORT);Database=$(DB_DATABASE);Username=$(DB_USERNAME);Password=$(DB_PASSWORD);SSL Mode=VerifyCA;SSL Certificate=$(DB_SSLCERT);SSL Key=$(DB_SSLKEY);Root Certificate=$(DB_SSLROOTCERT)
+    - name: Infrastructure__DocumentStorageConfiguration__BaseUrl
+      value: https://storage.googleapis.com/storage/v1/
+    - name: Infrastructure__DocumentStorageConfiguration__BucketName
+      value: {{receiver.bucket-name}}
+    - name: Infrastructure__ValkeyConfiguration__ConnectionString
+      value: $(VALKEY_HOST_STREAM):$(VALKEY_PORT_STREAM),ssl=true,user=$(VALKEY_USERNAME_STREAM),password=$(VALKEY_PASSWORD_STREAM)
+    - name: Infrastructure__VirusScanConfiguration__BaseUrl
+      value: http://clamav.nais-system/
+    - name: Infrastructure__AppDomain
+      value: https://{{receiver.external-ingress-domain}}
+  envFrom:
+    - secret: maskinporten
+  replicas:
+    max: 1
+    min: 1
+  resources:
+    requests:
+      cpu: 30m
+      memory: 512Mi
+    limits:
+      memory: 1024Mi
+  liveness:
+    path: /healthz/live
+  readiness:
+    failureThreshold: 10
+    initialDelay: 20
+    path: /healthz/ready
+    periodSeconds: 5
+    port: 8080
+    timeout: 1
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: sdk
+  valkey:
+    - instance: {{receiver.valkey-instance-name}}
+      access: readwrite
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        tier: {{receiver.db-tier}}
+        retainedBackups: 30
+        databases:
+          - envVarPrefix: DB
+    buckets:
+      - name: {{receiver.bucket-name}}

@@ -1,0 +1,24 @@
+team: ws-goldenpath
+dotnet-env: Staging
+nais-project: atil-dev
+alert-value-template: "{{ $value }}"
+receiver:
+  name: workshop-receiver
+  ingresses:
+    - https://workshop-receiver-api.intern.dev.arbeidstilsynet.no
+  external-ingress-domain: workshop-receiver-api.dev.arbeidstilsynet.no
+  external-ingress-whitelist: 20.100.24.41/32
+  egresses:
+    - platform.tt02.altinn.no
+    - dat.apps.tt02.altinn.no
+    - test.maskinporten.no
+  bucket-name: workshop-receiver-bucket
+  valkey-instance-name: stream
+  db-tier: db-g1-small
+  alerts:
+    health:
+      severity: critical
+      runbook-uri: Receiver/health
+    recovery:
+      severity: critical
+      runbook-uri: Receiver/recovery

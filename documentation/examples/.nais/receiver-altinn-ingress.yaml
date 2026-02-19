@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{receiver.name}}-external-ingress
+  namespace: {{team}}
+  labels:
+    app: {{receiver.name}}
+    team: {{team}}
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{receiver.external-ingress-whitelist}}"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /webhook/receive-altinn-cloudevent
+spec:
+  ingressClassName: nais-ingress-external
+  rules:
+  - host: {{receiver.external-ingress-domain}}
+    http:
+      paths:
+      - path: /webhook/receive-altinn-cloudevent
+        pathType: Prefix
+        backend:
+          service:
+            name: {{receiver.name}}
+            port:
+              number: 80

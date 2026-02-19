@@ -62,7 +62,7 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<Meldin
         {
             var structuredData = JsonSerializer.Deserialize<TStructuredData>(document);
 
-            if (structuredData == null)
+            if (structuredData is null)
             {
                 logger.LogError(
                     "The message's structured data could not be deserialized. Id: {MeldingId}, DocumentId: {DocumentId}",
