@@ -80,7 +80,7 @@ jobs:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
           source-feed: AT.Public.NuGet
-          config-file: ./nuget.config
+          config-file: ./src/nuget.config
       - name: Check if package version was updated
         if: needs.check_changes.outputs.backend == 'true'
         id: get_version
