@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: {{receiver.name}}
+    team: {{team}}
+  name: {{receiver.name}}-external
+  namespace: {{team}}
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: nais-system
+      podSelector:
+        matchLabels:
+          nais.io/ingressClass: nais-ingress-external
+  podSelector:
+    matchLabels:
+      app: {{receiver.name}}
+  policyTypes:
+  - Ingress
