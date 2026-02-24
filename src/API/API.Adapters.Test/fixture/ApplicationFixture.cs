@@ -55,15 +55,8 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
         Substitute.For<IMeldingNotificationService>();
 
     public static string[] KnownApplicationIds =>
-        [
-            KnownApplicationId,
-            SafeToDeleteApplicationId,
-            "applikasjon-2",
-            "applikasjon-3",
-            AdHocApplicationId,
-        ];
+        [KnownApplicationId, SafeToDeleteApplicationId, "applikasjon-2", "applikasjon-3"];
 
-    public const string AdHocApplicationId = "my-adhoc-app";
     public const string KnownApplicationId = "ulykkesvarsel";
     public const string SafeToDeleteApplicationId = "flip-flop-varsel";
     public static Guid KnownMeldingId { get; } = Guid.Parse("22222222-2222-2222-2222-222222222222");

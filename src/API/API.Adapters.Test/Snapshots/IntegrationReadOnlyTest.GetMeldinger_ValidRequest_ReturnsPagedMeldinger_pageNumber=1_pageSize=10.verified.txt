@@ -3,7 +3,7 @@
     {
       Id: Guid_1,
       Source: Altinn,
-      ApplicationId: applikasjon-3,
+      ApplicationId: applikasjon-2,
       ReceivedAt: DateTime_1,
       Tags: {
         1: voluptas,
@@ -44,7 +44,7 @@
     {
       Id: Guid_12,
       Source: Altinn,
-      ApplicationId: applikasjon-3,
+      ApplicationId: applikasjon-2,
       ReceivedAt: DateTime_3,
       Tags: {
         1: sunt,

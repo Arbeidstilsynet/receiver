@@ -1,13 +1,11 @@
 using System.Reflection;
 using Arbeidstilsynet.Common.Altinn.DependencyInjection;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.AdHoc;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Altinn;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Notification;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.Storage;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.VirusScan;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.AdHoc;
 using Google.Cloud.Storage.V1;
 using Mapster;
 using MapsterMapper;
@@ -71,8 +69,6 @@ public static class DependencyInjection
         InfrastructureConfiguration infrastructureConfiguration
     )
     {
-        services.AddScoped<IAdHocMigrateMainDocument, AdHocMigrateMainDocument>(); // TODO: Remove
-
         services.AddScoped<IMeldingRepository, MeldingRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInternalDocumentRepository, DocumentRepository>();

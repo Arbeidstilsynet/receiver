@@ -39,19 +39,6 @@
     ]
   },
   {
-    ConsumerName: my-adhoc-app,
-    AppRegistrations: [
-      {
-        AppId: my-adhoc-app,
-        MessageSource: Altinn
-      },
-      {
-        AppId: my-adhoc-app,
-        MessageSource: Api
-      }
-    ]
-  },
-  {
     ConsumerName: ulykkesvarsel,
     AppRegistrations: [
       {
