@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security <!-- in case of vulnerabilities. -->
 
+## 1.1.3
+
+### Removed
+
+- Removed the adhoc function to set the main document. This is no longer necessary since the database migration is now complete.
+
 ## 1.1.2
 
 ### Changed
