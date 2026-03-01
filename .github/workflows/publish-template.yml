@@ -46,7 +46,7 @@ jobs:
       - name: Docker meta
         if: steps.nuget_version_check.outputs.published == 'false'
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: |
             ghcr.io/arbeidstilsynet/receiver
@@ -57,7 +57,7 @@ jobs:
 
       - name: Log in to GHCR
         if: steps.nuget_version_check.outputs.published == 'false'
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -65,7 +65,7 @@ jobs:
 
       - name: Build and push (GHCR)
         if: steps.nuget_version_check.outputs.published == 'false'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ./src/
           push: true
@@ -110,7 +110,7 @@ jobs:
       - name: Docker meta
         if: steps.nuget_version_check.outputs.published == 'false'
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: |
             ghcr.io/arbeidstilsynet/receiver
@@ -121,7 +121,7 @@ jobs:
 
       - name: Log in to GHCR
         if: steps.nuget_version_check.outputs.published == 'false'
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -130,7 +130,7 @@ jobs:
       - name: Build and push image to NAIS registry
         if: steps.nuget_version_check.outputs.published == 'false'
         id: nais_build_push
-        uses: nais/docker-build-push@v0
+        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # v0
         with:
           team: meldinger
           docker_context: ./src/
