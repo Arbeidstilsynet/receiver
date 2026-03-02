@@ -6,7 +6,7 @@ networks:
 
 services:
   valkey:
-    image: valkey/valkey:latest@sha256:546304417feac0874c3dd576e0952c6bb8f06bb4093ea0c9ca303c73cf458f63
+    image: valkey/valkey:latest@sha256:2bce660b767cb62c8c0ea020e94a230093be63dbd6af4f21b044960517a5842d
     networks:
       - meldinger_network
     volumes:
