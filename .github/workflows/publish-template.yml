@@ -38,7 +38,7 @@ jobs:
       - name: Publish package if not already published
         id: publish
         if: steps.nuget_version_check.outputs.published == 'false'
-        uses: Arbeidstilsynet/action-dotnet-publish@8d282653fd85f9a26e80d4f6a4c660eb5d6c8896 # v2
+        uses: Arbeidstilsynet/action-dotnet-publish@d1cc7810946ae13e76f109fab16a07bf75ec5917 # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
@@ -101,7 +101,7 @@ jobs:
       - name: Publish package if not already published
         id: publish
         if: steps.nuget_version_check.outputs.published == 'false'
-        uses: Arbeidstilsynet/action-dotnet-publish@8d282653fd85f9a26e80d4f6a4c660eb5d6c8896 # v2
+        uses: Arbeidstilsynet/action-dotnet-publish@d1cc7810946ae13e76f109fab16a07bf75ec5917 # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-auth-token: ${{ secrets.AZURE_DEVOPS_PACKAGING_WRITE_PAT }}
