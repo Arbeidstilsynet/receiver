@@ -1,7 +1,7 @@
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Extensions;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Microsoft.Extensions.Logging;
 

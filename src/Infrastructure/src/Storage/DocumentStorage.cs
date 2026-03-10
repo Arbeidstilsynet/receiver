@@ -1,9 +1,9 @@
 using System.Net;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using Google;
 using Google.Cloud.Storage.V1;
 using Microsoft.Extensions.Logging;

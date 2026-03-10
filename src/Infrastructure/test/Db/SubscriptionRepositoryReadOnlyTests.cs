@@ -1,7 +1,7 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Argon;
 using Bogus;
 using Shouldly;

@@ -1,13 +1,13 @@
 using System.Text;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Storage;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

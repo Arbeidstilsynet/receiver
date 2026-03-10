@@ -1,8 +1,8 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 using Bogus;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

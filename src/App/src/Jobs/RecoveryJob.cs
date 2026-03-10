@@ -1,8 +1,8 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Quartz;
 

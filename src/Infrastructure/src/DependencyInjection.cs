@@ -1,11 +1,11 @@
 using System.Reflection;
 using Arbeidstilsynet.Common.Altinn.DependencyInjection;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Notification;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Storage;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.VirusScan;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Google.Cloud.Storage.V1;
 using Mapster;
 using MapsterMapper;

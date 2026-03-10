@@ -4,8 +4,8 @@ using Arbeidstilsynet.MeldingerReceiver.App;
 using Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using FluentValidation;
 using IAssemblyInfo = Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo;
 

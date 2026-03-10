@@ -38,7 +38,7 @@ internal record CorsConfiguration
 internal record AuthConfiguration
 {
     [ConfigurationKeyName("DangerousDisableAuth")]
-    public bool DangerousDisableAuth { get; init; } = false;
+    public bool DangerousDisableAuth { get; init; } = true;
 
     [ConfigurationKeyName("TenantId")]
     public string EntraTenantId { get; init; } = string.Empty;

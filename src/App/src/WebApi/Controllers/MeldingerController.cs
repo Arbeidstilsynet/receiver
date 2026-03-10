@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Arbeidstilsynet.MeldingerReceiver.App.Extensions;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
 using FluentValidation;

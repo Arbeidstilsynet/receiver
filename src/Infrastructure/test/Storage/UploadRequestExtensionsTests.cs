@@ -1,6 +1,6 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Storage;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Storage;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.Storage;

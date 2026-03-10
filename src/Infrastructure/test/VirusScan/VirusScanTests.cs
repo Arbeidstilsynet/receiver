@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
-using Arbeidstilsynet.MeldingerReceiver.Infrastructure.VirusScan;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.VirusScan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;

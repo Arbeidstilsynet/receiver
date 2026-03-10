@@ -1,5 +1,5 @@
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 
