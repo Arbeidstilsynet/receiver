@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.3.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference
+      Include="OpenTelemetry.Instrumentation.StackExchangeRedis"
+      Version="1.14.0-beta.1"
+    />
+    <PackageReference
+      Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
+      Version="1.14.0-beta.1"
+    />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Quartz" Version="1.14.0-beta.2" />
+    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="2.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <RootNamespace>Arbeidstilsynet.MeldingerReceiver.App</RootNamespace>
+    <AssemblyName>MeldingerReceiver.App</AssemblyName>
+    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsPreviewNamespaces>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Domain/Logic/src/Domain.Logic.csproj" />
+    <ProjectReference Include="../../Domain/Ports/App/Domain.Ports.App.csproj" />
+    <ProjectReference Include="../../Infrastructure/src/Infrastructure.csproj" />
+    <ProjectReference Include="../../Publish/Receiver.Publish/Receiver.Publish.csproj" />
+  </ItemGroup>
+</Project>

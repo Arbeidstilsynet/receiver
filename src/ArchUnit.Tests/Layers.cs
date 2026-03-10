@@ -6,7 +6,7 @@ namespace ArchUnit.Tests
     internal static class Constants
     {
         internal static string NameSpacePrefix =
-            $"Arbeidstilsynet\\.{Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo.AppName}";
+            $"Arbeidstilsynet\\.{Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo.AppName}";
 
         internal static string CoverageCollectorNamespace =
             "Microsoft.CodeCoverage.Instrumentation.Static.Tracker";
@@ -17,15 +17,15 @@ namespace ArchUnit.Tests
         internal static readonly System.Reflection.Assembly DomainLogicAssembly =
             typeof(Arbeidstilsynet.MeldingerReceiver.Domain.Logic.IAssemblyInfo).Assembly;
         internal static readonly System.Reflection.Assembly APIPortAssembly =
-            typeof(Arbeidstilsynet.MeldingerReceiver.API.Ports.IAssemblyInfo).Assembly;
+            typeof(Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App.IAssemblyInfo).Assembly;
         internal static readonly System.Reflection.Assembly InfrastructureAdapterAssembly =
-            typeof(Arbeidstilsynet.MeldingerReceiver.Infrastructure.Adapters.IAssemblyInfo).Assembly;
+            typeof(Arbeidstilsynet.MeldingerReceiver.Infrastructure.IAssemblyInfo).Assembly;
         internal static readonly System.Reflection.Assembly InfrastructurePortAssembly =
-            typeof(Arbeidstilsynet.MeldingerReceiver.Infrastructure.Ports.IAssemblyInfo).Assembly;
+            typeof(Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.IAssemblyInfo).Assembly;
         internal static readonly System.Reflection.Assembly DomainAssembly =
             typeof(Arbeidstilsynet.MeldingerReceiver.Domain.Data.IAssemblyInfo).Assembly;
         internal static readonly System.Reflection.Assembly APIAdapterAssembly =
-            typeof(Arbeidstilsynet.MeldingerReceiver.API.Adapters.IAssemblyInfo).Assembly;
+            typeof(Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo).Assembly;
 
         internal static readonly System.Reflection.Assembly SystemConsoleAssembly =
             typeof(System.Console).Assembly;
@@ -45,7 +45,7 @@ namespace ArchUnit.Tests
             .ResideInAssembly(InfrastructureAdapterAssembly)
             .And()
             .DoNotResideInNamespaceMatching(
-                $"^({Constants.CoverageCollectorNamespace}|{Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters\\.DependencyInjection|{Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters\\.DependencyInjection\\..*)$"
+                $"^({Constants.CoverageCollectorNamespace}|{Constants.NameSpacePrefix}\\.Infrastructure\\.DependencyInjection|{Constants.NameSpacePrefix}\\.Infrastructure\\.DependencyInjection\\..*)$"
             )
             .And()
             .DoNotResideInNamespace(Constants.CoverageCollectorNamespace)

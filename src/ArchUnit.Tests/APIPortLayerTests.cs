@@ -21,7 +21,7 @@ public class APIPortLayerTests
             .Are(Layers.APIPortLayer)
             .Should()
             .ResideInNamespaceMatching(
-                $"^({Constants.NameSpacePrefix}\\.API\\.Ports|{Constants.NameSpacePrefix}\\.API\\.Ports\\..*)$"
+                $"^({Constants.NameSpacePrefix}\\.Domain\\.Ports\\.App|{Constants.NameSpacePrefix}\\.Domain\\.Ports\\.App\\..*)$"
             );
 
         archRule.Check(Architecture);
@@ -46,7 +46,7 @@ public class APIPortLayerTests
                 Types()
                     .That()
                     .DoNotResideInNamespaceMatching(
-                        $"^({Constants.CoverageCollectorNamespace}|System.*|{Constants.NameSpacePrefix}\\.API\\.Ports|{Constants.NameSpacePrefix}\\.API\\.Ports\\..*|{Constants.NameSpacePrefix}\\.Domain\\.Data.*)$"
+                        $"^({Constants.CoverageCollectorNamespace}|System.*|{Constants.NameSpacePrefix}\\.Domain\\.Ports\\.App|{Constants.NameSpacePrefix}\\.Domain\\.Ports\\.App\\..*|{Constants.NameSpacePrefix}\\.Domain\\.Data.*)$"
                     )
             );
 

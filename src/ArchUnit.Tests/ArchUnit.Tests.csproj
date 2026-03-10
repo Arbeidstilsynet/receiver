@@ -21,14 +21,9 @@
     <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Infrastructure\Infrastructure.Adapters\Infrastructure.Adapters.csproj" />
-    <ProjectReference Include="..\Infrastructure\Infrastructure.Ports\Infrastructure.Ports.csproj" />
-    <ProjectReference Include="..\API\API.Ports\API.Ports.csproj" />
-    <ProjectReference Include="..\API\API.Adapters\API.Adapters.csproj" />
-    <ProjectReference Include="..\Domain\Domain.Logic\Domain.Logic.csproj" />
-    <ProjectReference Include="..\Domain\Domain.Data\Domain.Data.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="../App/src/App.csproj" />
   </ItemGroup>
 </Project>

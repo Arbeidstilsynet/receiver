@@ -27,13 +27,13 @@ This starts (as per today) a plain postgres instance without any seed, a common 
 Before starting the actual application, we need to create quartz tables for persisting scheduled jobs (this also needs to be done whenever you have changed something withing the entity model, just remember to adjust the migration name):
 
 ```terminal
-dotnet ef migrations add AddQuartz --startup-project API/API.Adapters --project Infrastructure/Infrastructure.Adapters -o Db/Migrations
+dotnet ef migrations add InitDb --startup-project App/src --project Infrastructure/src -o Db/Migrations
 ```
 
 Now, start the actual asp dotnet core application:
 
 ```terminal
-dotnet run --project API/API.Adapters
+dotnet run --project App/src
 ```
 
 ### Local Development in a complete dockerized environment (for e.g tester)
@@ -85,36 +85,38 @@ dotnet test
 <!-- prettier-ignore -->
 ```md
 .
-├── API
-│   ├── API.Adapters
-│   ├── API.Adapters.Test
-│   └── API.Ports
+├── App
+│   ├── src
+│   └── test
 ├── ArchUnit.Tests
 ├── Domain
-│   ├── Domain.Data
-│   ├── Domain.Logic
-│   └── Domain.Logic.Test
+│   ├── Data
+│   ├── Logic
+│   │   ├── src
+│   │   └── test
+│   └── Ports
+│       ├── App
+│       └── Infrastructure
 └── Infrastructure
-    ├── Infrastructure.Adapters
-    ├── Infrastructure.Adapters.Test
-    └── Infrastructure.Ports
+    ├── src
+    └── test
 ```
 
 - ArchUnit.Tests
   - Important tests to gurantee the below structure keeps maintained
 - Domain
-  - Domain Logic _implements_ API.Ports and _uses_ Infrastructure.Ports
-  - Tests that validate the domain logic
-  - Domain Data contains Classes/DTOs which can be shared across layers
+  - **Domain.Logic** _implements_ Domain.Ports.App and _uses_ Domain.Ports.Infrastructure
+  - **Domain.Logic.Test** contains tests that validate the domain logic
+  - **Domain.Data** contains Classes/DTOs which can be shared across layers
 - Infrastructure (Outgoing: infrastructure the application talks with)
-  - Infrastructure.Ports and their implementations (i.e. Adapters)
-  - Tests that validate the Infrastructure.Adapters
-- API (Incoming: adapters to make it possible to talk with the application)
-  - Responsible for injecting the necessary dependencies
-  - API.Ports and their implementations (i.e. Adapters)
-  - Tests that validate the API.Adapters
+  - **Infrastructure** _implements_ Domain.Ports.Infrastructure (i.e. Adapters)
+  - **Infrastructure.Test** contains tests that validate the Infrastructure
+- App (Incoming: adapters to make it possible to talk with the application)
+  - **App** _uses_ Domain.Ports.App
+  - Responsible for injecting the necessary dependencies and exposing API endpoints
+  - **App.Test** contains typically integration tests
 
-> Domain Logic and Infrastructure Adapter implementations are internal, and only exposed through DependencyInjection extensions.
+> Domain.Logic and Infrastructure implementations are internal, and only exposed through DependencyInjection extensions.
 
 ## 👩‍💻 Logging
 

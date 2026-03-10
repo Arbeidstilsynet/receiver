@@ -21,7 +21,7 @@ public class InfrastructurePortLayerTests
             .Are(Layers.InfrastructurePortLayer)
             .Should()
             .ResideInNamespaceMatching(
-                $"^({Constants.NameSpacePrefix}\\.Infrastructure\\.Ports|{Constants.NameSpacePrefix}\\.Infrastructure\\.Ports\\..*)$"
+                $"^({Constants.NameSpacePrefix}\\.Domain\\.Ports\\.Infrastructure|{Constants.NameSpacePrefix}\\.Domain\\.Ports\\.Infrastructure\\..*)$"
             );
 
         archRule.Check(Architecture);
@@ -46,7 +46,7 @@ public class InfrastructurePortLayerTests
                 Types()
                     .That()
                     .DoNotResideInNamespaceMatching(
-                        $"^({Constants.CoverageCollectorNamespace}|System.*|{Constants.NameSpacePrefix}\\.Infrastructure\\.Ports.*|{Constants.NameSpacePrefix}\\.Domain\\.Data.*)$"
+                        $"^({Constants.CoverageCollectorNamespace}|System.*|{Constants.NameSpacePrefix}\\.Domain\\.Ports\\.Infrastructure.*|{Constants.NameSpacePrefix}\\.Domain\\.Data.*)$"
                     )
             );
 
