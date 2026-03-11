@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/App/">
+    <Project Path="App/src/App.csproj" />
+    <Project Path="App/test/App.Test.csproj" />
+  </Folder>
+  <Folder Name="/Domain/">
+    <Project Path="Domain/Data/Domain.Data.csproj" />
+    <Project Path="Domain/Logic/src/Domain.Logic.csproj" />
+    <Project Path="Domain/Logic/test/Domain.Logic.Test.csproj" />
+    <Project Path="Domain/Ports/App/Domain.Ports.App.csproj" />
+    <Project Path="Domain/Ports/Infrastructure/Domain.Ports.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/src/Infrastructure.csproj" />
+    <Project Path="Infrastructure/test/Infrastructure.Test.csproj" />
+  </Folder>
+  <Folder Name="/Publish/">
+    <Project Path="Publish/Receiver.Publish/Receiver.Publish.csproj" />
+    <Project Path="Publish/Receiver.Publish.Test/Receiver.Publish.Test.csproj" />
+    <Project Path="Publish/Receiver.Publish.Test.ArchUnit/Receiver.Publish.Test.ArchUnit.csproj" />
+  </Folder>
+  <Project Path="ArchUnit.Tests/ArchUnit.Tests.csproj" />
+</Solution>

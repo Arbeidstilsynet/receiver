@@ -24,10 +24,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Domain/Domain.Data/Domain.Data.csproj" />
-    <ProjectReference Include="..\Receiver.Publish\Receiver.Publish.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="../../Domain/Data/Domain.Data.csproj" />
+    <ProjectReference Include="../Receiver.Publish/Receiver.Publish.csproj" />
   </ItemGroup>
 </Project>

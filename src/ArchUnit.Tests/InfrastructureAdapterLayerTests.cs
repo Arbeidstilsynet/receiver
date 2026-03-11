@@ -21,7 +21,7 @@ public class InfrastructureAdapterLayerTests
             .Are(Layers.InfrastructureAdapterLayer)
             .Should()
             .ResideInNamespaceMatching(
-                $"^({Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters|{Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters\\..*)$"
+                $"^({Constants.NameSpacePrefix}\\.Infrastructure|{Constants.NameSpacePrefix}\\.Infrastructure\\..*)$"
             );
 
         archRule.Check(Architecture);
@@ -35,7 +35,7 @@ public class InfrastructureAdapterLayerTests
             .Are(Layers.InfrastructureAdapterLayer)
             .And()
             .DoNotResideInNamespaceMatching(
-                $"^({Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters\\.DependencyInjection|{Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters\\.DependencyInjection\\..*|{Constants.NameSpacePrefix}\\.Infrastructure\\.Adapters\\.Db\\.Migrations)$"
+                $"^({Constants.NameSpacePrefix}\\.Infrastructure\\.DependencyInjection|{Constants.NameSpacePrefix}\\.Infrastructure\\.DependencyInjection\\..*|{Constants.NameSpacePrefix}\\.Infrastructure\\.Db\\.Migrations)$"
             )
             .Should()
             .NotBePublic();

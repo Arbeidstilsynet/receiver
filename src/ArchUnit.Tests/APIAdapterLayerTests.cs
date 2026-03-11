@@ -24,7 +24,7 @@ public class APIAdapterLayerTests
             .DoNotHaveFullName("Program")
             .Should()
             .ResideInNamespaceMatching(
-                $"^({Constants.NameSpacePrefix}\\.API\\.Adapters|{Constants.NameSpacePrefix}\\.API\\.Adapters\\..*)$"
+                $"^({Constants.NameSpacePrefix}\\.App|{Constants.NameSpacePrefix}\\.App\\..*)$"
             );
 
         archRule.Check(Architecture);

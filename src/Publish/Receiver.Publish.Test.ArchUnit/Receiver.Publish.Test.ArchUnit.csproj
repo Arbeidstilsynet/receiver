@@ -21,9 +21,6 @@
     <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Receiver.Publish\Receiver.Publish.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="../Receiver.Publish/Receiver.Publish.csproj" />
   </ItemGroup>
 </Project>

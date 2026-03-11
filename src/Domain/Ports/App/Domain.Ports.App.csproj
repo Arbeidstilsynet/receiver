@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App</RootNamespace>
+    <AssemblyName>MeldingerReceiver.Domain.Ports.App</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Data/Domain.Data.csproj" />
+  </ItemGroup>
+</Project>

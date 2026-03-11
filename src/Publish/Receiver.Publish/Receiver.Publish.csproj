@@ -11,7 +11,7 @@
     <Description>Receive meldinger with attachments and structured data</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.1.3</Version>
+    <Version>1.2.0</Version>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
@@ -36,11 +36,12 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Domain/Domain.Data/Domain.Data.csproj">
+    <ProjectReference Include="../../Domain/Data/Domain.Data.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <PrivateAssets>All</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
+
   <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
     <ItemGroup>
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />

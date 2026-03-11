@@ -1,32 +1,35 @@
+# syntax=docker/dockerfile:1.22@sha256:4a43a54dd1fedceb30ba47e76cfcf2b47304f4161c0caeac2db1c61804ea3c91
 # https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine@sha256:48b443d87fe7426ce6a20554e87fdd6189143dc4aa5f43b501acf5fef6d42740 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine@sha256:9b4b31da5246f575086b1901e9871b189ae2a80eb42fe9234e9d000b51febd4b AS build
 WORKDIR /source
 
-COPY MeldingerReceiver.sln ./
-COPY nuget.config ./
+# Improves restore speed by skipping XML docs.
+ENV NUGET_XMLDOC_MODE=skip
+
+COPY MeldingerReceiver.slnx .
+COPY nuget.config .
 
 # Copy project files first to maximize Docker layer caching for restore.
-COPY API/API.Adapters/API.Adapters.csproj ./API/API.Adapters/
-COPY API/API.Ports/API.Ports.csproj ./API/API.Ports/
-COPY Domain/Domain.Data/Domain.Data.csproj ./Domain/Domain.Data/
-COPY Domain/Domain.Logic/Domain.Logic.csproj ./Domain/Domain.Logic/
-COPY Infrastructure/Infrastructure.Adapters/Infrastructure.Adapters.csproj ./Infrastructure/Infrastructure.Adapters/
-COPY Infrastructure/Infrastructure.Ports/Infrastructure.Ports.csproj ./Infrastructure/Infrastructure.Ports/
+COPY App/src/App.csproj ./App/src/
+COPY Domain/Ports/App/Domain.Ports.App.csproj ./Domain/Ports/App/
+COPY Domain/Data/Domain.Data.csproj ./Domain/Data/
+COPY Domain/Logic/src/Domain.Logic.csproj ./Domain/Logic/src/
+COPY Domain/Ports/Infrastructure/Domain.Ports.Infrastructure.csproj ./Domain/Ports/Infrastructure/
+COPY Infrastructure/src/Infrastructure.csproj ./Infrastructure/src/
 COPY Publish/Receiver.Publish/Receiver.Publish.csproj ./Publish/Receiver.Publish/
 
-RUN dotnet restore ./API/API.Adapters/API.Adapters.csproj
+RUN dotnet restore ./App/src/App.csproj
 
 # Copy the remaining source code.
 COPY Domain/ ./Domain/
-COPY API/ ./API/
+COPY App/ ./App/
 COPY Infrastructure/ ./Infrastructure/
 COPY Publish/ ./Publish/
 
-RUN dotnet publish ./API/API.Adapters/API.Adapters.csproj -c Release -f net10.0 -o /app --no-restore
+RUN dotnet publish ./App/src/App.csproj -c Release -f net10.0 -o /app --no-restore
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:55fa85c0075d8b48b4854af502ffbb305470564e9125c227da28b52cfec6dc92
-WORKDIR /build
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:258b939d6d684ff05ad7ea16782b4bee55260de4acc6f99bec897fd11de7640c
+WORKDIR /app
 COPY --from=build /app ./
-RUN apk add --no-cache curl
-ENTRYPOINT ["dotnet", "MeldingerReceiver.API.Adapters.dll"]
+ENTRYPOINT ["dotnet", "MeldingerReceiver.App.dll"]
