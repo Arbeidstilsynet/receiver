@@ -31,6 +31,6 @@ RUN dotnet publish ./App/src/App.csproj -c Release -f net10.0 -o /app --no-resto
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:258b939d6d684ff05ad7ea16782b4bee55260de4acc6f99bec897fd11de7640c
 WORKDIR /app
-COPY --from=build /app ./
 RUN apk add --no-cache curl
+COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "MeldingerReceiver.App.dll"]
