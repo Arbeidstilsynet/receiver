@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security <!-- in case of vulnerabilities. -->
 
+## 1.2.1
+
+### Fixed
+
+- fix: Install curl as last step in dockerfile to make internal healthcheck via curl available. This was unintentionally removed during refactoring.
+
 ## 1.2.0
 
 ### Changed
