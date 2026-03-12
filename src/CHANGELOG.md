@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- feat: Added possibility to require authentication via config. Therefore we moved the ``POST /meldinger`` endpoint to a new path: ``POST /receive/melding``. Since this is a breaking change, we bumped to a new major version even if we know there are now consumers yet:)
+- feat: Added possibility to require authentication via config. Therefore we moved the ``POST /meldinger`` endpoint to a new path: ``POST /receive/melding``. Since this is a breaking change, we bumped to a new major version even if we know there are no consumers yet.
 - chore(deps): minor and patch version updates
 
 ## 1.2.1
