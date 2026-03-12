@@ -43,18 +43,18 @@ internal record AuthConfiguration
     /// <summary>
     /// required if <see cref="DisableAuth"/> is false
     /// </summary>
-    [ConfigurationKeyName("TenantId")]
+    [ConfigurationKeyName("EntraTenantId")]
     public string EntraTenantId { get; init; } = string.Empty;
 
     /// <summary>
     /// required if <see cref="DisableAuth"/> is false
     /// </summary>
-    [ConfigurationKeyName("ClientId")]
+    [ConfigurationKeyName("EntraClientId")]
     public string EntraClientId { get; init; } = string.Empty;
 
     /// <summary>
     /// required if <see cref="DisableAuth"/> is false
     /// </summary>
-    [ConfigurationKeyName("Scope")]
+    [ConfigurationKeyName("EntraScope")]
     public string EntraScope { get; init; } = string.Empty;
 }
