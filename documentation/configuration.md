@@ -5,9 +5,9 @@
 | ASPNETCORE_ENVIRONMENT                                           | yes      | Development                                                                           |
 | ASPNETCORE_HTTP_PORT                                             | no       | "8080"                                                                                |
 | API__Authentication__DisableAuth                                 | no       | false                                                                                 |
-| API__Authentication__EntraTenantId                               | no**     | false                                                                                 |
-| API__Authentication__EntraClientId                               | no**     | false                                                                                 |
-| API__Authentication__EntraScope                                  | no**     | false                                                                                 |
+| API__Authentication__EntraTenantId                               | no**     | da4bf886-a8a6-450d-a806-c347b8eb8d80                                                  |
+| API__Authentication__EntraClientId                               | no**     | 862cc399-04fe-44f9-898e-bea29cb29eef                                                  |
+| API__Authentication__EntraScope                                  | no**     | api://{env}.{team}.{app}/.default                                                     |
 | API__Cors__AllowedOrigins__0                                     | no       | <http://localhost:3000>                                                               |
 | API__Cors__AllowCredentials                                      | no       | false                                                                                 |
 | Domain__AllowOnlyRegisteredApps                                  | no       | true                                                                                  |
