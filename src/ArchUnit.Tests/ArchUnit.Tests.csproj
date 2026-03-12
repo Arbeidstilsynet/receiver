@@ -15,10 +15,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.3.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageReference Include="TngTech.ArchUnitNET" Version="0.13.2" />
-    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.2" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.5.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="TngTech.ArchUnitNET" Version="0.13.3" />
+    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.3" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
