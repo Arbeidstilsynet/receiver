@@ -37,15 +37,24 @@ internal record CorsConfiguration
 
 internal record AuthConfiguration
 {
-    [ConfigurationKeyName("DangerousDisableAuth")]
-    public bool DangerousDisableAuth { get; init; } = true;
+    [ConfigurationKeyName("DisableAuth")]
+    public bool DisableAuth { get; init; } = true;
 
+    /// <summary>
+    /// required if <see cref="DisableAuth"/> is false
+    /// </summary>
     [ConfigurationKeyName("TenantId")]
     public string EntraTenantId { get; init; } = string.Empty;
 
+    /// <summary>
+    /// required if <see cref="DisableAuth"/> is false
+    /// </summary>
     [ConfigurationKeyName("ClientId")]
     public string EntraClientId { get; init; } = string.Empty;
 
+    /// <summary>
+    /// required if <see cref="DisableAuth"/> is false
+    /// </summary>
     [ConfigurationKeyName("Scope")]
     public string EntraScope { get; init; } = string.Empty;
 }

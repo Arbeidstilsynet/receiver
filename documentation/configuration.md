@@ -4,6 +4,10 @@
 |------------------------------------------------------------------|----------|---------------------------------------------------------------------------------------|
 | ASPNETCORE_ENVIRONMENT                                           | yes      | Development                                                                           |
 | ASPNETCORE_HTTP_PORT                                             | no       | "8080"                                                                                |
+| API__Authentication__DisableAuth                                 | no       | false                                                                                 |
+| API__Authentication__EntraTenantId                               | no**     | false                                                                                 |
+| API__Authentication__EntraClientId                               | no**     | false                                                                                 |
+| API__Authentication__EntraScope                                  | no**     | false                                                                                 |
 | API__Cors__AllowedOrigins__0                                     | no       | <http://localhost:3000>                                                               |
 | API__Cors__AllowCredentials                                      | no       | false                                                                                 |
 | Domain__AllowOnlyRegisteredApps                                  | no       | true                                                                                  |
@@ -21,6 +25,17 @@
 | OTEL_EXPORTER_OTLP_ENDPOINT                                      | no       | http://monitoring_otel:4317                                                           |
 
 \* required for communication with altinns staging and prod systems
+
+\*\* required if `DisableAuth` is false
+
+## Endpoints
+
+The receiver API provides two different types of endpoints: the first ones are to actually receive documents (`/webhook`, `/receive/melding`) and the others are basically endpoints designed to be consumed by apps running within the same cluster, which is why we drop authentication for them by default. The `webhook` endpoint is designed to be used by altinn, which is why it should be publically available. It is recommended to secure this endpoint with IP-whitelisting, see [receiver-altinn-ingress.yaml](./examples/.nais/receiver-altinn-ingress.yaml). The second endpoint __can__ be made publically available, but then we recommend to use Entra Authentication to secure it (see next chapter). All other endpoints are recommended to not have any external ingress.
+
+## Authentication
+
+By default, authentication is disabled, since we are assuming that you are only exposing the webhook controller endpoint to an ip-whitelist secured external ingress.
+However, if you wish to expose the `/receive/melding` endpoint, __we beg you to enable authentication__. Per today we support jwt bearer authentication via Entra, which means you need to provide a `TenantId`, `ClientId` and a `Scope` to validate the token.
 
 ## Run with docker compose
 
