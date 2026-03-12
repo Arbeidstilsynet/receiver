@@ -47,7 +47,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         };
 
         var httpResponse = await _client.PostAsync(
-            "/meldinger",
+            "/receive/melding",
             postMeldingBody.ToMultipartFormDataContent(),
             TestContext.Current.CancellationToken
         );
@@ -68,7 +68,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         };
 
         var httpResponse = await _client.PostAsync(
-            "/meldinger",
+            "/receive/melding",
             postMeldingBody.ToMultipartFormDataContent(),
             TestContext.Current.CancellationToken
         );
@@ -89,7 +89,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         };
 
         var httpResponse = await _client.PostAsync(
-            "/meldinger",
+            "/receive/melding",
             postMeldingBody.ToMultipartFormDataContent(),
             TestContext.Current.CancellationToken
         );
@@ -133,7 +133,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         };
 
         var httpResponse = await _client.PostAsync(
-            "/meldinger",
+            "/receive/melding",
             postMeldingBody.ToMultipartFormDataContent(),
             TestContext.Current.CancellationToken
         );
