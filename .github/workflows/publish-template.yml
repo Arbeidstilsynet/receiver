@@ -130,7 +130,7 @@ jobs:
       - name: Build and push image to NAIS registry
         if: steps.nuget_version_check.outputs.published == 'false'
         id: nais_build_push
-        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # v0
+        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # v0
         with:
           team: meldinger
           docker_context: ./src/
