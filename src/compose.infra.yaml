@@ -78,7 +78,7 @@ services:
       retries: 5
 
   clamav:
-    image: clamav/clamav@sha256:d772ad4aae0f7f2fb6fe7e7af570b5c4025ce9327d88ddba763fe015b02b564f
+    image: clamav/clamav@sha256:bb355a4d75613eaa5566fbcc268f869e5811faadc84f6c4cecb0c83656b6feeb
     environment:
       MODE: clamd
     networks:
