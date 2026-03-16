@@ -181,7 +181,7 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.nuget_version_check.outputs.published == 'false'
-        uses: softprops/action-gh-release@b25b93d384199fc0fc8c2e126b2d937a0cbeb2ae # v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
           tag_name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }} v${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
