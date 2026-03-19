@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Build and Test .NET solution
-        uses: Arbeidstilsynet/action-dotnet-build@9c35ccb4022ccc93ca72b67538da77615eb74af9 # v4
+        uses: Arbeidstilsynet/action-dotnet-build@7ae1e7bc33ebd805bcd4d039065e86b3eb2cdbbf # v4
         with:
           working-directory: ./src/
 
