@@ -6,6 +6,8 @@ using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using OpenTelemetry.Trace;
 using Quartz;
@@ -50,6 +52,57 @@ internal static class StartupExtensions
             apiConfiguration.Cors.AllowCredentials,
             env.IsDevelopment()
         );
+
+        if (apiConfiguration.AuthenticationConfiguration.DisableAuth)
+        {
+            LoggerFactory
+                .Create(builder => builder.AddConsole())
+                .CreateLogger<Program>()
+                .LogWarning(
+                    "Authentication is disabled. Update AuthenticationConfiguration to require authentication."
+                );
+
+            // Register a permissive authorization policy that allows all requests
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAssertion(_ => true)
+                    .Build();
+            });
+        }
+        else
+        {
+            var clientId = apiConfiguration.AuthenticationConfiguration.EntraClientId;
+            var tenantId = apiConfiguration.AuthenticationConfiguration.EntraTenantId;
+            var scope = apiConfiguration.AuthenticationConfiguration.EntraScope;
+
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentException(
+                    "EntraClientId must be set either in appsettings when auth is enabled"
+                );
+            }
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("EntraTenantId must be set when auth is enabled");
+            }
+            if (string.IsNullOrEmpty(scope))
+            {
+                throw new ArgumentException(
+                    "(Default) EntraScope must be set when auth is enabled, e.g. api://<my.app>/.default"
+                );
+            }
+
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(jwtOptions =>
+                {
+                    jwtOptions.Authority = $"https://login.microsoftonline.com/{tenantId}/v2.0";
+                    jwtOptions.Audience = clientId;
+                });
+
+            services.AddAuthorization();
+        }
 
         return services;
     }
@@ -134,7 +187,7 @@ file static class Extensions
                     Version = "v1",
                     Description = $"Common entrypoints to interact with {appName}.",
                 };
-                if (!apiConfiguration.AuthenticationConfiguration.DangerousDisableAuth)
+                if (!apiConfiguration.AuthenticationConfiguration.DisableAuth)
                 {
                     document.Components ??= new OpenApiComponents();
                     document.Components.SecuritySchemes ??=

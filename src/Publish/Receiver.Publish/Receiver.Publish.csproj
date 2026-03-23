@@ -11,14 +11,14 @@
     <Description>Receive meldinger with attachments and structured data</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.2.1</Version>
+    <Version>2.0.0</Version>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.2.0" />
+    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.3.0" />
     <PackageReference
       Include="Microsoft.Extensions.DependencyInjection.Abstractions"
-      Version="10.0.2"
+      Version="10.0.4"
     />
     <PackageReference
       Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
@@ -28,9 +28,9 @@
       Include="OpenTelemetry.Instrumentation.StackExchangeRedis"
       Version="1.14.0-beta.1"
     />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.11.8" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />

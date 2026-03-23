@@ -34,6 +34,7 @@ services:
       Infrastructure__AppDomain: http://receiver-api:8080
       API__Cors__AllowedOrigins__0: http://localhost:3000
       API__Cors__AllowCredentials: false
+      API__Authentication__DisableAuth: true
       OTEL_EXPORTER_OTLP_ENDPOINT: http://monitoring_otel:4317
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/healthz/ready"]
