@@ -54,8 +54,12 @@ internal static class AltinnMappingExtensions
     {
         return new DocumentFileMetadata
         {
-            ContentType = fileMetadata.ContentType ?? throw new ArgumentException("ContentType is required in order to succeed."),
-            FileName = fileMetadata.Filename ?? throw new ArgumentException("Filename is required in order to succeed."),
+            ContentType =
+                fileMetadata.ContentType
+                ?? throw new ArgumentException("ContentType is required in order to succeed."),
+            FileName =
+                fileMetadata.Filename
+                ?? throw new ArgumentException("Filename is required in order to succeed."),
         };
     }
 
