@@ -76,13 +76,25 @@ internal static class RecoveryJobExtensions
                 };
             }
 
-            apiMeters.MeldingReceived(MessageSource.Altinn, appId);
-            var request = instance.MapAltinnSummaryToPostMeldingRequest();
-            var melding = await meldingService.ProcessMelding(request, cancellationToken);
-            apiMeters.MeldingProcessed(melding);
-            apiMeters.RegisterMeldingDuration(melding);
-            jobsLeftForAppId--;
-            processedCount++;
+            try
+            {
+                var request = instance.MapAltinnSummaryToPostMeldingRequest();
+                apiMeters.MeldingReceived(MessageSource.Altinn, appId);
+                var melding = await meldingService.ProcessMelding(request, cancellationToken);
+                apiMeters.MeldingProcessed(melding);
+                apiMeters.RegisterMeldingDuration(melding);
+                jobsLeftForAppId--;
+                processedCount++;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Error processing instance {InstanceId} for app {AppId} during recovery job.",
+                    instance.Metadata.InstanceGuid,
+                    appId
+                );
+            }
         }
 
         apiMeters.UpdateRecoveryCounts(jobsLeftForAppId, appId);

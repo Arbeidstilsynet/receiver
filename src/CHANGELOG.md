@@ -7,17 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added <!-- for new features. -->
+## 1.2.2
 
-### Changed <!--  for changes in existing functionality. -->
+### Fixed
 
-### Deprecated <!--  for soon-to-be removed features. -->
-
-### Removed <!-- for now removed features. -->
-
-### Fixed <!-- for any bug fixes. -->
-
-### Security <!-- in case of vulnerabilities. -->
+- Throw exception when altinn file metadata is missing required fields, instead of falling back to a dummy value.
 
 ## 1.2.1
 

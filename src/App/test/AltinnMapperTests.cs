@@ -88,6 +88,51 @@ public class AltinnMapperTests
         await Verify(result, _verifySettings);
     }
 
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenAppIsNull_ThrowsArgumentException()
+    {
+        var summary = GetCompleteAltinnSummary();
+
+        summary = summary with { Metadata = summary.Metadata with { App = null } };
+
+        Should
+            .Throw<ArgumentException>(() => summary.MapAltinnSummaryToPostMeldingRequest())
+            .Message.ShouldContain("app name");
+    }
+
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenContentTypeIsNull_ThrowsArgumentException()
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary = summary with
+        {
+            SkjemaAsPdf = summary.SkjemaAsPdf with
+            {
+                FileMetadata = summary.SkjemaAsPdf.FileMetadata with { ContentType = null },
+            },
+        };
+
+        Should
+            .Throw<ArgumentException>(() => summary.MapAltinnSummaryToPostMeldingRequest())
+            .Message.ShouldContain("ContentType");
+    }
+
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenFilenameIsNull_ThrowsArgumentException()
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary = summary with
+        {
+            SkjemaAsPdf = summary.SkjemaAsPdf with
+            {
+                FileMetadata = summary.SkjemaAsPdf.FileMetadata with { Filename = null },
+            },
+        };
+        Should
+            .Throw<ArgumentException>(() => summary.MapAltinnSummaryToPostMeldingRequest())
+            .Message.ShouldContain("Filename");
+    }
+
     private static AltinnInstanceSummary GetCompleteAltinnSummary(
         FileScanResult fileScanResult = FileScanResult.Clean
     )
