@@ -15,10 +15,10 @@
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.2.0" />
+    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.4.1" />
     <PackageReference
       Include="Microsoft.Extensions.DependencyInjection.Abstractions"
-      Version="10.0.2"
+      Version="10.0.5"
     />
     <PackageReference
       Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
@@ -28,9 +28,9 @@
       Include="OpenTelemetry.Instrumentation.StackExchangeRedis"
       Version="1.14.0-beta.1"
     />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.12.14" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
