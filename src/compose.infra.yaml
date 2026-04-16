@@ -20,7 +20,7 @@ services:
       - 6379:6379
 
   postgres-receiver:
-    image: postgres:17-alpine@sha256:e8620ab449ee1dc2d47356b6a82806c22a2c68d46b9620b689723570ed9df927
+    image: postgres:17-alpine@sha256:778d0b486d6daa02b77434d0358ec57a1b21fd8b6d22ac2eef56a33e816928f6
     networks:
       - meldinger_network
     ports:
