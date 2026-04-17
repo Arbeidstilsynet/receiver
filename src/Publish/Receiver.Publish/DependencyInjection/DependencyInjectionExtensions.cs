@@ -122,14 +122,14 @@ public static class DependencyInjectionExtensions
 
         group.MapGet(
             "/get-pending-messages",
-            (IMeldingerRedriver redriver) =>
+            ([FromServices] IMeldingerRedriver redriver) =>
             {
                 return redriver.GetPendingMessages();
             }
         );
         group.MapPost(
             "/acknowledge-pending-messages",
-            async (IMeldingerRedriver redriver, [FromQuery] string[]? messageIds) =>
+            async ([FromServices] IMeldingerRedriver redriver, [FromQuery] string[]? messageIds) =>
             {
                 if (messageIds == null || messageIds.Length == 0)
                 {
@@ -143,7 +143,7 @@ public static class DependencyInjectionExtensions
         );
         return group.MapPost(
             "/redrive-pending-messages",
-            (IMeldingerRedriver redriver) =>
+            ([FromServices] IMeldingerRedriver redriver) =>
             {
                 return redriver.RedrivePendingMessages();
             }
