@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Arbeidstilsynet.Common.AspNetCore.Extensions.CrossCutting;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 
@@ -23,29 +24,5 @@ internal record ApiConfiguration
     public CorsConfiguration Cors { get; init; } = new();
 
     [ConfigurationKeyName("Authentication")]
-    public AuthConfiguration AuthenticationConfiguration { get; init; } = new();
-}
-
-internal record CorsConfiguration
-{
-    [Required]
-    public string[] AllowedOrigins { get; init; } = [];
-
-    [Required]
-    public bool AllowCredentials { get; init; } = false;
-}
-
-internal record AuthConfiguration
-{
-    [ConfigurationKeyName("DangerousDisableAuth")]
-    public bool DangerousDisableAuth { get; init; } = true;
-
-    [ConfigurationKeyName("TenantId")]
-    public string EntraTenantId { get; init; } = string.Empty;
-
-    [ConfigurationKeyName("ClientId")]
-    public string EntraClientId { get; init; } = string.Empty;
-
-    [ConfigurationKeyName("Scope")]
-    public string EntraScope { get; init; } = string.Empty;
+    public AuthConfiguration? AuthenticationConfiguration { get; init; }
 }
