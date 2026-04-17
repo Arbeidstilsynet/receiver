@@ -23,7 +23,7 @@ internal static class StartupExtensions
 
         return services.ConfigureStandardMvc();
     }
-    
+
     public static IServiceCollection ConfigureApp(
         this IServiceCollection services,
         string appName,
@@ -36,18 +36,17 @@ internal static class StartupExtensions
         {
             configure.AddConfiguration(configurationRoot);
         });
-        
+
         services.ConfigureApi();
-        
-        services.AddHealthChecks()
-            .AddInfrastructureHealthChecks();
+
+        services.AddHealthChecks().AddInfrastructureHealthChecks();
 
         services.ConfigureOpenTelemetry(appName);
 
         services.AddOpenApi(openApiOptions =>
             openApiOptions.ConfigureBasicOpenApiSpec(IAssemblyInfo.AppName)
         );
-        
+
         //add custom instrumentation
         services
             .AddOpenTelemetry()
@@ -67,11 +66,12 @@ internal static class StartupExtensions
     {
         app.AddStandardApi(
             apiConfiguration.AuthenticationConfiguration,
-            options => options
-                .AddExceptionMapping<AltinnEventSourceParseException>(
-                    HttpStatusCode.InternalServerError
-                )
-                .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
+            options =>
+                options
+                    .AddExceptionMapping<AltinnEventSourceParseException>(
+                        HttpStatusCode.InternalServerError
+                    )
+                    .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
         );
 
         return app;
@@ -124,4 +124,3 @@ internal static class StartupExtensions
         return services;
     }
 }
-
