@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.2.4
+
+### Changed
+
+- Migrated to new (non-deprecated) configuration API from `Arbeidstilsynet.Common.AspNetCore.Extensions` (upgraded to 2.5.1)
+- Updated NuGet dependencies
+
 ## 1.2.3
 
 ### Fixed
