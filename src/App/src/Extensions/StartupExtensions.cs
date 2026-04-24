@@ -15,25 +15,33 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 
 internal static class StartupExtensions
 {
-    public static IServiceCollection ConfigureStandardApi(
+    public static IMvcBuilder ConfigureApi(this IServiceCollection services)
+    {
+        services.AddOpenApi(openApiOptions =>
+            openApiOptions.ConfigureBasicOpenApiSpec(IAssemblyInfo.AppName)
+        );
+
+        return services.ConfigureStandardMvc();
+    }
+
+    public static IServiceCollection ConfigureApp(
         this IServiceCollection services,
         string appName,
         ApiConfiguration apiConfiguration,
         IWebHostEnvironment env,
-        StartupChecks? StartupChecks = null
+        IConfiguration configurationRoot
     )
     {
-        services.ConfigureApi(
-            startupChecks: StartupChecks,
-            buildHealthChecksAction: builder => builder.AddInfrastructureHealthChecks()
-        );
+        services.AddLogging(configure =>
+        {
+            configure.AddConfiguration(configurationRoot.GetSection("Logging"));
+        });
+
+        services.ConfigureApi();
+
+        services.AddHealthChecks().AddInfrastructureHealthChecks();
 
         services.ConfigureOpenTelemetry(appName);
-        services.ConfigureOpenApi(
-            documentName: "v1",
-            openApiOptions: openApiOptions =>
-                openApiOptions.ConfigureDocumentTransformer(appName, apiConfiguration)
-        );
 
         //add custom instrumentation
         services
@@ -45,26 +53,22 @@ internal static class StartupExtensions
                 options.AddRedisInstrumentation();
             });
 
-        services.ConfigureCors(
-            apiConfiguration.Cors.AllowedOrigins,
-            apiConfiguration.Cors.AllowCredentials,
-            env.IsDevelopment()
-        );
+        services.ConfigureCors(apiConfiguration.Cors, env.IsDevelopment());
 
         return services;
     }
 
-    public static WebApplication AddStandardApi(this WebApplication app)
+    public static WebApplication AddApi(this WebApplication app, ApiConfiguration apiConfiguration)
     {
-        app.AddApi(options =>
-            options
-                .AddExceptionMapping<AltinnEventSourceParseException>(
-                    HttpStatusCode.InternalServerError
-                )
-                .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
+        app.AddStandardApi(
+            apiConfiguration.AuthenticationConfiguration,
+            options =>
+                options
+                    .AddExceptionMapping<AltinnEventSourceParseException>(
+                        HttpStatusCode.InternalServerError
+                    )
+                    .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
         );
-        app.UseCors();
-        app.AddScalar();
 
         return app;
     }
@@ -114,60 +118,5 @@ internal static class StartupExtensions
         });
 
         return services;
-    }
-}
-
-file static class Extensions
-{
-    internal static Microsoft.AspNetCore.OpenApi.OpenApiOptions ConfigureDocumentTransformer(
-        this Microsoft.AspNetCore.OpenApi.OpenApiOptions openApiOptions,
-        string appName,
-        ApiConfiguration apiConfiguration
-    )
-    {
-        return openApiOptions.AddDocumentTransformer(
-            (document, context, cancellationToken) =>
-            {
-                document.Info = new OpenApiInfo
-                {
-                    Title = appName,
-                    Version = "v1",
-                    Description = $"Common entrypoints to interact with {appName}.",
-                };
-                if (!apiConfiguration.AuthenticationConfiguration.DangerousDisableAuth)
-                {
-                    document.Components ??= new OpenApiComponents();
-                    document.Components.SecuritySchemes ??=
-                        new Dictionary<string, IOpenApiSecurityScheme>();
-                    document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
-                    {
-                        Type = SecuritySchemeType.Http,
-                        Scheme = "bearer",
-                        BearerFormat = "JWT",
-                    };
-                    document.Components.SecuritySchemes["OAuth2"] = new OpenApiSecurityScheme
-                    {
-                        Type = SecuritySchemeType.OAuth2,
-                        Flows = new OpenApiOAuthFlows
-                        {
-                            ClientCredentials = new OpenApiOAuthFlow
-                            {
-                                TokenUrl = new Uri(
-                                    $"https://login.microsoftonline.com/{apiConfiguration.AuthenticationConfiguration.EntraTenantId}/oauth2/v2.0/token"
-                                ),
-                                Scopes = new Dictionary<string, string>
-                                {
-                                    {
-                                        apiConfiguration.AuthenticationConfiguration.EntraScope,
-                                        "Access API"
-                                    },
-                                },
-                            },
-                        },
-                    };
-                }
-                return Task.CompletedTask;
-            }
-        );
     }
 }

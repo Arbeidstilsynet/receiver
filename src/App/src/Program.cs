@@ -16,10 +16,11 @@ var services = builder.Services;
 var env = builder.Environment;
 
 var appNameFromConfig = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME");
-services.ConfigureStandardApi(
+services.ConfigureApp(
     string.IsNullOrEmpty(appNameFromConfig) ? IAssemblyInfo.AppName : appNameFromConfig,
     appSettings.ApiConfig,
-    env
+    env,
+    builder.Configuration
 );
 
 services.AddSingleton<ApiMeters>();
@@ -57,7 +58,7 @@ if (env.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
-app.AddStandardApi();
+app.AddApi(appSettings.ApiConfig);
 
 using (var scope = app.Services.CreateScope())
 {
