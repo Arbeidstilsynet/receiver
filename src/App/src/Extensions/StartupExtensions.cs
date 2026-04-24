@@ -43,10 +43,6 @@ internal static class StartupExtensions
 
         services.ConfigureOpenTelemetry(appName);
 
-        services.AddOpenApi(openApiOptions =>
-            openApiOptions.ConfigureBasicOpenApiSpec(IAssemblyInfo.AppName)
-        );
-
         //add custom instrumentation
         services
             .AddOpenTelemetry()
