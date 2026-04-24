@@ -34,7 +34,7 @@ internal static class StartupExtensions
     {
         services.AddLogging(configure =>
         {
-            configure.AddConfiguration(configurationRoot);
+            configure.AddConfiguration(configurationRoot.GetSection("Logging"));
         });
 
         services.ConfigureApi();
