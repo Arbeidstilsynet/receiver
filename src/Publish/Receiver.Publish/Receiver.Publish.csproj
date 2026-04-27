@@ -11,7 +11,7 @@
     <Description>Receive meldinger with attachments and structured data</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.2.4</Version>
+    <Version>1.2.5</Version>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
@@ -21,12 +21,8 @@
       Version="10.0.6"
     />
     <PackageReference
-      Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
-      Version="1.14.0-beta.1"
-    />
-    <PackageReference
       Include="OpenTelemetry.Instrumentation.StackExchangeRedis"
-      Version="1.14.0-beta.1"
+      Version="1.15.1-beta.1"
     />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.6" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
