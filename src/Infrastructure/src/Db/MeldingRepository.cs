@@ -12,26 +12,11 @@ internal class MeldingRepository : IMeldingRepository
 {
     private readonly ReceiverDbContext _dbContext;
     private readonly IMapper _mapper;
-    private readonly ILogger<MeldingRepository> _logger;
 
-    public MeldingRepository(
-        ReceiverDbContext dbContext,
-        IMapper mapper,
-        ILogger<MeldingRepository> logger
-    )
+    public MeldingRepository(ReceiverDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;
-        _logger = logger;
-    }
-
-    private ReceiverDbContext DbContext
-    {
-        get
-        {
-            _dbContext.Database.EnsureCreated();
-            return _dbContext;
-        }
     }
 
     public async Task<Melding> CreateMelding(
@@ -43,9 +28,9 @@ internal class MeldingRepository : IMeldingRepository
 
         var meldingEntity = createMeldingRequest.ToMeldingEntity();
 
-        var updatedEntity = await DbContext.Meldinger.AddAsync(meldingEntity, cancellationToken);
+        var updatedEntity = await _dbContext.Meldinger.AddAsync(meldingEntity, cancellationToken);
 
-        await DbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
         await updatedEntity.ReloadAsync(cancellationToken);
         return _mapper.Map<Melding>(updatedEntity.Entity);
     }
@@ -53,7 +38,7 @@ internal class MeldingRepository : IMeldingRepository
     public async Task<Melding?> GetMelding(Guid meldingId, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity();
-        var entity = await DbContext
+        var entity = await _dbContext
             .Meldinger.Include(m => m.Documents)
             .FirstOrDefaultAsync(f => f.Id == meldingId, cancellationToken);
         if (entity != null)
@@ -66,7 +51,7 @@ internal class MeldingRepository : IMeldingRepository
     public async Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1)
     {
         using var activity = Tracer.Source.StartActivity();
-        var baseQuery = DbContext.Meldinger.Select(s => new { s.Id, s.ReceivedAt });
+        var baseQuery = _dbContext.Meldinger.Select(s => new { s.Id, s.ReceivedAt });
         int totalRecords = await baseQuery.CountAsync();
         int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
         var items = await baseQuery
@@ -76,7 +61,7 @@ internal class MeldingRepository : IMeldingRepository
             .Take(pageSize)
             .ToListAsync();
         var meldingIds = items.Select(s => s.Id).ToList();
-        var itemsWithDocument = await DbContext
+        var itemsWithDocument = await _dbContext
             .Meldinger.Include(m => m.Documents)
             .Where(w => meldingIds.Contains(w.Id))
             .OrderByDescending(b => b.ReceivedAt)

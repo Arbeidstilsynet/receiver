@@ -24,21 +24,12 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
         _mapper = mapper;
     }
 
-    private ReceiverDbContext DbContext
-    {
-        get
-        {
-            _dbContext.Database.EnsureCreated();
-            return _dbContext;
-        }
-    }
-
     public async Task<List<Document>> GetAllDocumentsForMelding(
         Guid meldingId,
         CancellationToken cancellationToken
     )
     {
-        return await DbContext
+        return await _dbContext
             .Documents.Where(d => d.MeldingId == meldingId)
             .Select(s => _mapper.Map<Document>(s))
             .ToListAsync(cancellationToken);
@@ -51,7 +42,7 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
     )
     {
         return (
-            await DbContext.Documents.FindAsync([documentId], cancellationToken: cancellationToken)
+            await _dbContext.Documents.FindAsync([documentId], cancellationToken: cancellationToken)
         )?.InternalDocumentReference;
     }
 
@@ -60,7 +51,7 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
         CancellationToken cancellationToken
     )
     {
-        var entity = await DbContext.Documents.FindAsync(
+        var entity = await _dbContext.Documents.FindAsync(
             [documentId],
             cancellationToken: cancellationToken
         );

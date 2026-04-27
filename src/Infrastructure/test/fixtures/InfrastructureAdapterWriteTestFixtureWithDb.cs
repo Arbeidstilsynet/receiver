@@ -1,14 +1,17 @@
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit.Microsoft.DependencyInjection;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
+using Xunit.v3;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
 
 public class InfrastructureAdapterWriteTestFixtureWithDb : TestBedFixture, IAsyncLifetime
 {
     private readonly PostgresDbDemoFixture _dbDemoFixture;
+    private readonly TestOutputHelper _testOutputHelper = new();
 
     private readonly InfrastructureConfiguration _infraConfigMock =
         Substitute.For<InfrastructureConfiguration>();
@@ -50,6 +53,8 @@ public class InfrastructureAdapterWriteTestFixtureWithDb : TestBedFixture, IAsyn
     async ValueTask IAsyncLifetime.InitializeAsync()
     {
         await _dbDemoFixture.InitializeAsync();
+        var dbContext = GetService<ReceiverDbContext>(_testOutputHelper)!;
+        await dbContext.Database.EnsureCreatedAsync();
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()

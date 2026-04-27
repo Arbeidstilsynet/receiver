@@ -10,15 +10,6 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapper)
     : ISubscriptionsRepository
 {
-    private ReceiverDbContext DbContext
-    {
-        get
-        {
-            dbContext.Database.EnsureCreated();
-            return dbContext;
-        }
-    }
-
     public async Task<IEnumerable<AltinnConnection>> CreateSubscription(
         ConsumerManifest consumerManifest
     )
@@ -49,9 +40,9 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
             RegisteredAltinnApps = altinnAppReferences,
             RegisteredApiApps = apiAppReferences,
         };
-        var updatedEntity = await DbContext.Subscriptions.AddAsync(subscriptionEntity);
+        var updatedEntity = await dbContext.Subscriptions.AddAsync(subscriptionEntity);
 
-        await DbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
         await updatedEntity.ReloadAsync();
 
         return updatedEntity.Entity.RegisteredAltinnApps.Select(mapper.Map<AltinnConnection>);
@@ -59,7 +50,7 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
 
     public async Task<ConsumerManifest?> GetPersistedSubscription(string consumerName)
     {
-        var result = await DbContext
+        var result = await dbContext
             .Subscriptions.Include(i => i.RegisteredAltinnApps.Where(a => a.SubscriptionId != null))
             .Include(i => i.RegisteredApiApps)
             .Where(w => w.ConsumerName == consumerName)
@@ -70,7 +61,7 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
 
     public async Task<IEnumerable<AltinnConnection>> GetAllActiveAltinnSubscriptions()
     {
-        return await DbContext
+        return await dbContext
             .AltinnApps.Where(w => w.SubscriptionId != null)
             .Select(s => mapper.Map<AltinnConnection>(s))
             .ToListAsync();
@@ -78,7 +69,7 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
 
     public async Task<AltinnConnection?> GetActiveAltinnSubscription(string altinnAppId)
     {
-        var result = await DbContext
+        var result = await dbContext
             .AltinnApps.AsNoTracking()
             .Where(w => w.AppIdentifier == altinnAppId)
             .FirstOrDefaultAsync();
@@ -87,34 +78,34 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
 
     public async Task UpdateAltinnSubscriptionId(Guid altinnSubscriptionEntity, int subscriptionId)
     {
-        var entityToUpdate = await DbContext.AltinnApps.FindAsync(altinnSubscriptionEntity);
+        var entityToUpdate = await dbContext.AltinnApps.FindAsync(altinnSubscriptionEntity);
         if (entityToUpdate != null)
         {
             entityToUpdate.SubscriptionId = subscriptionId;
-            await DbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 
     public async Task DeleteSubscription(ConsumerManifest consumerManifest)
     {
-        var existingEntity = await DbContext
+        var existingEntity = await dbContext
             .Subscriptions.Where(w => w.ConsumerName == consumerManifest.ConsumerName)
             .SingleOrDefaultAsync();
         if (existingEntity is not null)
         {
             // Rely on database cascade delete (FK `SubscriptionEntityId` is required and
             // configured with DeleteBehavior.Cascade in migrations/model).
-            DbContext.Subscriptions.Remove(existingEntity);
-            await DbContext.SaveChangesAsync();
+            dbContext.Subscriptions.Remove(existingEntity);
+            await dbContext.SaveChangesAsync();
 
             // Clear change tracker to prevent caching issues
-            DbContext.ChangeTracker.Clear();
+            dbContext.ChangeTracker.Clear();
         }
     }
 
     public async Task<IList<ConsumerManifest>> GetSubscriptions()
     {
-        return await DbContext
+        return await dbContext
             .Subscriptions.Include(i => i.RegisteredAltinnApps)
             .Include(i => i.RegisteredApiApps)
             .OrderBy(o => o.ConsumerName)
@@ -129,7 +120,7 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
     {
         if (messageSource == MessageSource.Altinn)
         {
-            var altinnApp = await DbContext
+            var altinnApp = await dbContext
                 .AltinnApps.Where(w => w.AppIdentifier == appId)
                 .FirstOrDefaultAsync();
             return altinnApp == null
@@ -138,7 +129,7 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
         }
         else if (messageSource == MessageSource.Api)
         {
-            var apiApp = await DbContext
+            var apiApp = await dbContext
                 .ApiApps.Where(w => w.AppIdentifier == appId)
                 .FirstOrDefaultAsync();
             return apiApp == null
