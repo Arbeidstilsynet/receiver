@@ -15,7 +15,7 @@
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.2.0" />
+    <PackageReference Include="Arbeidstilsynet.Common.AspNetCore.Extensions" Version="2.5.2" />
     <PackageReference
       Include="Microsoft.Extensions.DependencyInjection.Abstractions"
       Version="10.0.6"
