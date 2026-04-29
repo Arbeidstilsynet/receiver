@@ -145,6 +145,7 @@ public class AltinnMapperTests
                 InstanceGuid = Guid.Parse(TestInstanceId),
                 Org = TestOrg,
                 InstanceOwnerPartyId = TestOwnerPartyid,
+                DataValues = [],
             },
 
             StructuredData = new AltinnDocument

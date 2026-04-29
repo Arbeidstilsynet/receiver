@@ -36,18 +36,24 @@ public class AltinnCompletionActionTests
         };
     }
 
-    [Fact]
-    public async Task RunPostActionFor_WhenCalledWithValidAltinnMelding_SendsCompletionRequest()
+    private AltinnMetadata SampleAltinnMetadata()
     {
-        //arrange
-        _altinnStorageClient.ClearReceivedCalls();
-        var altinnMetadata = new AltinnMetadata
+        return new AltinnMetadata
         {
             App = "test",
             Org = "dat",
             InstanceGuid = Guid.NewGuid(),
             InstanceOwnerPartyId = "123123",
+            DataValues = [],
         };
+    }
+
+    [Fact]
+    public async Task RunPostActionFor_WhenCalledWithValidAltinnMelding_SendsCompletionRequest()
+    {
+        //arrange
+        _altinnStorageClient.ClearReceivedCalls();
+        var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
         //act
         await _sut.RunPostActionFor(melding);
@@ -72,13 +78,7 @@ public class AltinnCompletionActionTests
         _altinnStorageClient
             .CompleteInstance("altinn-app", Arg.Any<InstanceRequest>())
             .ThrowsAsync<HttpRequestException>();
-        var altinnMetadata = new AltinnMetadata
-        {
-            App = "test",
-            Org = "dat",
-            InstanceGuid = Guid.NewGuid(),
-            InstanceOwnerPartyId = "123123",
-        };
+        var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
         //act
         var act = () => _sut.RunPostActionFor(melding);
@@ -99,7 +99,10 @@ public class AltinnCompletionActionTests
     public async Task RunPostActionFor_WhenCalledWithInvalidAltinnMelding_ShouldThrow()
     {
         //arrange
-        var melding = SampleMelding(new AltinnMetadata());
+        var melding = SampleMelding(SampleAltinnMetadata()) with
+        {
+            Tags = [],
+        };
         //act
         var act = () => _sut.RunPostActionFor(melding);
         //assert
@@ -110,7 +113,7 @@ public class AltinnCompletionActionTests
     public async Task RunPostActionFor_WhenCalledWithNonAltinnMelding_ShouldNotThrow()
     {
         //arrange
-        var altinnMelding = SampleMelding(new AltinnMetadata());
+        var altinnMelding = SampleMelding(SampleAltinnMetadata());
         var nonAltinnMelding = altinnMelding with { Source = MessageSource.Api };
         //act
         var act = () => _sut.RunPostActionFor(nonAltinnMelding);
