@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.2.7
+
+### Changed
+
+- feat: updated Arbeidstilsynet.Common.Altinn package to save more altinn metadata, e.g. the provided dialogId
+
 ## 1.2.6
 
 ### Fixed
