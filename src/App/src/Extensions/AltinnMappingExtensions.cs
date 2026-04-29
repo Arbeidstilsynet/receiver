@@ -16,7 +16,7 @@ internal static class AltinnMappingExtensions
     {
         return new CreateMeldingRequest
         {
-            MeldingId = altinnInstanceSummary.Metadata.InstanceGuid ?? Guid.NewGuid(),
+            MeldingId = altinnInstanceSummary.Metadata.InstanceGuid,
             Source = MessageSource.Altinn,
             ApplicationReference =
                 altinnInstanceSummary.Metadata.App

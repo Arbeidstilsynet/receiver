@@ -43,6 +43,8 @@
   Metadata: {
     altinnReference: 54a32f7627b6,
     app: test-skjema,
+    dataValues: {},
+    dialogId: ,
     instanceGuid: 11827765-ed99-44a4-a88b-54a32f7627b6,
     instanceOwnerPartyId: 123123,
     org: dat,
