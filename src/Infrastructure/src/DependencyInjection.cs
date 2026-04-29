@@ -32,6 +32,8 @@ public record InfrastructureConfiguration
     public virtual required AltinnConfiguration AltinnConfiguration { get; init; }
 
     public virtual required string AppDomain { get; init; }
+
+    public virtual required bool SkipVirusScan { get; init; } = false;
 }
 
 public record DocumentStorageConfiguration
@@ -73,7 +75,11 @@ public static class DependencyInjection
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInternalDocumentRepository, DocumentRepository>();
         services.AddScoped<IDocumentStorage, DocumentStorage>();
-        services.AddScoped<IVirusScanService, VirusScanService>();
+        if (infrastructureConfiguration.SkipVirusScan) { }
+        else
+        {
+            services.AddScoped<IVirusScanService, VirusScanService>();
+        }
         services.AddScoped<IAltinnRegistrationService, AltinnRegistrationService>();
         services.AddScoped<IAltinnRecoveryService, AltinnRecoveryService>();
         services.AddScoped<ISubscriptionsRepository, SubscriptionsRepository>();

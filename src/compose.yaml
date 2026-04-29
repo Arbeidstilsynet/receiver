@@ -32,6 +32,7 @@ services:
       Infrastructure__AltinnAppConfiguration__AltinnOrgIdentifier: dat
       Infrastructure__AltinnAppConfiguration__MainDocumentDataTypeName: structured-data
       Infrastructure__AppDomain: http://receiver-api:8080
+      Infrastructure__SkipVirusScan: true
       API__Cors__AllowedOrigins__0: http://localhost:3000
       API__Cors__AllowCredentials: false
       OTEL_EXPORTER_OTLP_ENDPOINT: http://monitoring_otel:4317
@@ -48,5 +49,3 @@ services:
         condition: service_healthy
       postgres-receiver:
         condition: service_healthy
-      clamav-web:
-        condition: service_started

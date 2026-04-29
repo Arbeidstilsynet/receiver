@@ -18,6 +18,7 @@
 | Infrastructure__ValkeyConfiguration__ConnectionString            | yes      | valkey:6379                                                                           |
 | Infrastructure__VirusScanConfiguration__BaseUrl                  | yes      | <http://clamav-web:8080/>                                                             |
 | Infrastructure__AppDomain                                        | yes      | <http://receiver-api:8080>                                                            |
+| Infrastructure__SkipVirusScan                                    | no       | false                                                                                 |
 | OTEL_EXPORTER_OTLP_ENDPOINT                                      | no       | http://monitoring_otel:4317                                                           |
 
 \* required for communication with altinns staging and prod systems
