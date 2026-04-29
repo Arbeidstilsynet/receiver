@@ -26,7 +26,7 @@ jobs:
 
       - name: Check if package version exists
         id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@4e24ef27f0e3864ce598d1df5c9c28ecdce59208 # v2
+        uses: Arbeidstilsynet/action-nuget-check-published@f645c4474151c76472f352ade57e8c19242fbf9c # v2
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: Check if package version exists
         id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@4e24ef27f0e3864ce598d1df5c9c28ecdce59208 # v2
+        uses: Arbeidstilsynet/action-nuget-check-published@f645c4474151c76472f352ade57e8c19242fbf9c # v2
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
