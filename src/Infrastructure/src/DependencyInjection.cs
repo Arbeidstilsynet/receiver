@@ -75,7 +75,10 @@ public static class DependencyInjection
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInternalDocumentRepository, DocumentRepository>();
         services.AddScoped<IDocumentStorage, DocumentStorage>();
-        if (infrastructureConfiguration.SkipVirusScan) { }
+        if (infrastructureConfiguration.SkipVirusScan)
+        {
+            services.AddScoped<IVirusScanService, DummyVirusScanService>();
+        }
         else
         {
             services.AddScoped<IVirusScanService, VirusScanService>();
