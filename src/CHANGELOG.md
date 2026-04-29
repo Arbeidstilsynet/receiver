@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.2.8
+
+### Fixed
+
+- fix: The `MeldingerClient` implementation returned a mismatching dto from what we get in return from our internal API. Get melding detials via this client is working as it should now
+
+### Added
+
+- chore: added flag to skip virus scanning. This can be useful when running integration tests in docker.
+
 ## 1.2.7
 
 ### Changed

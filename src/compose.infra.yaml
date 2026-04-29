@@ -44,7 +44,15 @@ services:
       - meldinger_network
     ports:
       - 4443:4443
-    command: ["-scheme", "http", "-backend", "filesystem", "-external-url", "http://localhost:4443"]
+    command:
+      [
+        "-scheme",
+        "http",
+        "-backend",
+        "filesystem",
+        "-external-url",
+        "http://localhost:4443",
+      ]
     volumes:
       - cloudstorage-data:/data
     post_start:
@@ -55,7 +63,9 @@ services:
             "-X",
             "POST",
             "-d",
-            "{\"name\": \"test-bucket\",  \"location\": \"EU\",  \"storageClass\": \"STANDARD\",   \"iamConfiguration\": {  \"uniformBucketLevelAccess\": { \"enabled\": true} }}",
+            "{\"name\": \"test-bucket\",  \"location\":
+              \"EU\",  \"storageClass\": \"STANDARD\",   \"iamConfiguration\":
+              {  \"uniformBucketLevelAccess\": { \"enabled\": true} }}",
             "-H",
             "Content-Type: application/json",
             "http://localhost:4443/storage/v1/b?project=localhost",
@@ -66,7 +76,7 @@ services:
             "-X",
             "PUT",
             "-d",
-            '{"externalUrl": "http://file-storage:4443"}',
+            "{\"externalUrl\": \"http://file-storage:4443\"}",
             "-H",
             "Content-Type: application/json",
             "http://file-storage:4443/_internal/config",
@@ -83,6 +93,8 @@ services:
       MODE: clamd
     networks:
       - meldinger_network
+    profiles:
+      - virus-scan
     ulimits:
       stack: 1048576
     volumes:
@@ -105,6 +117,8 @@ services:
       - "8091:8080"
     networks:
       - meldinger_network
+    profiles:
+      - virus-scan
     depends_on:
       clamav:
         condition: service_healthy
