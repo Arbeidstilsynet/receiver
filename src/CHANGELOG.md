@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.2.11
+
+### Fixed
+
+- fix: fixed missing service when starting with the SkipVirusScan flag.
+
 ## 1.2.10
 
 ### Fixed

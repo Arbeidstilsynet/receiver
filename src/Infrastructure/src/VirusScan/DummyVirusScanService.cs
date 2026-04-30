@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.VirusScan;
 
-internal class DummyVirusScanService(ILogger logger) : IVirusScanService
+internal class DummyVirusScanService(ILogger<DummyVirusScanService> logger) : IVirusScanService
 {
     public Task<DocumentScanResult> ScanForVirus(
         UploadResponse persistedDocument,
