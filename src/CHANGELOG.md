@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.3.0
+
+### Fixed
+
+- chore: bump `Arbeidstilsynet.Common.Altinn` to v3.1.1 which includes a fix for potential null reference exceptions.
+
 ## 1.2.9
 
 ### Fixed
