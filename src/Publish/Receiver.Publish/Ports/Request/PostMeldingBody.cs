@@ -36,7 +36,12 @@ public record PostMeldingBody
     public List<IFormFile> Attachments { get; init; } = [];
 
     /// <summary>
-    /// IdempotentKey to avoid multiple uploads. If set, will be used as internal melding id.
-    /// </summary>
-    public Guid? IdempotentKey { get; init; }
+    /// Optional key for avoiding duplicate uploads. If set, this value becomes the
+    /// externally visible MeldingId returned by the API and used for subsequent lookups.
+    /// <br/>
+    /// The value must be unique per <see cref="ApplicationId"/> and must not be reused for a
+    /// different melding payload. If the same key is submitted again for the same application,
+    /// the server handles the request idempotently instead of creating a new melding.
+    ///</summary>
+    public Guid? MeldingId { get; init; }
 }

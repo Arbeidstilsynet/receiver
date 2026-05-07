@@ -49,7 +49,7 @@ public class MeldingerController : ControllerBase
         _apiMeters.MeldingReceived(MessageSource.Api, model.ApplicationId);
         var postMeldingRequest = new CreateMeldingRequest
         {
-            MeldingId = model.IdempotentKey ?? Guid.NewGuid(),
+            MeldingId = model.MeldingId ?? Guid.NewGuid(),
             Source = MessageSource.Api,
             ApplicationReference = model.ApplicationId,
             MainContent = model.MainContent?.ToUploadDocumentRequest(),

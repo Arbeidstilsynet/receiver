@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- feat: add idempotent key in `PostMeldingBody` to avoid duplicates when receiving the same request twice.
+- feat: add optional key (meldingId) in `PostMeldingBody` to avoid duplicate persistence when receiving the same request twice.
 
 ## 1.2.11
 
