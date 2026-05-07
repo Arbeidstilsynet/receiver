@@ -153,7 +153,8 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
         var notifications = await valkey.GetNotificationsAsync(consumer.ConsumerManifest);
         totalNotifications += notifications.Count;
 
-        var (messageIdsToAcknowledge, _) = await scopeFactory.ConsumeNotifications(
+        var (messageIdsToAcknowledge, _) = await consumer.ConsumeNotifications(
+            scopeFactory,
             notifications,
             maxConcurrency,
             apiMeters,

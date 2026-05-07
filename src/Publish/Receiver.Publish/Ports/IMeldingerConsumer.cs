@@ -25,7 +25,7 @@ public interface IMeldingerConsumer
     /// Gets the maximum number of messages to process concurrently.
     /// If null, defaults to sequential processing (1).
     /// </summary>
-    int? MaxConcurrency { get; }
+    public int? MaxConcurrency { get; }
 
     /// <summary>
     /// Called when a <see cref="Melding"/> are available for this consumer.
