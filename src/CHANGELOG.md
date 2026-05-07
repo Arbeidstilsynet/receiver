@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.3.0
+
+### Added
+
+- feat: add idempotent key in `PostMeldingBody` to avoid duplicates when receiving the same request twice.
+
 ## 1.2.11
 
 ### Fixed

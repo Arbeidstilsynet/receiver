@@ -34,4 +34,9 @@ public record PostMeldingBody
     /// Optional attachment files.
     /// </summary>
     public List<IFormFile> Attachments { get; init; } = [];
+
+    /// <summary>
+    /// IdempotentKey to avoid multiple uploads. If set, will be used as internal melding id.
+    /// </summary>
+    public Guid? IdempotentKey { get; init; }
 }
