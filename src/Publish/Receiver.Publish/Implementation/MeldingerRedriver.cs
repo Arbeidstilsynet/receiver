@@ -1,11 +1,13 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Ports;
 using Arbeidstilsynet.Receiver.Ports.Model;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.Receiver.Implementation;
 
 internal class MeldingerRedriver(
+    IServiceScopeFactory serviceScopeFactory,
     IValkeyConsumer valkeyConsumer,
     IMeldingerConsumer meldingerConsumer,
     ApiMeters apiMeters,
@@ -60,8 +62,10 @@ internal class MeldingerRedriver(
             meldingerConsumer.ConsumerManifest
         );
 
+        var maxConcurrency = meldingerConsumer.MaxConcurrency ?? 1;
+
         var (successfulMessages, unsuccessfulMessages) =
-            await meldingerConsumer.ConsumeNotifications(pendingMessages, apiMeters, logger, true);
+            await serviceScopeFactory.ConsumeNotifications(pendingMessages, maxConcurrency, apiMeters, logger, true);
 
         if (successfulMessages.Count != 0)
         {

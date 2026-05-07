@@ -50,17 +50,25 @@ internal static class RedisExtensions
         var successfulMessages = new ConcurrentBag<MessageId>();
         var unsuccessfulMessages = new ConcurrentBag<RedriveException>();
         using var rootActivity = ReceiverTracer.Source.StartActivity(ActivityKind.Consumer);
+        var rootActivityId = rootActivity?.Id;
 
         await Parallel.ForEachAsync(
             notifications,
             new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency },
-            async (kvp, _) =>
+            async (kvp, ct) =>
             {
                 var (messageId, melding) = kvp;
                 using var scope = scopeFactory.CreateScope();
                 var consumer = scope.ServiceProvider.GetRequiredService<IMeldingerConsumer>();
 
-                using var activity = ReceiverTracer.Source.StartActivity();
+                var rootTraceParent = triggeredFromRedrive
+                    ? rootActivityId
+                    : melding.GetInternalTag("rootTraceParent");
+                using var activity = ReceiverTracer.Source.StartActivity(
+                    $"Consume {melding.ApplicationId} Notification",
+                    ActivityKind.Internal,
+                    rootTraceParent
+                );
                 try
                 {
                     var consumedAt = DateTime.Now;
