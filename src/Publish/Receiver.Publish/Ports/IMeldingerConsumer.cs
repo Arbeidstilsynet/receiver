@@ -21,6 +21,8 @@ public interface IMeldingerConsumer
     /// </summary>
     public int? PollInterval { get; }
 
+    int? MaxConcurrency { get; }  // null = sequential (default, backward-compatible)
+
     /// <summary>
     /// Called when a <see cref="Melding"/> are available for this consumer.
     /// Throws an exception when a message could not be consumed.
