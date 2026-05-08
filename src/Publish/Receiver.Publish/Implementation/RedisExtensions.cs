@@ -37,15 +37,12 @@ internal static class RedisExtensions
         this IMeldingerConsumer consumer,
         IServiceScopeFactory scopeFactory,
         Dictionary<MessageId, Melding> notifications,
-        int maxConcurrency,
         ApiMeters apiMeters,
         ILogger logger,
         bool triggeredFromRedrive = false
     )
     {
-        using var rootActivity = ReceiverTracer.Source.StartActivity(ActivityKind.Consumer);
-        var rootActivityId = rootActivity?.Id;
-
+        var maxConcurrency = consumer.MaxConcurrency ?? 1;
         var successfulMessages = new ConcurrentBag<MessageId>();
         var unsuccessfulMessages = new ConcurrentBag<RedriveException>();
 
@@ -54,7 +51,7 @@ internal static class RedisExtensions
             new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency },
             async (kvp, ct) =>
             {
-                var (messageId, melding) = kvp;
+
                 // For parallel processing, each message gets its own scope and consumer.
                 // For sequential, reuse the caller-provided consumer directly.
                 var scope = maxConcurrency > 1 ? scopeFactory.CreateScope() : null;
@@ -64,48 +61,8 @@ internal static class RedisExtensions
                         scope != null
                             ? scope.ServiceProvider.GetRequiredService<IMeldingerConsumer>()
                             : consumer;
+                    await effectiveConsumer.ConsumeMelding(kvp, successfulMessages, unsuccessfulMessages, apiMeters, logger, triggeredFromRedrive);
 
-                    var rootTraceParent = triggeredFromRedrive
-                        ? rootActivityId
-                        : melding.GetInternalTag("rootTraceParent");
-                    using var activity = ReceiverTracer.Source.StartActivity(
-                        $"Consume {melding.ApplicationId} Notification",
-                        ActivityKind.Internal,
-                        rootTraceParent
-                    );
-                    try
-                    {
-                        var consumedAt = DateTime.Now;
-                        apiMeters.MeldingConsumed(melding, triggeredFromRedrive);
-                        await effectiveConsumer.ConsumeMelding(melding);
-                        successfulMessages.Add(messageId);
-                        apiMeters.MeldingAcknowledged(melding, triggeredFromRedrive);
-                        apiMeters.RegisterMeldingDurationFromStart(melding, triggeredFromRedrive);
-                        apiMeters.RegisterMeldingDurationFromConsumerHook(
-                            melding,
-                            consumedAt,
-                            triggeredFromRedrive
-                        );
-                    }
-                    catch (Exception e)
-                    {
-                        var rootTraceId = melding.GetInternalTag("rootTraceId");
-                        unsuccessfulMessages.Add(
-                            new RedriveException()
-                            {
-                                ValkeyMessageId = messageId,
-                                MeldingId = melding.Id,
-                                ExceptionMessage = e.Message,
-                                TraceId = activity?.TraceId.ToString(),
-                                OriginalTraceId = rootTraceId,
-                            }
-                        );
-                        logger.LogError(
-                            e,
-                            "Error consuming message with ID {MessageId}",
-                            messageId
-                        );
-                    }
                 }
                 finally
                 {
@@ -116,4 +73,61 @@ internal static class RedisExtensions
 
         return (successfulMessages.ToList(), unsuccessfulMessages.ToList());
     }
+
+    private static async Task ConsumeMelding(this IMeldingerConsumer consumer,
+        KeyValuePair<MessageId, Melding> meldingToConsumePair,
+        ConcurrentBag<MessageId> successfulMessages,
+        ConcurrentBag<RedriveException> unsuccessfulMessages,
+        ApiMeters apiMeters,
+        ILogger logger,
+        bool triggeredFromRedrive = false)
+    {
+        using var rootActivity = ReceiverTracer.Source.StartActivity(ActivityKind.Consumer);
+        var rootActivityId = rootActivity?.Id;
+        var (messageId, melding) = meldingToConsumePair;
+        var rootTraceParent = triggeredFromRedrive
+                       ? rootActivityId
+                       : melding.GetInternalTag("rootTraceParent");
+        using var activity = ReceiverTracer.Source.StartActivity(
+            $"Consume {melding.ApplicationId} Notification",
+            ActivityKind.Internal,
+            rootTraceParent
+        );
+        try
+        {
+            var consumedAt = DateTime.Now;
+            apiMeters.MeldingConsumed(melding, triggeredFromRedrive);
+            await consumer.ConsumeMelding(melding);
+            successfulMessages.Add(messageId);
+
+            // update metrics
+            apiMeters.MeldingAcknowledged(melding, triggeredFromRedrive);
+            apiMeters.RegisterMeldingDurationFromStart(melding, triggeredFromRedrive);
+            apiMeters.RegisterMeldingDurationFromConsumerHook(
+                melding,
+                consumedAt,
+                triggeredFromRedrive
+            );
+        }
+        catch (Exception e)
+        {
+            var rootTraceId = melding.GetInternalTag("rootTraceId");
+            unsuccessfulMessages.Add(
+                new RedriveException()
+                {
+                    ValkeyMessageId = messageId,
+                    MeldingId = melding.Id,
+                    ExceptionMessage = e.Message,
+                    TraceId = activity?.TraceId.ToString(),
+                    OriginalTraceId = rootTraceId,
+                }
+            );
+            logger.LogError(
+                e,
+                "Error consuming message with ID {MessageId}",
+                messageId
+            );
+        }
+    }
+
 }
