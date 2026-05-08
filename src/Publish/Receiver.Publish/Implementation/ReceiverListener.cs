@@ -59,7 +59,13 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
         var channel = await CreateSubscriptionWriter(connectionMultiplexer, logger);
 
         // Start by getting up to date
-        await ReadFromStreamAndTriggerConsumer(consumer, valkey, apiMeters, logger);
+        await ReadFromStreamAndTriggerConsumer(
+            serviceScopeFactory,
+            consumer,
+            valkey,
+            apiMeters,
+            logger
+        );
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -76,7 +82,13 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
                         "Received notification for message ID: {MessageId}",
                         message
                     );
-                    await ReadFromStreamAndTriggerConsumer(consumer, valkey, apiMeters, logger);
+                    await ReadFromStreamAndTriggerConsumer(
+                        serviceScopeFactory,
+                        consumer,
+                        valkey,
+                        apiMeters,
+                        logger
+                    );
                 }
             }
             catch (OperationCanceledException canceledException)
@@ -84,7 +96,13 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
                 if (!stoppingToken.IsCancellationRequested)
                 {
                     // Timeout occurred, check for pending messages
-                    await ReadFromStreamAndTriggerConsumer(consumer, valkey, apiMeters, logger);
+                    await ReadFromStreamAndTriggerConsumer(
+                        serviceScopeFactory,
+                        consumer,
+                        valkey,
+                        apiMeters,
+                        logger
+                    );
                 }
                 else
                 {
@@ -135,7 +153,8 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
         }
     }
 
-    private async Task ReadFromStreamAndTriggerConsumer(
+    private static async Task ReadFromStreamAndTriggerConsumer(
+        IServiceScopeFactory scopeFactory,
         IMeldingerConsumer consumer,
         IValkeyConsumer valkey,
         ApiMeters apiMeters,
@@ -151,6 +170,7 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
         totalNotifications += notifications.Count;
 
         var (messageIdsToAcknowledge, _) = await consumer.ConsumeNotifications(
+            scopeFactory,
             notifications,
             apiMeters,
             logger

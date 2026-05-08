@@ -22,6 +22,12 @@ public interface IMeldingerConsumer
     public int? PollInterval { get; }
 
     /// <summary>
+    /// Gets the maximum number of messages to process concurrently.
+    /// If null, defaults to sequential processing (1).
+    /// </summary>
+    public int? MaxConcurrency { get; }
+
+    /// <summary>
     /// Called when a <see cref="Melding"/> are available for this consumer.
     /// Throws an exception when a message could not be consumed.
     /// If an exception is thrown, the message may be re-driven later.

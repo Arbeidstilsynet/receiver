@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.4.0
+
+### Added
+
+- feat: updated `IMeldingerConsumer` to include `MaxConcurrency`. If not set, it defaults to 1. If set to a value > 1, the consumer will consume tasks parallel instead of sequential.
+
 ## 1.3.0
 
 ### Added
