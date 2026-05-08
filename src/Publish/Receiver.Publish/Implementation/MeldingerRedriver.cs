@@ -65,7 +65,14 @@ internal class MeldingerRedriver(
         var maxConcurrency = meldingerConsumer.MaxConcurrency ?? 1;
 
         var (successfulMessages, unsuccessfulMessages) =
-            await meldingerConsumer.ConsumeNotifications(serviceScopeFactory, pendingMessages, maxConcurrency, apiMeters, logger, true);
+            await meldingerConsumer.ConsumeNotifications(
+                serviceScopeFactory,
+                pendingMessages,
+                maxConcurrency,
+                apiMeters,
+                logger,
+                true
+            );
 
         if (successfulMessages.Count != 0)
         {

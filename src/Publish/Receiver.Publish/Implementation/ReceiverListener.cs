@@ -60,7 +60,14 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
         var channel = await CreateSubscriptionWriter(connectionMultiplexer, logger);
 
         // Start by getting up to date
-        await ReadFromStreamAndTriggerConsumer(serviceScopeFactory, consumer, valkey, maxConcurrency, apiMeters, logger);
+        await ReadFromStreamAndTriggerConsumer(
+            serviceScopeFactory,
+            consumer,
+            valkey,
+            maxConcurrency,
+            apiMeters,
+            logger
+        );
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -77,7 +84,14 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
                         "Received notification for message ID: {MessageId}",
                         message
                     );
-                    await ReadFromStreamAndTriggerConsumer(serviceScopeFactory, consumer, valkey, maxConcurrency, apiMeters, logger);
+                    await ReadFromStreamAndTriggerConsumer(
+                        serviceScopeFactory,
+                        consumer,
+                        valkey,
+                        maxConcurrency,
+                        apiMeters,
+                        logger
+                    );
                 }
             }
             catch (OperationCanceledException canceledException)
@@ -85,7 +99,14 @@ internal class ReceiverListener(IServiceScopeFactory serviceScopeFactory) : Back
                 if (!stoppingToken.IsCancellationRequested)
                 {
                     // Timeout occurred, check for pending messages
-                    await ReadFromStreamAndTriggerConsumer(serviceScopeFactory, consumer, valkey, maxConcurrency, apiMeters, logger);
+                    await ReadFromStreamAndTriggerConsumer(
+                        serviceScopeFactory,
+                        consumer,
+                        valkey,
+                        maxConcurrency,
+                        apiMeters,
+                        logger
+                    );
                 }
                 else
                 {

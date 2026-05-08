@@ -60,9 +60,10 @@ internal static class RedisExtensions
                 var scope = maxConcurrency > 1 ? scopeFactory.CreateScope() : null;
                 try
                 {
-                    var effectiveConsumer = scope != null
-                        ? scope.ServiceProvider.GetRequiredService<IMeldingerConsumer>()
-                        : consumer;
+                    var effectiveConsumer =
+                        scope != null
+                            ? scope.ServiceProvider.GetRequiredService<IMeldingerConsumer>()
+                            : consumer;
 
                     var rootTraceParent = triggeredFromRedrive
                         ? rootActivityId
@@ -79,10 +80,7 @@ internal static class RedisExtensions
                         await effectiveConsumer.ConsumeMelding(melding);
                         successfulMessages.Add(messageId);
                         apiMeters.MeldingAcknowledged(melding, triggeredFromRedrive);
-                        apiMeters.RegisterMeldingDurationFromStart(
-                            melding,
-                            triggeredFromRedrive
-                        );
+                        apiMeters.RegisterMeldingDurationFromStart(melding, triggeredFromRedrive);
                         apiMeters.RegisterMeldingDurationFromConsumerHook(
                             melding,
                             consumedAt,
