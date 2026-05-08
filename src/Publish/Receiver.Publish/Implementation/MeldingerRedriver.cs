@@ -62,7 +62,6 @@ internal class MeldingerRedriver(
             meldingerConsumer.ConsumerManifest
         );
 
-
         var (successfulMessages, unsuccessfulMessages) =
             await meldingerConsumer.ConsumeNotifications(
                 serviceScopeFactory,
