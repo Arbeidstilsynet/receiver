@@ -90,6 +90,27 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
     }
 
     [Fact]
+    public async Task GetMeldingerByShortId_DelegatesToRepository()
+    {
+        //arrange
+        const string shortId = "222222222222";
+        var melding = TestData.CreateMeldingFaker().Generate();
+        _meldingRepository
+            .GetMeldingerByShortId(shortId, Arg.Any<CancellationToken>())
+            .Returns([melding]);
+        //act
+        var result = await _sut.GetMeldingerByShortId(
+            shortId,
+            TestContext.Current.CancellationToken
+        );
+        //assert
+        await _meldingRepository
+            .Received(1)
+            .GetMeldingerByShortId(shortId, Arg.Any<CancellationToken>());
+        result.ShouldHaveSingleItem().ShouldBe(melding);
+    }
+
+    [Fact]
     public async Task GetMeldinger_WhenCalledWithDefaultParameters_CallsRepositoryMethodWithCorrectParameters()
     {
         //arrange

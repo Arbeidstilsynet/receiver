@@ -1,18 +1,20 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text.RegularExpressions;
 using Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class MeldingerController : ControllerBase
+public partial class MeldingerController : ControllerBase
 {
     private readonly IDocumentService _documentService;
     private readonly ApiMeters _apiMeters;
@@ -97,6 +99,50 @@ public class MeldingerController : ControllerBase
 
         return new GetMeldingResponse { Melding = melding };
     }
+
+    /// <summary>
+    /// Resolves a melding by its short id, i.e. the trailing 12 hex characters of the melding GUID
+    /// (the last GUID segment, as shown to users in the public frontend).
+    /// </summary>
+    /// <remarks>
+    /// A short id is not guaranteed to be unique. When several meldinger share the same short id,
+    /// the endpoint returns <c>409 Conflict</c> together with the list of matching full ids so the
+    /// caller can disambiguate using <see cref="GetMelding"/>.
+    /// </remarks>
+    [HttpGet("by-short-id/{shortId}")]
+    [ProducesResponseType<GetMeldingResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<GetMeldingByShortIdConflictResponse>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<GetMeldingResponse>> GetMeldingByShortId(
+        [Required] [FromRoute] string shortId,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!ShortIdRegex().IsMatch(shortId))
+        {
+            return BadRequest(
+                "shortId must be the trailing 12 hex characters of the melding GUID."
+            );
+        }
+
+        var matches = await _meldingService.GetMeldingerByShortId(shortId, cancellationToken);
+
+        return matches.Count switch
+        {
+            0 => NotFound(),
+            1 => new GetMeldingResponse { Melding = matches[0] },
+            _ => Conflict(
+                new GetMeldingByShortIdConflictResponse
+                {
+                    MatchingMeldingIds = matches.Select(m => m.Id).ToList(),
+                }
+            ),
+        };
+    }
+
+    [GeneratedRegex("^[0-9a-fA-F]{12}$")]
+    private static partial Regex ShortIdRegex();
 
     [HttpGet("{meldingId:guid}/documents/{documentId:guid}")]
     public async Task<ActionResult<Document>> GetDocument(

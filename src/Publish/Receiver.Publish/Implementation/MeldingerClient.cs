@@ -1,8 +1,10 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.DependencyInjection;
+using Arbeidstilsynet.Receiver.Model;
 using Arbeidstilsynet.Receiver.Model.Response;
 using Arbeidstilsynet.Receiver.Ports;
 
@@ -40,6 +42,35 @@ internal class MeldingerClient : IMeldingerClient
             _jsonSerializerOptions
         );
         return response?.Melding;
+    }
+
+    public async Task<Melding?> GetMeldingByShortId(string shortId)
+    {
+        var response = await _httpClient.GetAsync($"meldinger/by-short-id/{shortId}");
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            var conflict =
+                await response.Content.ReadFromJsonAsync<GetMeldingByShortIdConflictResponse>(
+                    _jsonSerializerOptions
+                );
+            throw new MeldingShortIdCollisionException(
+                shortId,
+                conflict?.MatchingMeldingIds ?? []
+            );
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var melding = await response.Content.ReadFromJsonAsync<GetMeldingResponse>(
+            _jsonSerializerOptions
+        );
+        return melding?.Melding;
     }
 
     public async Task<Document?> GetDocument(Guid meldingId, Guid documentId)

@@ -48,6 +48,26 @@ internal class MeldingRepository : IMeldingRepository
         return null;
     }
 
+    public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
+        string shortId,
+        CancellationToken cancellationToken
+    )
+    {
+        using var activity = Tracer.Source.StartActivity();
+
+        // The short id is the trailing segment of the GUID. Postgres renders a uuid as a
+        // lowercase, hyphenated string (e.g. "22222222-2222-2222-2222-222222222222"), so we
+        // match meldinger whose id text ends with the (lowercased) short id.
+        var suffix = shortId.ToLowerInvariant();
+
+        var entities = await _dbContext
+            .Meldinger.Include(m => m.Documents)
+            .Where(m => EF.Functions.Like(m.Id.ToString()!, "%" + suffix))
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(e => _mapper.Map<Melding>(e)).ToList();
+    }
+
     public async Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1)
     {
         using var activity = Tracer.Source.StartActivity();
