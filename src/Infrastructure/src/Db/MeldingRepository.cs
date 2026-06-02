@@ -55,14 +55,14 @@ internal class MeldingRepository : IMeldingRepository
     {
         using var activity = Tracer.Source.StartActivity();
 
-        // The short id is the trailing segment of the GUID. Postgres renders a uuid as a
-        // lowercase, hyphenated string (e.g. "22222222-2222-2222-2222-222222222222"), so we
-        // match meldinger whose id text ends with the (lowercased) short id.
-        var suffix = shortId.ToLowerInvariant();
+        // ShortId is a stored, indexed computed column holding the trailing 12 hex characters of the
+        // GUID. Postgres renders a uuid as a lowercase string, so we compare against the lowercased
+        // short id to keep the lookup case-insensitive while remaining index-sargable.
+        var normalizedShortId = shortId.ToLowerInvariant();
 
         var entities = await _dbContext
             .Meldinger.Include(m => m.Documents)
-            .Where(m => EF.Functions.Like(m.Id.ToString()!, "%" + suffix))
+            .Where(m => m.ShortId == normalizedShortId)
             .ToListAsync(cancellationToken);
 
         return entities.Select(e => _mapper.Map<Melding>(e)).ToList();

@@ -59,10 +59,15 @@ internal class MeldingerClient : IMeldingerClient
                 await response.Content.ReadFromJsonAsync<GetMeldingByShortIdConflictResponse>(
                     _jsonSerializerOptions
                 );
-            throw new MeldingShortIdCollisionException(
-                shortId,
-                conflict?.MatchingMeldingIds ?? []
-            );
+
+            if (conflict?.MatchingMeldingIds is not { Count: > 0 } matchingIds)
+            {
+                throw new InvalidOperationException(
+                    $"Receiver returned 409 Conflict for short id '{shortId}' but did not provide any matching melding ids."
+                );
+            }
+
+            throw new MeldingShortIdCollisionException(shortId, matchingIds);
         }
 
         response.EnsureSuccessStatusCode();
