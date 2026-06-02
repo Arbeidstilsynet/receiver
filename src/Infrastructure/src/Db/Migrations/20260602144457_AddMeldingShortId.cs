@@ -17,13 +17,15 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 type: "text",
                 nullable: false,
                 computedColumnSql: "right(\"Id\"::text, 12)",
-                stored: true);
+                stored: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_meldinger_ShortId",
                 schema: "public",
                 table: "meldinger",
-                column: "ShortId");
+                column: "ShortId"
+            );
         }
 
         /// <inheritdoc />
@@ -32,12 +34,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_meldinger_ShortId",
                 schema: "public",
-                table: "meldinger");
+                table: "meldinger"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "ShortId",
-                schema: "public",
-                table: "meldinger");
+            migrationBuilder.DropColumn(name: "ShortId", schema: "public", table: "meldinger");
         }
     }
 }
