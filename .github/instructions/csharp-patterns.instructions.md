@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or modifying C# in the receiver service: adding a feature slice (port → domain service → infrastructure adapter → controller), DI registration and Configuration records, Mapster mapping, FluentValidation, EF Core entities/migrations, observability (Tracer/ApiMeters/logging), or ArchUnit and fixture-based tests."
+description: "Use when writing or modifying C# in the receiver service: adding a feature slice (port → domain service → infrastructure adapter → controller), DI registration and Configuration types, Mapster mapping, FluentValidation, EF Core entities/migrations, observability (Tracer/ApiMeters/logging), or ArchUnit and fixture-based tests."
 name: "Receiver C# patterns"
 applyTo: "src/**/*.cs"
 ---
@@ -25,11 +25,13 @@ Layer rules:
 5. **Expose over HTTP** with a thin controller in `App/src/WebApi/Controllers` that maps to the domain request, calls the service, and returns a response model.
 6. **Test**: domain unit tests in `Domain/Logic/test`, infra tests in `Infrastructure/test`, integration tests in `App/test`.
 
-## DI registration + Configuration records
+## DI registration + Configuration types
 
 Each module has a `public static class DependencyInjection` with an `AddX` extension. Concrete
-types are registered against their ports; configuration is a `record` with `required` `init`-only
-members, wrapped via `Options.Create(...)`.
+types are registered against their ports; configuration is a type with `required` `init`-only
+members, wrapped via `Options.Create(...)`. Both `record` (e.g. `InfrastructureConfiguration`)
+and `class` (e.g. `DomainConfiguration`) configuration types are used — match the style of the
+module you are editing.
 
 ```csharp
 public record FooConfiguration
@@ -37,9 +39,9 @@ public record FooConfiguration
     public required string BaseUrl { get; init; }
 }
 
-public static IServiceCollection AddInfrastructure(
+public static IServiceCollection AddFoo(
     this IServiceCollection services,
-    InfrastructureConfiguration configuration)
+    FooConfiguration configuration)
 {
     services.AddScoped<IFooRepository, FooRepository>();
     services.AddSingleton(Options.Create(configuration));
