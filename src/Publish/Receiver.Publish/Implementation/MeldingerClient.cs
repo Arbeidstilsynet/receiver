@@ -46,7 +46,7 @@ internal class MeldingerClient : IMeldingerClient
 
     public async Task<Melding?> GetMeldingByShortId(string shortId)
     {
-        var response = await _httpClient.GetAsync($"meldinger/by-short-id/{shortId}");
+        using var response = await _httpClient.GetAsync($"meldinger/by-short-id/{shortId}");
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {

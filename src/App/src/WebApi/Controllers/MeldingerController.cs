@@ -111,7 +111,7 @@ public partial class MeldingerController : ControllerBase
     /// </remarks>
     [HttpGet("by-short-id/{shortId}")]
     [ProducesResponseType<GetMeldingResponse>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<string>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType<GetMeldingByShortIdConflictResponse>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<GetMeldingResponse>> GetMeldingByShortId(

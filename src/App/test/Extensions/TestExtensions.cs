@@ -13,6 +13,13 @@ internal static class TestExtensions
         // Add ApplicationId
         content.Add(new StringContent(body.ApplicationId), nameof(PostMeldingBody.ApplicationId));
 
+        // Add MeldingId
+        if (body.MeldingId is { } meldingId)
+            content.Add(
+                new StringContent(meldingId.ToString()),
+                nameof(PostMeldingBody.MeldingId)
+            );
+
         // Add Metadata
         foreach (var kvp in body.Metadata)
             content.Add(
