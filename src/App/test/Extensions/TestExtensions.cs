@@ -15,10 +15,7 @@ internal static class TestExtensions
 
         // Add MeldingId
         if (body.MeldingId is { } meldingId)
-            content.Add(
-                new StringContent(meldingId.ToString()),
-                nameof(PostMeldingBody.MeldingId)
-            );
+            content.Add(new StringContent(meldingId.ToString()), nameof(PostMeldingBody.MeldingId));
 
         // Add Metadata
         foreach (var kvp in body.Metadata)
