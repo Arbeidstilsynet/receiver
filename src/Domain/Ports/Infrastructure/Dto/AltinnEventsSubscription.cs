@@ -8,4 +8,5 @@ public record AltinnEventsSubscription
     public required string CreatedBy { get; set; }
     public required string Consumer { get; set; }
     public required DateTime Created { get; set; }
+    public required bool Validated { get; set; }
 }

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.5.1
+
+### Added
+
+- feat: added Validated on the `AltinnEventSubscription`, which indicates that altin has successfully validated the subscription.
+
 ## 1.5.0
 
 ### Added

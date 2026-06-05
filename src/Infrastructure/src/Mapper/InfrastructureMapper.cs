@@ -31,7 +31,8 @@ internal class InfrastructureMapper : IRegister
             .Map(target => target.SourceFilter, src => src.SourceFilter)
             .Map(target => target.Consumer, src => src.Consumer)
             .Map(target => target.CreatedBy, src => src.CreatedBy)
-            .Map(target => target.Created, src => src.Created);
+            .Map(target => target.Created, src => src.Created)
+            .Map(target => target.Validated, src => src.Validated);
 
         config
             .NewConfig<MeldingEntity, Domain.Data.Melding>()
