@@ -100,6 +100,14 @@ internal class MeldingService : IMeldingService
         return await _meldingRepository.GetMelding(request.MeldingId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
+        string shortId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _meldingRepository.GetMeldingerByShortId(shortId, cancellationToken);
+    }
+
     public async Task<Domain.Ports.App.PaginationResponse<Melding>> GetMeldinger(
         int? pageNumber = 1,
         int? pageSize = 10

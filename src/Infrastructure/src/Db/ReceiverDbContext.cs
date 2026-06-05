@@ -26,6 +26,14 @@ internal class ReceiverDbContext(DbContextOptions<ReceiverDbContext> dbContextOp
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<MeldingEntity>(builder =>
+        {
+            builder
+                .Property(m => m.ShortId)
+                .HasComputedColumnSql("right(\"Id\"::text, 12)", stored: true);
+            builder.HasIndex(m => m.ShortId);
+        });
+
         modelBuilder.AddQuartz(builder => builder.UsePostgreSql());
     }
 

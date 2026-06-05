@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
 {
     [DbContext(typeof(ReceiverDbContext))]
-    partial class InfrastructureAdaptersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260602144457_AddMeldingShortId")]
+    partial class AddMeldingShortId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

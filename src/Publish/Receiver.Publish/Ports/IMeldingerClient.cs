@@ -1,4 +1,5 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.Receiver.Model;
 using Arbeidstilsynet.Receiver.Model.Response;
 
 namespace Arbeidstilsynet.Receiver.Ports;
@@ -15,6 +16,17 @@ public interface IMeldingerClient
     /// <param name="meldingId"></param>
     /// <returns>A <see cref="Melding"/> object if found; otherwise, null.</returns>
     Task<Melding?> GetMelding(Guid meldingId);
+
+    /// <summary>
+    /// Retrieves a <see cref="Melding"/> by its short id, i.e. the trailing 12 hex characters of the
+    /// melding GUID (the last GUID segment).
+    /// </summary>
+    /// <param name="shortId">The trailing 12 hex characters of the melding GUID.</param>
+    /// <returns>The matching <see cref="Melding"/> if exactly one is found; otherwise, null.</returns>
+    /// <exception cref="MeldingShortIdCollisionException">
+    /// Thrown when more than one melding shares the given short id. The full ids are available on the exception.
+    /// </exception>
+    Task<Melding?> GetMeldingByShortId(string shortId);
 
     /// <summary>
     /// Retrieves metadata for a specific document associated with a message from the receiver application.

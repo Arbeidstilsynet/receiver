@@ -116,6 +116,57 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
     }
 
     [Fact]
+    public async Task GetMeldingByShortId_ReturnsMelding()
+    {
+        // Arrange
+        var shortId = ApplicationFixture.KnownMeldingId.ToString().Split('-').Last();
+
+        // Act
+        var content = await _client.GetFromJsonAsync<GetMeldingResponse>(
+            $"/meldinger/by-short-id/{shortId}",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+
+        // Assert
+        content.ShouldNotBeNull();
+        content.Melding.ShouldNotBeNull();
+        content.Melding.Id.ShouldBe(ApplicationFixture.KnownMeldingId);
+    }
+
+    [Fact]
+    public async Task GetMeldingByShortId_ReturnsNotFoundForUnknownShortId()
+    {
+        // Arrange
+        var unknownShortId = Guid.NewGuid().ToString().Split('-').Last();
+
+        // Act
+        var response = await _client.GetAsync(
+            $"/meldinger/by-short-id/{unknownShortId}",
+            TestContext.Current.CancellationToken
+        );
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Theory]
+    [InlineData("not-hex-1234")]
+    [InlineData("2222")]
+    [InlineData("22222222-2222-2222-2222-222222222222")]
+    public async Task GetMeldingByShortId_ReturnsBadRequestForInvalidShortId(string shortId)
+    {
+        // Act
+        var response = await _client.GetAsync(
+            $"/meldinger/by-short-id/{shortId}",
+            TestContext.Current.CancellationToken
+        );
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task GetDocuments_ReturnsDocumentsForMelding()
     {
         // Arrange

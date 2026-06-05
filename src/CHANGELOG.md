@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.5.0
+
+### Added
+
+- feat: add `GET /meldinger/by-short-id/{shortId}` endpoint to resolve a melding by its short id (the trailing 12 hex characters of the melding GUID). Returns `404` when no melding matches and `409 Conflict` with the list of matching full ids when the short id is ambiguous. Lookups are backed by a stored, indexed computed column so they remain fast as the table grows. The `IMeldingerClient` SDK exposes this via `GetMeldingByShortId`, which throws `MeldingShortIdCollisionException` on collisions.
+
 ## 1.4.0
 
 ### Added

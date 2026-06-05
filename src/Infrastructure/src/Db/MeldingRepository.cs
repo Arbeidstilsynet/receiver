@@ -48,6 +48,26 @@ internal class MeldingRepository : IMeldingRepository
         return null;
     }
 
+    public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
+        string shortId,
+        CancellationToken cancellationToken
+    )
+    {
+        using var activity = Tracer.Source.StartActivity();
+
+        // ShortId is a stored, indexed computed column holding the trailing 12 hex characters of the
+        // GUID. Postgres renders a uuid as a lowercase string, so we compare against the lowercased
+        // short id to keep the lookup case-insensitive while remaining index-sargable.
+        var normalizedShortId = shortId.ToLowerInvariant();
+
+        var entities = await _dbContext
+            .Meldinger.Include(m => m.Documents)
+            .Where(m => m.ShortId == normalizedShortId)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(e => _mapper.Map<Melding>(e)).ToList();
+    }
+
     public async Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1)
     {
         using var activity = Tracer.Source.StartActivity();

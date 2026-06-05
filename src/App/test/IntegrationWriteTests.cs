@@ -280,6 +280,58 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         postMeldingResponse?.MeldingId.ShouldNotBe(Guid.Empty);
     }
 
+    [Fact]
+    public async Task GetMeldingByShortId_MultipleMatches_ReturnsConflictWithMatchingIds()
+    {
+        // Arrange: two meldinger whose GUIDs share the same trailing 12 hex chars (short id).
+        const string sharedShortId = "abcabcabcabc";
+        var firstMeldingId = Guid.Parse($"11111111-1111-1111-1111-{sharedShortId}");
+        var secondMeldingId = Guid.Parse($"22222222-2222-2222-2222-{sharedShortId}");
+
+        await PostMeldingWithId(firstMeldingId);
+        await PostMeldingWithId(secondMeldingId);
+
+        // Act
+        var response = await _client.GetAsync(
+            $"/meldinger/by-short-id/{sharedShortId}",
+            TestContext.Current.CancellationToken
+        );
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        var conflict =
+            await response.Content.ReadFromJsonAsync<GetMeldingByShortIdConflictResponse>(
+                _jsonSerializerOptions,
+                cancellationToken: TestContext.Current.CancellationToken
+            );
+
+        conflict.ShouldNotBeNull();
+        conflict.MatchingMeldingIds.ShouldContain(firstMeldingId);
+        conflict.MatchingMeldingIds.ShouldContain(secondMeldingId);
+    }
+
+    private async Task PostMeldingWithId(Guid meldingId)
+    {
+        var body = CreatePostMeldingBody() with
+        {
+            MeldingId = meldingId,
+            MainContent = TestData.CreateFormFile(
+                "mainContent.txt",
+                "Hello World",
+                contentType: "text/plain"
+            ),
+        };
+
+        var response = await _client.PostAsync(
+            "/meldinger",
+            body.ToMultipartFormDataContent(),
+            TestContext.Current.CancellationToken
+        );
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
     private static PostMeldingBody CreatePostMeldingBody()
     {
         return TestData.CreatePostMeldingBodyFaker().Generate() with

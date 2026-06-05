@@ -8,6 +8,12 @@ internal class MeldingEntity : BaseEntity
 {
     public required Guid Id { get; set; }
 
+    /// <summary>
+    /// The trailing 12 hex characters of <see cref="Id"/> (the last GUID segment), used to look up
+    /// a melding by its short id. This is a database-computed, stored column - never set it in code.
+    /// </summary>
+    public string ShortId { get; private set; } = string.Empty;
+
     [Column(TypeName = "varchar(24)")]
     public required MessageSource Source { get; set; }
 

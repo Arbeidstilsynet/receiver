@@ -117,6 +117,50 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         result.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task GetMeldingerByShortId_WhenCalledWithExistingShortId_ReturnsMatchingMelding()
+    {
+        //arrange
+        var existingMelding = Seed.First();
+        var shortId = existingMelding.Id.ToString().Split('-').Last();
+        //act
+        var result = await _meldingRepository.GetMeldingerByShortId(
+            shortId,
+            TestContext.Current.CancellationToken
+        );
+        //assert
+        result.ShouldContain(m => m.Id == existingMelding.Id);
+    }
+
+    [Fact]
+    public async Task GetMeldingerByShortId_IsCaseInsensitive()
+    {
+        //arrange
+        var existingMelding = Seed.First();
+        var shortId = existingMelding.Id.ToString().Split('-').Last().ToUpperInvariant();
+        //act
+        var result = await _meldingRepository.GetMeldingerByShortId(
+            shortId,
+            TestContext.Current.CancellationToken
+        );
+        //assert
+        result.ShouldContain(m => m.Id == existingMelding.Id);
+    }
+
+    [Fact]
+    public async Task GetMeldingerByShortId_WhenCalledWithNonExistingShortId_ReturnsEmpty()
+    {
+        //arrange
+        var nonExistingShortId = Guid.NewGuid().ToString().Split('-').Last();
+        //act
+        var result = await _meldingRepository.GetMeldingerByShortId(
+            nonExistingShortId,
+            TestContext.Current.CancellationToken
+        );
+        //assert
+        result.ShouldBeEmpty();
+    }
+
     [Theory]
     [InlineData(1, 10, 5, 10)]
     [InlineData(2, 10, 5, 10)]
