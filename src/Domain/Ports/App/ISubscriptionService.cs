@@ -11,4 +11,6 @@ public interface ISubscriptionService
     public Task<int?> GetActiveAltinnSubscriptionId(string altinnAppId);
 
     public Task<bool> ShouldMeldingForAppIdBeIgnored(MessageSource messageSource, string appId);
+
+    public Task<bool> RetriggerAltinnValidation(int altinnSubscriptionId);
 }

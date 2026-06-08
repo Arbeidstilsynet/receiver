@@ -84,6 +84,31 @@ internal class SubscriptionService(
         return subscriptionsRepository.GetSubscriptions();
     }
 
+    public async Task<bool> RetriggerAltinnValidation(int altinnSubscriptionId)
+    {
+        var existing = await altinnService.GetAltinnRegistrationById(altinnSubscriptionId);
+        if (existing == null)
+            return false;
+
+        if (existing.Validated)
+            return true;
+
+        var altinnConnection = await subscriptionsRepository.GetAltinnConnectionByAltinnSubscriptionId(
+            altinnSubscriptionId
+        );
+        if (altinnConnection == null)
+            return false;
+
+        var newSubscription = await altinnService.RegisterAltinnApplication(
+            altinnConnection.AltinnAppId
+        );
+        await subscriptionsRepository.UpdateAltinnSubscriptionId(
+            altinnConnection.InternalId,
+            newSubscription.Id
+        );
+        return true;
+    }
+
     public async Task<bool> ShouldMeldingForAppIdBeIgnored(
         MessageSource messageSource,
         string appId
