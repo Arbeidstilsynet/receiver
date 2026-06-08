@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- feat: added Validated on the `AltinnEventSubscription`, which indicates that altin has successfully validated the subscription.
+- feat: added `Validated` on `AltinnEventsSubscription`, which indicates that Altinn has successfully validated the subscription.
 
 ## 1.5.0
 
