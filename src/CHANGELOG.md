@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.5.1
+
+### Added
+
+- feat: added `Validated` on `AltinnEventsSubscription`, which indicates that Altinn has successfully validated the subscription.
+- feat: add `POST /altinn/subscriptions/{id}/retrigger-altinn-validation` endpoint to re-trigger Altinn subscription validation. Checks current validation state first and only re-posts if not yet validated. Intended for operators to recover from transient Altinn infrastructure failures without requiring consumer app redeployment.
+
 ## 1.5.0
 
 ### Added

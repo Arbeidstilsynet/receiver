@@ -60,6 +60,13 @@ public class AltinnController(
             );
     }
 
+    [HttpPost("subscriptions/{id}/retrigger-altinn-validation")]
+    public async Task<ActionResult> RetriggerAltinnValidation([FromRoute] int id)
+    {
+        var found = await subscriptionService.RetriggerAltinnValidation(id);
+        return found ? Ok() : NotFound($"No Altinn subscription found with id '{id}'.");
+    }
+
     [HttpPost("start-recovery-job/{appId}")]
     public async Task<ActionResult<List<RecoveryJobResult>>> PostRecoveryRequest(
         [FromRoute] string? appId,

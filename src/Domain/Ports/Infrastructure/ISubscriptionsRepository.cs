@@ -24,5 +24,9 @@ public interface ISubscriptionsRepository
 
     public Task<AltinnConnection?> GetActiveAltinnSubscription(string altinnAppId);
 
+    public Task<AltinnConnection?> GetAltinnConnectionByAltinnSubscriptionId(
+        int altinnSubscriptionId
+    );
+
     public Task UpdateAltinnSubscriptionId(Guid altinnSubscriptionEntity, int subscriptionId);
 }

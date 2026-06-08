@@ -294,4 +294,152 @@ public class SubscriptionServiceTests
     }
 
     #endregion
+
+    #region RetriggerAltinnValidation Tests
+
+    [Fact]
+    public async Task RetriggerAltinnValidation_WhenAltinnSubscriptionNotFound_ReturnsFalse()
+    {
+        // Arrange
+        _altinnRegistrationService
+            .GetAltinnRegistrationById(99)
+            .Returns((AltinnEventsSubscription?)null);
+
+        // Act
+        var result = await _sut.RetriggerAltinnValidation(99);
+
+        // Assert
+        result.ShouldBeFalse();
+        await _altinnRegistrationService
+            .DidNotReceive()
+            .RegisterAltinnApplication(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task RetriggerAltinnValidation_WhenAlreadyValidated_ReturnsWithoutReregistering()
+    {
+        // Arrange
+        var validatedSubscription = new AltinnEventsSubscription
+        {
+            Id = 42,
+            CallbackUrl = "https://example.com",
+            SourceFilter = "",
+            CreatedBy = "",
+            Consumer = "",
+            Created = DateTime.UtcNow,
+            Validated = true,
+        };
+        _altinnRegistrationService.GetAltinnRegistrationById(42).Returns(validatedSubscription);
+
+        // Act
+        var result = await _sut.RetriggerAltinnValidation(42);
+
+        // Assert
+        result.ShouldBeTrue();
+        await _subscriptionRepository
+            .DidNotReceive()
+            .GetAltinnConnectionByAltinnSubscriptionId(Arg.Any<int>());
+        await _altinnRegistrationService
+            .DidNotReceive()
+            .RegisterAltinnApplication(Arg.Any<string>());
+        await _subscriptionRepository
+            .DidNotReceive()
+            .UpdateAltinnSubscriptionId(Arg.Any<Guid>(), Arg.Any<int>());
+    }
+
+    [Fact]
+    public async Task RetriggerAltinnValidation_WhenNotValidated_LooksUpConnectionAndReRegisters()
+    {
+        // Arrange
+        var connection = TestData.CreateAltinnConnection("app-1", subscriptionId: 42);
+        var unvalidatedSubscription = new AltinnEventsSubscription
+        {
+            Id = 42,
+            CallbackUrl = "https://example.com",
+            SourceFilter = "",
+            CreatedBy = "",
+            Consumer = "",
+            Created = DateTime.UtcNow,
+            Validated = false,
+        };
+
+        _altinnRegistrationService.GetAltinnRegistrationById(42).Returns(unvalidatedSubscription);
+        _subscriptionRepository.GetAltinnConnectionByAltinnSubscriptionId(42).Returns(connection);
+
+        // Act
+        var result = await _sut.RetriggerAltinnValidation(42);
+
+        // Assert
+        result.ShouldBeTrue();
+        await _altinnRegistrationService
+            .DidNotReceive()
+            .UnsubscribeAltinnApplication(Arg.Any<int>());
+        await _altinnRegistrationService.Received(1).RegisterAltinnApplication("app-1");
+        await _subscriptionRepository
+            .Received(1)
+            .UpdateAltinnSubscriptionId(connection.InternalId, Arg.Any<int>());
+    }
+
+    [Fact]
+    public async Task RetriggerAltinnValidation_WhenNotValidated_AndConnectionNotFoundLocally_ReturnsFalse()
+    {
+        // Arrange
+        var unvalidatedSubscription = new AltinnEventsSubscription
+        {
+            Id = 42,
+            CallbackUrl = "https://example.com",
+            SourceFilter = "",
+            CreatedBy = "",
+            Consumer = "",
+            Created = DateTime.UtcNow,
+            Validated = false,
+        };
+
+        _altinnRegistrationService.GetAltinnRegistrationById(42).Returns(unvalidatedSubscription);
+        _subscriptionRepository
+            .GetAltinnConnectionByAltinnSubscriptionId(42)
+            .Returns((AltinnConnection?)null);
+
+        // Act
+        var result = await _sut.RetriggerAltinnValidation(42);
+
+        // Assert
+        result.ShouldBeFalse();
+        await _altinnRegistrationService
+            .DidNotReceive()
+            .RegisterAltinnApplication(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task RetriggerAltinnValidation_DoesNotDeleteOrRecreateSubscription()
+    {
+        // Arrange
+        var connection = TestData.CreateAltinnConnection("app-1", subscriptionId: 99);
+        var unvalidatedSubscription = new AltinnEventsSubscription
+        {
+            Id = 99,
+            CallbackUrl = "https://example.com",
+            SourceFilter = "",
+            CreatedBy = "",
+            Consumer = "",
+            Created = DateTime.UtcNow,
+            Validated = false,
+        };
+
+        _altinnRegistrationService.GetAltinnRegistrationById(99).Returns(unvalidatedSubscription);
+        _subscriptionRepository.GetAltinnConnectionByAltinnSubscriptionId(99).Returns(connection);
+
+        // Act
+        await _sut.RetriggerAltinnValidation(99);
+
+        // Assert - internal subscription record must not be deleted or recreated
+        await _subscriptionRepository
+            .DidNotReceive()
+            .DeleteSubscription(Arg.Any<ConsumerManifest>());
+        await _subscriptionRepository
+            .DidNotReceive()
+            .CreateSubscription(Arg.Any<ConsumerManifest>());
+    }
+
+    #endregion
 }
