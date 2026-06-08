@@ -93,9 +93,10 @@ internal class SubscriptionService(
         if (existing.Validated)
             return true;
 
-        var altinnConnection = await subscriptionsRepository.GetAltinnConnectionByAltinnSubscriptionId(
-            altinnSubscriptionId
-        );
+        var altinnConnection =
+            await subscriptionsRepository.GetAltinnConnectionByAltinnSubscriptionId(
+                altinnSubscriptionId
+            );
         if (altinnConnection == null)
             return false;
 

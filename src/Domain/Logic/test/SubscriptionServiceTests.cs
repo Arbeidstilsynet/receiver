@@ -364,9 +364,7 @@ public class SubscriptionServiceTests
         };
 
         _altinnRegistrationService.GetAltinnRegistrationById(42).Returns(unvalidatedSubscription);
-        _subscriptionRepository
-            .GetAltinnConnectionByAltinnSubscriptionId(42)
-            .Returns(connection);
+        _subscriptionRepository.GetAltinnConnectionByAltinnSubscriptionId(42).Returns(connection);
 
         // Act
         var result = await _sut.RetriggerAltinnValidation(42);
@@ -429,9 +427,7 @@ public class SubscriptionServiceTests
         };
 
         _altinnRegistrationService.GetAltinnRegistrationById(99).Returns(unvalidatedSubscription);
-        _subscriptionRepository
-            .GetAltinnConnectionByAltinnSubscriptionId(99)
-            .Returns(connection);
+        _subscriptionRepository.GetAltinnConnectionByAltinnSubscriptionId(99).Returns(connection);
 
         // Act
         await _sut.RetriggerAltinnValidation(99);

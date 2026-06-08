@@ -76,9 +76,14 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
         return result == null ? null : mapper.Map<AltinnConnection>(result);
     }
 
-    public async Task<AltinnConnection?> GetAltinnConnectionByAltinnSubscriptionId(int altinnSubscriptionId)
+    public async Task<AltinnConnection?> GetAltinnConnectionByAltinnSubscriptionId(
+        int altinnSubscriptionId
+    )
     {
-        var result = await dbContext.AltinnApps.AsNoTracking().Where(w => w.SubscriptionId == altinnSubscriptionId).FirstOrDefaultAsync();
+        var result = await dbContext
+            .AltinnApps.AsNoTracking()
+            .Where(w => w.SubscriptionId == altinnSubscriptionId)
+            .FirstOrDefaultAsync();
         return result == null ? null : mapper.Map<AltinnConnection>(result);
     }
 
