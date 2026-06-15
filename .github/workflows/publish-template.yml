@@ -77,7 +77,17 @@ jobs:
             echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
           fi
 
-          cp --remove-destination "$(readlink types.d.ts)" types.d.ts
+          types_source="$(readlink types.d.ts || true)"
+          if [ -z "$types_source" ]; then
+            types_source="../generated/types.d.ts"
+          fi
+
+          if [ ! -f "$types_source" ]; then
+            echo "::error::Unable to materialize npm package types from types.d.ts symlink or ../generated/types.d.ts."
+            exit 1
+          fi
+
+          cp --remove-destination "$types_source" types.d.ts
           npm pkg set version="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           npm publish --access public --provenance --tag next
       - name: Docker meta
@@ -182,7 +192,17 @@ jobs:
             echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
           fi
 
-          cp --remove-destination "$(readlink types.d.ts)" types.d.ts
+          types_source="$(readlink types.d.ts || true)"
+          if [ -z "$types_source" ]; then
+            types_source="../generated/types.d.ts"
+          fi
+
+          if [ ! -f "$types_source" ]; then
+            echo "::error::Unable to materialize npm package types from types.d.ts symlink or ../generated/types.d.ts."
+            exit 1
+          fi
+
+          cp --remove-destination "$types_source" types.d.ts
           npm pkg set version="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           npm publish --access public --provenance
 
