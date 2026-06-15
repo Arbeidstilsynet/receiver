@@ -10,6 +10,8 @@
     }
   },
   "files": [
+    "LICENSE",
+    "README.md",
     "types.d.ts"
   ]
 }
