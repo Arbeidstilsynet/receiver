@@ -54,7 +54,7 @@ jobs:
 
       - name: Install TypeScript generation dependencies
         working-directory: ./src
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate types
         working-directory: ./src
