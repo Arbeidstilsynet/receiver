@@ -16,5 +16,12 @@
   "devDependencies": {
     "openapi-typescript": "7.10.1",
     "typescript": "6.0.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "typescript": "6.0.3"
+      }
+    }
   }
 }
