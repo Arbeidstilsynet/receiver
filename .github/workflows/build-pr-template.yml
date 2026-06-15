@@ -143,7 +143,6 @@ jobs:
     secrets: inherit
     permissions:
       id-token: write
-      actions: read
       contents: write
       packages: write
     with:
