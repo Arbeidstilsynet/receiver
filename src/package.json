@@ -1,0 +1,27 @@
+{
+  "name": "@meldinger-receiver/types",
+  "version": "0.0.0",
+  "private": true,
+  "types": "./generated/types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./generated/types.d.ts"
+    }
+  },
+  "scripts": {
+    "generate:openapi": "dotnet build Tools/Tools.GenerateOpenApi/Tools.GenerateOpenApi.csproj",
+    "generate:ts": "openapi-typescript generated/openApi.json -o generated/types.d.ts",
+    "generate:types": "pnpm generate:openapi && pnpm generate:ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.10.1",
+    "typescript": "6.0.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "typescript": "6.0.3"
+      }
+    }
+  }
+}

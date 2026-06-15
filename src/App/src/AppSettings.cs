@@ -8,13 +8,15 @@ namespace Arbeidstilsynet.MeldingerReceiver.App;
 internal record AppSettings
 {
     [ConfigurationKeyName("API")]
-    public ApiConfiguration ApiConfig { get; init; } = new();
+    [Required]
+    public required ApiConfiguration ApiConfig { get; init; }
 
     [Required]
     [ConfigurationKeyName("Infrastructure")]
     public required InfrastructureConfiguration InfrastructureConfig { get; init; }
 
     [ConfigurationKeyName("Domain")]
+    [Required]
     public required DomainConfiguration DomainConfig { get; init; }
 }
 
@@ -24,5 +26,6 @@ internal record ApiConfiguration
     public CorsConfiguration Cors { get; init; } = new();
 
     [ConfigurationKeyName("Authentication")]
-    public AuthConfiguration? AuthenticationConfiguration { get; init; }
+    [Required]
+    public required AuthConfiguration AuthenticationConfiguration { get; init; }
 }

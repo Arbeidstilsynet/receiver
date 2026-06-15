@@ -3,6 +3,9 @@
     <Project Path="App/src/App.csproj" />
     <Project Path="App/test/App.Test.csproj" />
   </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Tools/Tools.GenerateOpenApi/Tools.GenerateOpenApi.csproj" />
+  </Folder>
   <Folder Name="/Domain/">
     <Project Path="Domain/Data/Domain.Data.csproj" />
     <Project Path="Domain/Logic/src/Domain.Logic.csproj" />

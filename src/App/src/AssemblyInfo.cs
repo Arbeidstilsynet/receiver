@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("MeldingerReceiver.App.Test")]
+[assembly: InternalsVisibleTo("Tools.GenerateOpenApi")]
 
 namespace Arbeidstilsynet.MeldingerReceiver.App;
 
