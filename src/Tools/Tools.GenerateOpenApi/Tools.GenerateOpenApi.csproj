@@ -3,9 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
-    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\..\..\generated</OpenApiDocumentsDirectory>
-    <OpenApiGenerateDocumentsOptions>--document-name v1 --file-name openApi</OpenApiGenerateDocumentsOptions>
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/../../generated</OpenApiDocumentsDirectory>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
