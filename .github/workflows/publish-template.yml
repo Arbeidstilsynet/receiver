@@ -60,7 +60,6 @@ jobs:
 
       - name: Build and push (GHCR)
         if: steps.nuget_version_check.outputs.published == 'false'
-        id: ghcr_build_push
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
           context: ./src/
@@ -68,11 +67,26 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Resolve GHCR image digest
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: ghcr_image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ghcr_image="ghcr.io/arbeidstilsynet/receiver:${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          digest="$(docker buildx imagetools inspect "$ghcr_image" --format '{{.Manifest.Digest}}')"
+          if [ -z "$digest" ]; then
+            echo "::error::Could not resolve digest for $ghcr_image."
+            exit 1
+          fi
+          echo "image_ref=$ghcr_image@$digest" >> "$GITHUB_OUTPUT"
+
       - name: Generate SBOM and sign GHCR image
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: nais/attest-sign@2548fccb3e472f3f65d1cf0fe6e339c7675d3c55 # v2
         with:
-          image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.ghcr_build_push.outputs.digest }}
+          image_ref: ${{ steps.ghcr_image.outputs.image_ref }}
 
   publish_release:
     if: inputs.is-prerelease == false
@@ -135,7 +149,6 @@ jobs:
 
       - name: Push image to GHCR (from NAIS image)
         if: steps.nuget_version_check.outputs.published == 'false'
-        id: ghcr_image
         shell: bash
         run: |
           set -euo pipefail
@@ -154,6 +167,13 @@ jobs:
           done <<< '${{ steps.meta.outputs.tags }}'
 
           docker buildx imagetools create "${args[@]}" "$src_image"
+
+      - name: Resolve GHCR image digest
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: ghcr_image
+        shell: bash
+        run: |
+          set -euo pipefail
 
           ghcr_image="ghcr.io/arbeidstilsynet/receiver:${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           digest="$(docker buildx imagetools inspect "$ghcr_image" --format '{{.Manifest.Digest}}')"
