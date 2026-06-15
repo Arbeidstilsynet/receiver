@@ -31,6 +31,32 @@ jobs:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
+      - name: Setup Node.js
+        if: steps.nuget_version_check.outputs.published == 'false'
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Get npm package name
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: npm_metadata
+        working-directory: ./src/npm_publish
+        run: |
+          NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
+
+          echo "name=$NPM_PACKAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Check if npm package version exists
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: npm_version_check
+        run: |
+          if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}" version >/dev/null 2>&1; then
+            echo "published=true" >> $GITHUB_OUTPUT
+          else
+            echo "published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish package if not already published
         id: publish
         if: steps.nuget_version_check.outputs.published == 'false'
@@ -38,6 +64,22 @@ jobs:
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
+
+      - name: Publish npm package if not already published
+        if: steps.nuget_version_check.outputs.published == 'false' && steps.npm_version_check.outputs.published == 'false'
+        working-directory: ./src/npm_publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+          fi
+
+          cp --remove-destination "$(readlink types.d.ts)" types.d.ts
+          npm pkg set version="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          npm publish --access public --provenance --tag next
       - name: Docker meta
         if: steps.nuget_version_check.outputs.published == 'false'
         id: meta
@@ -94,6 +136,32 @@ jobs:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
+      - name: Setup Node.js
+        if: steps.nuget_version_check.outputs.published == 'false'
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Get npm package name
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: npm_metadata
+        working-directory: ./src/npm_publish
+        run: |
+          NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
+
+          echo "name=$NPM_PACKAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Check if npm package version exists
+        if: steps.nuget_version_check.outputs.published == 'false'
+        id: npm_version_check
+        run: |
+          if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}" version >/dev/null 2>&1; then
+            echo "published=true" >> $GITHUB_OUTPUT
+          else
+            echo "published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish package if not already published
         id: publish
         if: steps.nuget_version_check.outputs.published == 'false'
@@ -101,6 +169,22 @@ jobs:
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
+
+      - name: Publish npm package if not already published
+        if: steps.nuget_version_check.outputs.published == 'false' && steps.npm_version_check.outputs.published == 'false'
+        working-directory: ./src/npm_publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+          fi
+
+          cp --remove-destination "$(readlink types.d.ts)" types.d.ts
+          npm pkg set version="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          npm publish --access public --provenance
 
       - name: Docker meta
         if: steps.nuget_version_check.outputs.published == 'false'

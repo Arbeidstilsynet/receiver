@@ -1,0 +1,15 @@
+{
+  "name": "@arbeidstilsynet/receiver",
+  "version": "0.0.0",
+  "description": "TypeScript declarations for the receiver API",
+  "license": "MIT",
+  "types": "./types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types.d.ts"
+    }
+  },
+  "files": [
+    "types.d.ts"
+  ]
+}

@@ -195,7 +195,7 @@ This template includes automated TypeScript type generation from your OpenAPI sp
 
 ### Setup and Customization
 
-1. **NPM package name** is configured in [package.json](./package.json). Update the `name` field if the generated package should be published under a different name.
+1. **Type generation tooling** is configured in [package.json](./package.json).
 2. **Customize the OpenAPI specification** in [App/src/Extensions/StartupExtensions.cs](./App/src/Extensions/StartupExtensions.cs), where `ConfigureApi()` calls `ConfigureBasicOpenApiSpec(...)`.
 3. **Adjust TypeScript generation options** in [package.json](./package.json). Update the `generate:ts` script to customize [openapi-typescript](https://openapi-ts.dev/cli) behavior as needed.
 
@@ -212,6 +212,12 @@ This will:
 
 1. Generate the OpenAPI specification in `generated/openApi.json`
 2. Generate TypeScript type definitions in `generated/types.d.ts`
+
+### Publish TypeScript Types
+
+The publishable npm package root is [npm_publish](./npm_publish). It is published alongside receiver releases and uses the version from [Publish/Receiver.Publish/Receiver.Publish.csproj](./Publish/Receiver.Publish/Receiver.Publish.csproj), so the committed npm package version is only a placeholder and should not be bumped manually.
+
+Prerelease receiver versions (`*-*`) are published with the `next` npm tag. Stable receiver versions use npm's default tag.
 
 ### ⚠️ CI/CD Considerations
 
