@@ -32,14 +32,12 @@ jobs:
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Setup Node.js
-        if: steps.nuget_version_check.outputs.published == 'false'
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Get npm package name
-        if: steps.nuget_version_check.outputs.published == 'false'
         id: npm_metadata
         working-directory: ./src/npm_publish
         run: |
@@ -48,7 +46,6 @@ jobs:
           echo "name=$NPM_PACKAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: Check if npm package version exists
-        if: steps.nuget_version_check.outputs.published == 'false'
         id: npm_version_check
         run: |
           if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}" version >/dev/null 2>&1; then
@@ -66,7 +63,7 @@ jobs:
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Publish npm package if not already published
-        if: steps.nuget_version_check.outputs.published == 'false' && steps.npm_version_check.outputs.published == 'false'
+        if: steps.npm_version_check.outputs.published == 'false'
         working-directory: ./src/npm_publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -147,14 +144,12 @@ jobs:
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
 
       - name: Setup Node.js
-        if: steps.nuget_version_check.outputs.published == 'false'
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Get npm package name
-        if: steps.nuget_version_check.outputs.published == 'false'
         id: npm_metadata
         working-directory: ./src/npm_publish
         run: |
@@ -163,7 +158,6 @@ jobs:
           echo "name=$NPM_PACKAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: Check if npm package version exists
-        if: steps.nuget_version_check.outputs.published == 'false'
         id: npm_version_check
         run: |
           if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}" version >/dev/null 2>&1; then
@@ -181,7 +175,7 @@ jobs:
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Publish npm package if not already published
-        if: steps.nuget_version_check.outputs.published == 'false' && steps.npm_version_check.outputs.published == 'false'
+        if: steps.npm_version_check.outputs.published == 'false'
         working-directory: ./src/npm_publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

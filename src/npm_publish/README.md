@@ -101,4 +101,4 @@ contract (and updating this package) surfaces breaking changes the same way.
 
 ## License
 
-Internal Arbeidstilsynet package. See the repository for details.
+MIT. See [LICENSE](./LICENSE) for details.
