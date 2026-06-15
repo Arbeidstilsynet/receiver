@@ -44,7 +44,28 @@ jobs:
         with:
           working-directory: ./src/
 
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
 
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install TypeScript generation dependencies
+        working-directory: ./src
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate types
+        working-directory: ./src
+        run: pnpm generate:types
+
+      - name: Verify generated types are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- 'src/generated')" ]; then
+            echo "::error::Generated types are out of date. Run 'pnpm --dir src generate:types' locally and commit the result."
+            exit 1
+          fi
 
   check_publish_version:
     needs: [build_dotnet, check_changes]
