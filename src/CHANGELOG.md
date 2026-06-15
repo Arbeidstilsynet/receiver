@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.5.2
+
+### Changed
+
+- chore(ci): generate and sign SBOM attestations for Receiver images published to GHCR
 ## 1.5.1
 
 ### Added
