@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "description": "TypeScript declarations for the receiver API",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arbeidstilsynet/receiver.git",
+    "directory": "npm_publish"
+  },
   "types": "./types.d.ts",
   "exports": {
     ".": {
@@ -13,5 +18,9 @@
     "LICENSE",
     "README.md",
     "types.d.ts"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  }
 }
