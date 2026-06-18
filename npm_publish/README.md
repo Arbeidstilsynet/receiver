@@ -1,4 +1,4 @@
-# @arbeidstilsynet/receiver
+# @arbeidstilsynet/receiver-types
 
 TypeScript types for the Arbeidstilsynet **receiver** API, generated from its
 OpenAPI specification. This package ships **types only** - there is no runtime
@@ -11,9 +11,9 @@ bodies and responses are all checked against the live API contract.
 ## Installation
 
 ```sh
-npm install @arbeidstilsynet/receiver openapi-fetch
+npm install @arbeidstilsynet/receiver-types openapi-fetch
 # or
-pnpm add @arbeidstilsynet/receiver openapi-fetch
+pnpm add @arbeidstilsynet/receiver-types openapi-fetch
 ```
 
 > The package is published alongside receiver releases and uses the receiver
@@ -31,7 +31,7 @@ The generated module exposes the standard `openapi-typescript` shapes:
 
 ```ts
 import createClient from "openapi-fetch";
-import type { paths } from "@arbeidstilsynet/receiver";
+import type { paths } from "@arbeidstilsynet/receiver-types";
 
 export const client = createClient<paths>({
   baseUrl: "/api/receiver",
@@ -43,7 +43,7 @@ export const client = createClient<paths>({
 Alias the schemas you use so they read nicely in your code:
 
 ```ts
-import type { components } from "@arbeidstilsynet/receiver";
+import type { components } from "@arbeidstilsynet/receiver-types";
 
 export type Melding = components["schemas"]["Melding"];
 export type ConsumerManifest = components["schemas"]["ConsumerManifest"];
@@ -78,7 +78,7 @@ console.log(data?.items);
 The subscriptions endpoint exposes registered receiver consumers:
 
 ```ts
-import type { components } from "@arbeidstilsynet/receiver";
+import type { components } from "@arbeidstilsynet/receiver-types";
 
 type ConsumerManifest = components["schemas"]["ConsumerManifest"];
 

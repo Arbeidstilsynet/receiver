@@ -1,0 +1,7 @@
+minimumReleaseAge: 4320
+
+trustPolicy: no-downgrade
+
+peerDependencyRules:
+  allowedVersions:
+    typescript: 6.0.3

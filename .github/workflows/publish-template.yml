@@ -34,7 +34,6 @@ jobs:
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
 
       - name: Get npm package name
         id: npm_metadata
@@ -64,14 +63,8 @@ jobs:
       - name: Publish npm package if not already published
         if: steps.npm_version_check.outputs.published == 'false'
         working-directory: ./npm_publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
-
-          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
-            echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          fi
 
           types_source="$(readlink types.d.ts || true)"
           if [ -z "$types_source" ]; then
