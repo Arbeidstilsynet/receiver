@@ -6,12 +6,9 @@ on:
 jobs:
   build_receiver:
     uses: ./.github/workflows/build-pr-template.yml
-    secrets: inherit
     permissions:
-      contents: write
+      contents: read
       actions: read
-      packages: write
-      id-token: write
   fail_if_prerelease:
     needs: [build_receiver]
     if: ${{ needs.build_receiver.outputs.is-prerelease == 'true' }}

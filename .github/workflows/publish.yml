@@ -14,12 +14,9 @@ jobs:
     name: Check PR publish version
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/build-pr-template.yml
-    secrets: inherit
     permissions:
-      contents: write
+      contents: read
       actions: read
-      packages: write
-      id-token: write
 
   publish_prerelease_when_changed:
     name: Publish prerelease if changed
