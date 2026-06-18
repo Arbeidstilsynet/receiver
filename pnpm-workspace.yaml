@@ -5,3 +5,9 @@ trustPolicy: no-downgrade
 peerDependencyRules:
   allowedVersions:
     typescript: 6.0.3
+
+overrides:
+  js-yaml@<=4.1.1: ^4.1.2
+
+minimumReleaseAgeExclude:
+  - js-yaml@4.1.2
