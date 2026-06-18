@@ -111,9 +111,14 @@ jobs:
         run: |
           VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           FOUND="${{ steps.nuget_version_check.outputs.last_version }}"
+          IS_PRERELEASE="${{ steps.prerelease_check.outputs.is_prerelease }}"
           if [ "${{steps.nuget_version_check.outputs.published }}" = "true" ]; then
-            echo "❌ You did not increase the version number. When you have a code changes, it is required that you increase the version number. This version ($VERSION) is the same as the last published version."
-            exit 1
+            if [ "$IS_PRERELEASE" = "true" ]; then
+              echo "ℹ️ NuGet version $VERSION is already published. Continuing so npm publish can retry for this prerelease."
+            else
+              echo "❌ You did not increase the version number. When you have code changes, it is required that you increase the version number. This version ($VERSION) is the same as the last published version."
+              exit 1
+            fi
           else
             echo "✅ You increased the version number. The last published version was '$FOUND'. The new version $VERSION is going to be published when merging into main."
           fi
