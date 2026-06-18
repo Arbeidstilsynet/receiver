@@ -59,17 +59,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-build@0a55503485ec99ea192916a1804ddb7d91242bfe # v4
         with:
           working-directory: ./
-
-      - name: Setup Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: 24
-
-      - name: Enable pnpm
-        run: corepack enable
-
-      - name: Install TypeScript generation dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: Arbeidstilsynet/action-pnpm-setup@618fbc6ee30a13d077086cafba92b4e6cdca0f78 # v1
 
       - name: Generate types
         run: pnpm generate:types
