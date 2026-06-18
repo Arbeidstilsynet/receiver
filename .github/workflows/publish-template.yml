@@ -65,8 +65,6 @@ jobs:
       - name: Publish npm package if not already published
         if: steps.npm_version_check.outputs.published == 'false'
         working-directory: ./npm_publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
