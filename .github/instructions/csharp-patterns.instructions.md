@@ -1,14 +1,14 @@
 ---
 description: "Use when writing or modifying C# in the receiver service: adding a feature slice (port → domain service → infrastructure adapter → controller), DI registration and Configuration types, Mapster mapping, FluentValidation, EF Core entities/migrations, observability (Tracer/ApiMeters/logging), or ArchUnit and fixture-based tests."
 name: "Receiver C# patterns"
-applyTo: "src/**/*.cs"
+applyTo: "{App,ArchUnit.Tests,Domain,Infrastructure,Publish,Tools}/**/*.cs"
 ---
 
 # Receiver C# patterns
 
 This is a hexagonal (ports & adapters) .NET service. Namespace prefix:
 `Arbeidstilsynet.MeldingerReceiver`. Implementations are `internal` and exposed only via DI
-extensions. **ArchUnit.Tests enforce these rules — run `dotnet test` (from `src/`) after changes.**
+extensions. **ArchUnit.Tests enforce these rules — run `dotnet test` from the repository root after changes.**
 
 Layer rules:
 
@@ -99,7 +99,7 @@ registered with FluentValidation. Map exceptions to status codes via `AddExcepti
 
 - `ReceiverDbContext` is in `Infrastructure/src/Db`; entities in `Db/Model` derive from `BaseEntity`.
 - Migrations history table is `ef_migrations_history`. After changing the model, add a migration
-  (from `src/`):
+  from the repository root:
   ```sh
   dotnet ef migrations add <DescriptiveName> --startup-project App/src --project Infrastructure/src -o Db/Migrations
   ```

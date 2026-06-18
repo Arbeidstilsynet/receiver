@@ -6,6 +6,12 @@ on:
       changes-detected:
         description: "Whether changes were detected in the package path"
         value: ${{ jobs.check_changes.outputs.backend }}
+      is-prerelease:
+        description: "Whether the publish version is a prerelease"
+        value: ${{ jobs.check_publish_version.outputs.is-prerelease }}
+      publish-version:
+        description: "The version read from the publish project"
+        value: ${{ jobs.check_publish_version.outputs.publish-version }}
 
 jobs:
 
@@ -28,9 +34,25 @@ jobs:
         with:
           base-ref: origin/main
           include: |
-            ./src
+            ./.config
+            ./.dockerignore
+            ./App
+            ./ArchUnit.Tests
+            ./Domain
+            ./Dockerfile
+            ./generated
+            ./Infrastructure
+            ./MeldingerReceiver.slnx
+            ./nuget.config
+            ./npm_publish
+            ./package.json
+            ./pnpm-lock.yaml
+            ./Publish
+            ./Tools
+            ./CHANGELOG.md
+            ./README.md
           exclude: |
-            ./src/compose**.yaml
+            ./compose**.yaml
 
   build_dotnet:
     needs: [check_changes]
@@ -42,9 +64,18 @@ jobs:
       - name: Build and Test .NET solution
         uses: Arbeidstilsynet/action-dotnet-build@0a55503485ec99ea192916a1804ddb7d91242bfe # v4
         with:
-          working-directory: ./src/
+          working-directory: ./
+      - uses: Arbeidstilsynet/action-pnpm-setup@618fbc6ee30a13d077086cafba92b4e6cdca0f78 # v1
 
+      - name: Generate types
+        run: pnpm generate:types
 
+      - name: Verify generated types are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- 'generated')" ]; then
+            echo "::error::Generated types are out of date. Run 'pnpm generate:types' locally and commit the result."
+            exit 1
+          fi
 
   check_publish_version:
     needs: [build_dotnet, check_changes]
@@ -63,7 +94,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./src/Publish/Receiver.Publish
+          working-directory: ./Publish/Receiver.Publish
       - name: Check if version is prerelease
         id: prerelease_check
         run: |
@@ -79,16 +110,21 @@ jobs:
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
-          config-file: ./src/nuget.config
+          config-file: ./nuget.config
       - name: Check if package version was updated
         if: needs.check_changes.outputs.backend == 'true'
         id: get_version
         run: |
           VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           FOUND="${{ steps.nuget_version_check.outputs.last_version }}"
+          IS_PRERELEASE="${{ steps.prerelease_check.outputs.is_prerelease }}"
           if [ "${{steps.nuget_version_check.outputs.published }}" = "true" ]; then
-            echo "❌ You did not increase the version number. When you have a code changes, it is required that you increase the version number. This version ($VERSION) is the same as the last published version."
-            exit 1
+            if [ "$IS_PRERELEASE" = "true" ]; then
+              echo "ℹ️ NuGet version $VERSION is already published. Continuing so npm publish can retry for this prerelease."
+            else
+              echo "❌ You did not increase the version number. When you have code changes, it is required that you increase the version number. This version ($VERSION) is the same as the last published version."
+              exit 1
+            fi
           else
             echo "✅ You increased the version number. The last published version was '$FOUND'. The new version $VERSION is going to be published when merging into main."
           fi
@@ -135,30 +171,6 @@ jobs:
             echo "✅ This appears to be the first $VERSION_TYPE version of this package"
           fi
 
-  publish:
-    needs: [check_changes, check_publish_version]
-    name: Publish prerelease or new receiver version
-    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
-    uses: ./.github/workflows/publish-template.yml
-    secrets: inherit
-    permissions:
-      id-token: write
-      contents: write
-      packages: write
-    with:
-      is-prerelease: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
-
-  fail_if_prerelease:
-    needs: [check_publish_version, publish]
-    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fail if version is prerelease
-        run: |
-          echo "✅ Prerelease package was published successfully."
-          echo "❌ This branch cannot be merged until the prerelease version is removed from the .csproj file."
-          exit 1
-  
   fail_if_changelog_missing:
     needs: [check_publish_version]
     if: ${{ needs.check_publish_version.outputs.is-prerelease == 'false' }}
@@ -168,7 +180,6 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Fail if changelog is missing
-        working-directory: ./src/
         run: |
           if [ -f CHANGELOG.md ]; then
             echo "Changelog found."

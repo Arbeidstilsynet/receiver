@@ -6,14 +6,21 @@ on:
 jobs:
   build_receiver:
     uses: ./.github/workflows/build-pr-template.yml
-    secrets: inherit
     permissions:
-      contents: write
+      contents: read
       actions: read
-      packages: write
-      id-token: write
-  check:
+  fail_if_prerelease:
     needs: [build_receiver]
+    if: ${{ needs.build_receiver.outputs.is-prerelease == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if version is prerelease
+        run: |
+          echo "✅ Prerelease package is handled by publish.yml."
+          echo "❌ This branch cannot be merged until the prerelease version is removed from the .csproj file."
+          exit 1
+  check:
+    needs: [build_receiver, fail_if_prerelease]
     runs-on: ubuntu-latest
     if: always()
     timeout-minutes: 10
@@ -21,9 +28,10 @@ jobs:
       - name: Evaluate results
         run: |
           echo "Build Receiver: ${{ needs.build_receiver.result }}"
+          echo "Prerelease Gate: ${{ needs.fail_if_prerelease.result }}"
 
           # Pass if all succeeded
-          if [[ "${{ needs.build_receiver.result }}" == "success" ]]; then
+          if [[ "${{ needs.build_receiver.result }}" == "success" && "${{ needs.fail_if_prerelease.result }}" == "skipped" ]]; then
             echo "✅ All checks passed"
             exit 0
           fi

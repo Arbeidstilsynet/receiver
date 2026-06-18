@@ -3,16 +3,37 @@ name: Publish changed packages
 on:
   push:
     branches: [main]
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
-  publish_when_changed:
-    name: Publish if changed
+  check_pr_publish_version:
+    name: Check PR publish version
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/build-pr-template.yml
+    permissions:
+      contents: read
+      actions: read
+
+  publish_prerelease_when_changed:
+    name: Publish prerelease if changed
+    needs: [check_pr_publish_version]
+    if: ${{ github.event_name == 'pull_request' && needs.check_pr_publish_version.outputs.is-prerelease == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: ./.github/workflows/publish-template.yml
-    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+    with:
+      is-prerelease: true
+
+  publish_release_when_changed:
+    name: Publish release if changed
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/publish-template.yml
     permissions:
       id-token: write
       contents: write

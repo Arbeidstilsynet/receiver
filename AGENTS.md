@@ -6,4 +6,4 @@ overview, build/test commands, architecture, and conventions.
 
 Detailed C# coding patterns are in
 [`.github/instructions/csharp-patterns.instructions.md`](.github/instructions/csharp-patterns.instructions.md),
-auto-applied when editing `src/**/*.cs`.
+auto-applied when editing receiver C# files.

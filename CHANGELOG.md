@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.6.0
+
+### Added
+
+- ci: Added npm package based on open api typescript definitions. This package is published to npmjs.com as `@arbeidstilsynet/receiver-types` and can be used by consumer applications to get type safe access to the API. The package is automatically published on new releases via the publish workflow.
+
+### Added
+
+- docs: describe npm type package publishing and csproj-driven versioning
+
 ## 1.5.2
 
 ### Changed
