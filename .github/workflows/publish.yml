@@ -23,7 +23,6 @@ jobs:
     needs: [check_pr_publish_version]
     if: ${{ github.event_name == 'pull_request' && needs.check_pr_publish_version.outputs.is-prerelease == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: ./.github/workflows/publish-template.yml
-    secrets: inherit
     permissions:
       id-token: write
       contents: write
@@ -35,7 +34,6 @@ jobs:
     name: Publish release if changed
     if: ${{ github.event_name == 'push' }}
     uses: ./.github/workflows/publish-template.yml
-    secrets: inherit
     permissions:
       id-token: write
       contents: write
