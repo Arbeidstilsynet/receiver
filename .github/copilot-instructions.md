@@ -7,17 +7,17 @@ Norwegian on purpose (e.g. `Melding`, `Subscription`, `ConsumerManifest`).
 
 > The detailed coding patterns for this repo live in
 > [`.github/instructions/csharp-patterns.instructions.md`](instructions/csharp-patterns.instructions.md)
-> and are auto-applied when editing `src/**/*.cs`.
+> and are auto-applied when editing receiver C# files.
 
 ## Documentation map
 
-- [README](../README.md) → [src/README.md](../src/README.md) — getting started, project structure, logging, observability
+- [README](../README.md) — getting started, project structure, logging, observability
 - [documentation/architecture.md](../documentation/architecture.md) — how the publisher/consumer flow works
 - [documentation/configuration.md](../documentation/configuration.md) — environment variables and deployment
 
 ## Build, run and test
 
-Run all commands from the `src/` directory (solution: `src/MeldingerReceiver.slnx`).
+Run all commands from the repository root (solution: `MeldingerReceiver.slnx`).
 
 ```sh
 # Start infra (postgres, valkey, GCS emulator); add --profile monitoring for telemetry
@@ -35,8 +35,8 @@ dotnet csharpier format .
 dotnet csharpier check .
 ```
 
-- **SDK: .NET 10** (`global.json` is the source of truth — note `src/README.md` still says v8, which is stale). Test runner is `Microsoft.Testing.Platform`.
-- EF Core migrations (run from `src/`):
+- **SDK: .NET 10** (`global.json` is the source of truth). Test runner is `Microsoft.Testing.Platform`.
+- EF Core migrations (run from the repository root):
   ```sh
   dotnet ef migrations add <Name> --startup-project App/src --project Infrastructure/src -o Db/Migrations
   ```

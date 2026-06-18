@@ -21,7 +21,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./src/Publish/Receiver.Publish
+          working-directory: ./Publish/Receiver.Publish
 
       - name: Check if package version exists
         id: nuget_version_check
@@ -38,7 +38,7 @@ jobs:
 
       - name: Get npm package name
         id: npm_metadata
-        working-directory: ./src/npm_publish
+        working-directory: ./npm_publish
         run: |
           NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
 
@@ -58,12 +58,12 @@ jobs:
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@74f56a48df6466a1b1986cd298a71ed8a94311b6 # v3
         with:
-          working-directory: ./src/Publish/Receiver.Publish
+          working-directory: ./Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Publish npm package if not already published
         if: steps.npm_version_check.outputs.published == 'false'
-        working-directory: ./src/npm_publish
+        working-directory: ./npm_publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -117,7 +117,7 @@ jobs:
         id: ghcr_build_push
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
-          context: ./src/
+          context: ./
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -128,8 +128,8 @@ jobs:
         uses: nais/docker-build-push@05dbb6091b30bd84279c6d64a45ef8782fd410a5 # v0
         with:
           team: meldinger
-          docker_context: ./src/
-          dockerfile: ./src/Dockerfile
+          docker_context: ./
+          dockerfile: ./Dockerfile
           tag: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
           salsa: true
 
@@ -169,7 +169,6 @@ jobs:
       - name: Extract changelog section for current version
         if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
         id: changelog
-        working-directory: ./src/
         run: |
           VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
           if [ -f CHANGELOG.md ]; then

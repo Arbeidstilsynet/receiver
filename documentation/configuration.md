@@ -25,11 +25,11 @@
 
 ## Run with docker compose
 
-Use the compose files `compose.yaml` and `compose-infra.yaml` provided in [/src](./../src/).
+Use the compose files `compose.yaml` and `compose.infra.yaml` provided in the repository root.
 The `compose.yaml` contains the receiver app and the described configuration above.
 
 ```terminal
-docker compose -f compose-infra.yaml up -d
+docker compose -f compose.infra.yaml up -d
 ```
 
 > For the docker setup, we use the receiver image pushed to ghcr, which also includes prerelease versions. All available versions can be found [here](https://github.com/Arbeidstilsynet/receiver/pkgs/container/receiver).

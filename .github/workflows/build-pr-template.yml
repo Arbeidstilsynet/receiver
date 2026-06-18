@@ -28,9 +28,25 @@ jobs:
         with:
           base-ref: origin/main
           include: |
-            ./src
+            ./.config
+            ./.dockerignore
+            ./App
+            ./ArchUnit.Tests
+            ./Domain
+            ./Dockerfile
+            ./generated
+            ./Infrastructure
+            ./MeldingerReceiver.slnx
+            ./nuget.config
+            ./npm_publish
+            ./package.json
+            ./pnpm-lock.yaml
+            ./Publish
+            ./Tools
+            ./CHANGELOG.md
+            ./README.md
           exclude: |
-            ./src/compose**.yaml
+            ./compose**.yaml
 
   build_dotnet:
     needs: [check_changes]
@@ -42,7 +58,7 @@ jobs:
       - name: Build and Test .NET solution
         uses: Arbeidstilsynet/action-dotnet-build@0a55503485ec99ea192916a1804ddb7d91242bfe # v4
         with:
-          working-directory: ./src/
+          working-directory: ./
 
       - name: Setup Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
@@ -53,17 +69,15 @@ jobs:
         run: corepack enable
 
       - name: Install TypeScript generation dependencies
-        working-directory: ./src
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate types
-        working-directory: ./src
         run: pnpm generate:types
 
       - name: Verify generated types are up to date
         run: |
-          if [ -n "$(git status --porcelain -- 'src/generated')" ]; then
-            echo "::error::Generated types are out of date. Run 'pnpm --dir src generate:types' locally and commit the result."
+          if [ -n "$(git status --porcelain -- 'generated')" ]; then
+            echo "::error::Generated types are out of date. Run 'pnpm generate:types' locally and commit the result."
             exit 1
           fi
 
@@ -84,7 +98,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./src/Publish/Receiver.Publish
+          working-directory: ./Publish/Receiver.Publish
       - name: Check if version is prerelease
         id: prerelease_check
         run: |
@@ -100,7 +114,7 @@ jobs:
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
-          config-file: ./src/nuget.config
+          config-file: ./nuget.config
       - name: Check if package version was updated
         if: needs.check_changes.outputs.backend == 'true'
         id: get_version
@@ -189,7 +203,6 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Fail if changelog is missing
-        working-directory: ./src/
         run: |
           if [ -f CHANGELOG.md ]; then
             echo "Changelog found."

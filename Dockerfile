@@ -8,6 +8,7 @@ ENV NUGET_XMLDOC_MODE=skip
 
 COPY MeldingerReceiver.slnx .
 COPY nuget.config .
+COPY global.json .
 
 # Copy project files first to maximize Docker layer caching for restore.
 COPY App/src/App.csproj ./App/src/
