@@ -6,6 +6,12 @@ on:
       changes-detected:
         description: "Whether changes were detected in the package path"
         value: ${{ jobs.check_changes.outputs.backend }}
+      is-prerelease:
+        description: "Whether the publish version is a prerelease"
+        value: ${{ jobs.check_publish_version.outputs.is-prerelease }}
+      publish-version:
+        description: "The version read from the publish project"
+        value: ${{ jobs.check_publish_version.outputs.publish-version }}
 
 jobs:
 
@@ -165,30 +171,6 @@ jobs:
             echo "✅ This appears to be the first $VERSION_TYPE version of this package"
           fi
 
-  publish:
-    needs: [check_changes, check_publish_version]
-    name: Publish prerelease or new receiver version
-    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
-    uses: ./.github/workflows/publish-template.yml
-    secrets: inherit
-    permissions:
-      id-token: write
-      contents: write
-      packages: write
-    with:
-      is-prerelease: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
-
-  fail_if_prerelease:
-    needs: [check_publish_version, publish]
-    if: ${{ needs.check_publish_version.outputs.is-prerelease == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fail if version is prerelease
-        run: |
-          echo "✅ Prerelease package was published successfully."
-          echo "❌ This branch cannot be merged until the prerelease version is removed from the .csproj file."
-          exit 1
-  
   fail_if_changelog_missing:
     needs: [check_publish_version]
     if: ${{ needs.check_publish_version.outputs.is-prerelease == 'false' }}
