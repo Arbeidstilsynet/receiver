@@ -1,4 +1,6 @@
+using System.Net;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
@@ -32,12 +34,89 @@ public class AltinnController(
         );
     }
 
+    [HttpGet("instances/not-process-complete")]
+    public async Task<
+        ActionResult<NotProcessCompleteInstancesResult[]>
+    > GetAllNotProcessCompleteInstances()
+    {
+        var instancesByApp =
+            await altinnRecoveryService.GetAllNonCompletedInstancesForRegisteredApps();
+
+        return Ok(
+            instancesByApp
+                .Select(appInstances => new NotProcessCompleteInstancesResult
+                {
+                    AppId = appInstances.Key,
+                    Instances = appInstances
+                        .Value.Select(instance => instance.ToResponse(Url, appInstances.Key))
+                        .ToList(),
+                })
+                .ToArray()
+        );
+    }
+
     [HttpGet("non-completed-instances/{appId}")]
     public async Task<ActionResult<IEnumerable<AltinnMetadata>>> GetAllNonCompletedInstances(
         [FromRoute] string appId
     )
     {
         return Ok(await altinnRecoveryService.GetMetadataForNonCompletedInstancesByAppId(appId));
+    }
+
+    [HttpGet("instances/not-process-complete/{appId}")]
+    public async Task<
+        ActionResult<IReadOnlyList<AltinnInstanceSummaryResponse>>
+    > GetNotProcessCompleteInstances([FromRoute] string appId)
+    {
+        var instances = await altinnRecoveryService.GetNonCompletedInstancesByAppId(appId);
+        if (instances == null)
+            return NotFound();
+
+        return Ok(instances.Select(instance => instance.ToResponse(Url, appId)).ToList());
+    }
+
+    [HttpGet("instances/not-process-complete/{appId}/{instanceGuid:guid}")]
+    public async Task<ActionResult<AltinnInstanceSummaryResponse>> GetNotProcessCompleteInstance(
+        [FromRoute] string appId,
+        [FromRoute] Guid instanceGuid
+    )
+    {
+        var instance = await altinnRecoveryService.GetNonCompletedInstanceByAppId(
+            appId,
+            instanceGuid
+        );
+        if (instance == null)
+            return NotFound();
+
+        return Ok(instance.ToResponse(Url, appId));
+    }
+
+    [HttpGet(
+        "instances/not-process-complete/{appId}/{instanceGuid:guid}/documents/{documentId:guid}/download"
+    )]
+    public async Task<IActionResult> DownloadNotProcessCompleteInstanceDocument(
+        [FromRoute] string appId,
+        [FromRoute] Guid instanceGuid,
+        [FromRoute] Guid documentId
+    )
+    {
+        var document = await altinnRecoveryService.GetDocumentForNonCompletedInstance(
+            appId,
+            instanceGuid,
+            documentId
+        );
+
+        if (document == null)
+            return NotFound();
+
+        if (document.DocumentContent.CanSeek)
+        {
+            document.DocumentContent.Position = 0;
+        }
+
+        var contentType = document.FileMetadata.ContentType ?? "application/octet-stream";
+        var fileName = document.FileMetadata.Filename ?? documentId.ToString();
+        return File(document.DocumentContent, contentType, WebUtility.UrlEncode(fileName));
     }
 
     [HttpGet("subscriptions/{appId}")]
@@ -116,4 +195,84 @@ public record NonCompletedInstancesResult
     public required string AppId { get; init; }
 
     public required IEnumerable<AltinnMetadata> NonCompletedInstances { get; init; }
+}
+
+public record NotProcessCompleteInstancesResult
+{
+    public required string AppId { get; init; }
+    public required IReadOnlyList<AltinnInstanceSummaryResponse> Instances { get; init; }
+}
+
+public record AltinnInstanceSummaryResponse
+{
+    public required AltinnMetadata Metadata { get; init; }
+    public required AltinnDocumentResponse SkjemaAsPdf { get; init; }
+    public AltinnDocumentResponse? StructuredData { get; init; }
+    public required IReadOnlyList<AltinnDocumentResponse> Attachments { get; init; }
+}
+
+public record AltinnDocumentResponse
+{
+    public required Guid AltinnId { get; init; }
+    public string? AltinnDataType { get; init; }
+    public FileScanResult? FileScanResult { get; init; }
+    public string? ContentType { get; init; }
+    public string? Filename { get; init; }
+    public string? DownloadUrl { get; init; }
+}
+
+file static class AltinnInstanceSummaryResponseExtensions
+{
+    public static AltinnInstanceSummaryResponse ToResponse(
+        this AltinnInstanceSummary instance,
+        IUrlHelper url,
+        string appId
+    )
+    {
+        return new AltinnInstanceSummaryResponse
+        {
+            Metadata = instance.Metadata,
+            SkjemaAsPdf = instance.SkjemaAsPdf.ToResponse(
+                url,
+                appId,
+                instance.Metadata.InstanceGuid
+            ),
+            StructuredData = instance.StructuredData?.ToResponse(
+                url,
+                appId,
+                instance.Metadata.InstanceGuid
+            ),
+            Attachments = instance
+                .Attachments.Select(attachment =>
+                    attachment.ToResponse(url, appId, instance.Metadata.InstanceGuid)
+                )
+                .ToList(),
+        };
+    }
+
+    private static AltinnDocumentResponse ToResponse(
+        this AltinnDocument document,
+        IUrlHelper url,
+        string appId,
+        Guid instanceGuid
+    )
+    {
+        return new AltinnDocumentResponse
+        {
+            AltinnId = document.FileMetadata.AltinnId,
+            AltinnDataType = document.FileMetadata.AltinnDataType,
+            FileScanResult = document.FileMetadata.FileScanResult,
+            ContentType = document.FileMetadata.ContentType,
+            Filename = document.FileMetadata.Filename,
+            DownloadUrl = url.Action(
+                nameof(AltinnController.DownloadNotProcessCompleteInstanceDocument),
+                new
+                {
+                    appId,
+                    instanceGuid,
+                    documentId = document.FileMetadata.AltinnId,
+                }
+            ),
+        };
+    }
 }

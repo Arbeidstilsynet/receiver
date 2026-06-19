@@ -24,6 +24,29 @@ internal class AltinnRecoveryService(
         return nonCompletedInstances;
     }
 
+    public async Task<AltinnInstanceSummary?> GetNonCompletedInstanceByAppId(
+        string appId,
+        Guid instanceGuid
+    )
+    {
+        var nonCompletedInstances = await GetNonCompletedInstancesByAppId(appId);
+        return nonCompletedInstances?.FirstOrDefault(instance =>
+            instance.Metadata.InstanceGuid == instanceGuid
+        );
+    }
+
+    public async Task<AltinnDocument?> GetDocumentForNonCompletedInstance(
+        string appId,
+        Guid instanceGuid,
+        Guid documentId
+    )
+    {
+        var instance = await GetNonCompletedInstanceByAppId(appId, instanceGuid);
+        return instance
+            ?.GetDocuments()
+            .FirstOrDefault(document => document.FileMetadata.AltinnId == documentId);
+    }
+
     public Task<
         Dictionary<string, IEnumerable<AltinnInstanceSummary>>
     > GetAllNonCompletedInstancesForRegisteredApps()
@@ -87,5 +110,23 @@ internal class AltinnRecoveryService(
             allNonCompletedInstances.Add(registeredApp.AltinnAppId, nonCompletedInstances);
         }
         return allNonCompletedInstances;
+    }
+}
+
+file static class AltinnInstanceSummaryExtensions
+{
+    public static IEnumerable<AltinnDocument> GetDocuments(this AltinnInstanceSummary instance)
+    {
+        yield return instance.SkjemaAsPdf;
+
+        if (instance.StructuredData is { } structuredData)
+        {
+            yield return structuredData;
+        }
+
+        foreach (var attachment in instance.Attachments)
+        {
+            yield return attachment;
+        }
     }
 }

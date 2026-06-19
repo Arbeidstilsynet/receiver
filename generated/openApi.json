@@ -44,6 +44,44 @@
         }
       }
     },
+    "/altinn/instances/not-process-complete": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotProcessCompleteInstancesResult"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotProcessCompleteInstancesResult"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotProcessCompleteInstancesResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/altinn/non-completed-instances/{appId}": {
       "get": {
         "tags": [
@@ -88,6 +126,142 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/altinn/instances/not-process-complete/{appId}": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/altinn/instances/not-process-complete/{appId}/{instanceGuid}": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instanceGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/altinn/instances/not-process-complete/{appId}/{instanceGuid}/documents/{documentId}/download": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instanceGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -758,6 +932,52 @@
           }
         }
       },
+      "AltinnDocumentResponse": {
+        "required": [
+          "altinnId"
+        ],
+        "type": "object",
+        "properties": {
+          "altinnId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "altinnDataType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fileScanResult": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FileScanResult"
+              }
+            ]
+          },
+          "contentType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "filename": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "downloadUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "AltinnEventsSubscription": {
         "required": [
           "id",
@@ -796,6 +1016,38 @@
           },
           "validated": {
             "type": "boolean"
+          }
+        }
+      },
+      "AltinnInstanceSummaryResponse": {
+        "required": [
+          "metadata",
+          "skjemaAsPdf",
+          "attachments"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/AltinnMetadata"
+          },
+          "skjemaAsPdf": {
+            "$ref": "#/components/schemas/AltinnDocumentResponse"
+          },
+          "structuredData": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AltinnDocumentResponse"
+              }
+            ]
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AltinnDocumentResponse"
+            }
           }
         }
       },
@@ -973,6 +1225,15 @@
           }
         }
       },
+      "FileScanResult": {
+        "enum": [
+          "NotApplicable",
+          "Pending",
+          "Clean",
+          "Infected"
+        ],
+        "type": "string"
+      },
       "GetAllDocumentsResponse": {
         "type": "object",
         "properties": {
@@ -1147,6 +1408,24 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AltinnMetadata"
+            }
+          }
+        }
+      },
+      "NotProcessCompleteInstancesResult": {
+        "required": [
+          "appId",
+          "instances"
+        ],
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string"
+          },
+          "instances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AltinnInstanceSummaryResponse"
             }
           }
         }

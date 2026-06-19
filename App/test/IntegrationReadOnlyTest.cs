@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
+using Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Model.Response;
 using Argon;
@@ -346,5 +347,36 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
 
         // Assert
         await Verify(content, _verifySettings);
+    }
+
+    [Fact]
+    public async Task GetNotProcessCompleteAltinnInstances_ReturnsInstanceSummaries()
+    {
+        var content = await _client.GetFromJsonAsync<IReadOnlyList<AltinnInstanceSummaryResponse>>(
+            $"/altinn/instances/not-process-complete/{ApplicationFixture.KnownApplicationId}",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+
+        content.ShouldNotBeNull();
+        var instance = content.ShouldHaveSingleItem();
+        instance.Metadata.InstanceGuid.ShouldBe(ApplicationFixture.KnownAltinnInstanceId);
+        instance.SkjemaAsPdf.AltinnId.ShouldBe(ApplicationFixture.KnownAltinnMainDocumentId);
+        instance.SkjemaAsPdf.DownloadUrl.ShouldNotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task DownloadNotProcessCompleteAltinnInstanceDocument_ReturnsDocument()
+    {
+        var response = await _client.GetAsync(
+            $"/altinn/instances/not-process-complete/{ApplicationFixture.KnownApplicationId}/{ApplicationFixture.KnownAltinnInstanceId}/documents/{ApplicationFixture.KnownAltinnMainDocumentId}/download",
+            TestContext.Current.CancellationToken
+        );
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var content = await response.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken
+        );
+        content.ShouldBe(ApplicationFixture.KnownAltinnMainDocumentContent);
     }
 }

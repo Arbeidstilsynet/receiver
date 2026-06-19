@@ -1,4 +1,5 @@
 using System.Text;
+using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Quartz;
+using AltinnFileMetadata = Arbeidstilsynet.Common.Altinn.Model.Adapter.FileMetadata;
 using FileMetadata = Arbeidstilsynet.MeldingerReceiver.Domain.Data.FileMetadata;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
@@ -45,6 +47,13 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
         _altinnAdapterMock
             .GetSummary(default!)
             .ReturnsForAnyArgs(TestData.CreateAltinnInstanceSummaryFaker().Generate());
+        foreach (var applicationId in KnownApplicationIds)
+        {
+            _altinnAdapterMock.GetNonCompletedInstances(applicationId, true).Returns([]);
+        }
+        _altinnAdapterMock
+            .GetNonCompletedInstances(KnownApplicationId, true)
+            .Returns([KnownAltinnInstanceSummary]);
 
         _virusScanServiceMock
             .ScanForVirus(default!, default!)
@@ -61,6 +70,14 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
     public const string SafeToDeleteApplicationId = "flip-flop-varsel";
     public static Guid KnownMeldingId { get; } = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
+    public static Guid KnownAltinnInstanceId { get; } =
+        Guid.Parse("44444444-4444-4444-4444-444444444444");
+
+    public static Guid KnownAltinnMainDocumentId { get; } =
+        Guid.Parse("55555555-5555-5555-5555-555555555555");
+
+    public const string KnownAltinnMainDocumentContent = "Altinn main content.";
+
     public static Guid KnownAttachmentDocumentId { get; } =
         Guid.Parse("11111111-1111-1111-1111-111111111111");
 
@@ -68,6 +85,36 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
         Guid.Parse("33333333-3333-3333-3333-333333333333");
 
     public const string KnownDocumentContent = "Hello World.";
+
+    public static AltinnInstanceSummary KnownAltinnInstanceSummary =>
+        new()
+        {
+            Metadata = new AltinnMetadata
+            {
+                App = KnownApplicationId,
+                InstanceGuid = KnownAltinnInstanceId,
+                InstanceOwnerPartyId = "123456",
+                Org = "dat",
+                DataValues = [],
+                ProcessStarted = DateTime.UtcNow.AddMinutes(-10),
+            },
+            SkjemaAsPdf = new AltinnDocument
+            {
+                DocumentContent = new MemoryStream(
+                    Encoding.UTF8.GetBytes(KnownAltinnMainDocumentContent)
+                ),
+                FileMetadata = new AltinnFileMetadata
+                {
+                    AltinnId = KnownAltinnMainDocumentId,
+                    AltinnDataType = "ref-data-as-pdf",
+                    ContentType = "text/plain",
+                    Filename = "altinn-main-content.txt",
+                    FileScanResult = FileScanResult.Clean,
+                },
+            },
+            StructuredData = null,
+            Attachments = [],
+        };
 
     async ValueTask IAsyncLifetime.InitializeAsync()
     {

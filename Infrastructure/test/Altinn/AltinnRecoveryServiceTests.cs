@@ -87,4 +87,70 @@ public class AltinnRecoveryServiceTests
         //assert
         result.Count.ShouldBe(0);
     }
+
+    [Fact]
+    public async Task GetNonCompletedInstanceByAppId_WhenInstanceExists_ReturnsMatchingInstance()
+    {
+        var expectedInstanceId = Guid.NewGuid();
+        var expectedInstance = CreateInstance(expectedInstanceId);
+        _subscriptionsRepository
+            .GetActiveAltinnSubscription(SampleTestAppRegistration.AltinnAppId)
+            .Returns(SampleTestAppRegistration);
+        _altinnAdapter
+            .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
+            .Returns([CreateInstance(Guid.NewGuid()), expectedInstance]);
+
+        var result = await _sut.GetNonCompletedInstanceByAppId(
+            SampleTestAppRegistration.AltinnAppId,
+            expectedInstanceId
+        );
+
+        result.ShouldBe(expectedInstance);
+    }
+
+    [Fact]
+    public async Task GetDocumentForNonCompletedInstance_WhenDocumentExists_ReturnsMatchingDocument()
+    {
+        var instanceId = Guid.NewGuid();
+        var documentId = Guid.NewGuid();
+        var expectedDocument = new AltinnDocument
+        {
+            DocumentContent = new MemoryStream(),
+            FileMetadata = new FileMetadata { AltinnId = documentId },
+        };
+        var expectedInstance = CreateInstance(instanceId) with { SkjemaAsPdf = expectedDocument };
+        _subscriptionsRepository
+            .GetActiveAltinnSubscription(SampleTestAppRegistration.AltinnAppId)
+            .Returns(SampleTestAppRegistration);
+        _altinnAdapter
+            .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
+            .Returns([expectedInstance]);
+
+        var result = await _sut.GetDocumentForNonCompletedInstance(
+            SampleTestAppRegistration.AltinnAppId,
+            instanceId,
+            documentId
+        );
+
+        result.ShouldBe(expectedDocument);
+    }
+
+    private static AltinnInstanceSummary CreateInstance(Guid instanceId) =>
+        new()
+        {
+            Metadata = new AltinnMetadata
+            {
+                InstanceGuid = instanceId,
+                InstanceOwnerPartyId = "123456",
+                Org = "dat",
+                App = SampleTestAppRegistration.AltinnAppId,
+                DataValues = [],
+            },
+            SkjemaAsPdf = new AltinnDocument
+            {
+                DocumentContent = new MemoryStream(),
+                FileMetadata = new FileMetadata { AltinnId = Guid.NewGuid() },
+            },
+            Attachments = [],
+        };
 }
