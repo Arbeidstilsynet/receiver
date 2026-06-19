@@ -61,12 +61,6 @@ jobs:
       - name: Publish npm package if not already published
         if: steps.npm_version_check.outputs.published == 'false'
         working-directory: ./npm_publish
-        # Provenance is intentionally disabled: GitHub Actions provenance is only
-        # supported for public source repositories. This repo is "internal", so
-        # npm rejects the sigstore bundle (E422). Trusted publishing via OIDC
-        # still authenticates the publish; only the attestation is skipped.
-        env:
-          NPM_CONFIG_PROVENANCE: "false"
         run: |
           set -euo pipefail
 
