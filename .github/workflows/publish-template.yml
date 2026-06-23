@@ -84,7 +84,7 @@ jobs:
             npm publish --access public
           fi
 
-      - name: Publish package if not already published
+      - name: Publish nuget package if not already published
         id: publish
         if: steps.nuget_version_check.outputs.published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@74f56a48df6466a1b1986cd298a71ed8a94311b6 # v3
