@@ -66,10 +66,19 @@ jobs:
         id: npm_version_check
         shell: bash
         run: |
-          if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.csproj-metadata.outputs.version }}" version >/dev/null 2>&1; then
+          set -euo pipefail
+
+          package_ref="${{ steps.npm_metadata.outputs.name }}@${{ steps.csproj-metadata.outputs.version }}"
+          error_log="$(mktemp)"
+
+          if npm view "$package_ref" version > /dev/null 2> "$error_log"; then
             echo "published=true" >> $GITHUB_OUTPUT
-          else
+          elif grep -q "E404" "$error_log"; then
             echo "published=false" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Failed to check npm package version for $package_ref."
+            cat "$error_log"
+            exit 1
           fi
 
       - name: Stop early when both feeds already contain the version
