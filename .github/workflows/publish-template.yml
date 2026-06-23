@@ -33,6 +33,7 @@ jobs:
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+          source-feed: nuget
           config-file: ./nuget.config
 
       - name: Setup Node.js
