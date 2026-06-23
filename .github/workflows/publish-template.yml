@@ -15,7 +15,6 @@ jobs:
     outputs:
       version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
       name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
-      npm_name: ${{ steps.npm_metadata.outputs.name }}
       nuget_published: ${{ steps.nuget_version_check.outputs.published }}
       npm_published: ${{ steps.npm_version_check.outputs.published }}
     steps:
