@@ -10,9 +10,101 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check_publish_targets:
+    name: Check publish targets
+    runs-on: ubuntu-latest
+    outputs:
+      is-prerelease: ${{ steps.prerelease_check.outputs.is_prerelease }}
+      publish-version: ${{ steps.csproj-metadata.outputs.version }}
+      all_feeds_published: ${{ steps.publish_status.outputs.all_feeds_published }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Get version and name from csproj file
+        id: csproj-metadata
+        uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
+        with:
+          working-directory: ./Publish/Receiver.Publish
+
+      - name: Check if version is prerelease
+        id: prerelease_check
+        shell: bash
+        run: |
+          VERSION="${{ steps.csproj-metadata.outputs.version }}"
+          if [[ "$VERSION" == *-* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if package version exists in NuGet
+        id: nuget_version_check
+        uses: Arbeidstilsynet/action-nuget-check-published@c706392290e42d3ee19cf8c22be9678c716703e0 # v2
+        with:
+          name: ${{ steps.csproj-metadata.outputs.name }}
+          version: ${{ steps.csproj-metadata.outputs.version }}
+          config-file: ./nuget.config
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Get npm package name
+        id: npm_metadata
+        working-directory: ./npm_publish
+        shell: bash
+        run: |
+          NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          echo "name=$NPM_PACKAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Check if npm package version exists
+        id: npm_version_check
+        shell: bash
+        run: |
+          if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.csproj-metadata.outputs.version }}" version >/dev/null 2>&1; then
+            echo "published=true" >> $GITHUB_OUTPUT
+          else
+            echo "published=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Stop early when both feeds already contain the version
+        id: publish_status
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ steps.csproj-metadata.outputs.version }}"
+          NUGET_PUBLISHED="${{ steps.nuget_version_check.outputs.published }}"
+          NPM_PUBLISHED="${{ steps.npm_version_check.outputs.published }}"
+
+          if [ "$NUGET_PUBLISHED" = "true" ] && [ "$NPM_PUBLISHED" = "true" ]; then
+            echo "all_feeds_published=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already exists in both feeds. Skipping build and publish jobs."
+          else
+            echo "all_feeds_published=false" >> $GITHUB_OUTPUT
+            echo "Version $VERSION still needs publishing (NuGet: $NUGET_PUBLISHED, npm: $NPM_PUBLISHED)."
+          fi
+
+  already_published:
+    name: Stop when already published
+    needs: [check_publish_targets]
+    if: ${{ needs.check_publish_targets.outputs.all_feeds_published == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skipped publish
+        shell: bash
+        run: |
+          echo "Version ${{ needs.check_publish_targets.outputs['publish-version'] }} is already published to both feeds."
+
   check_pr_publish_version:
     name: Check PR publish version
-    if: ${{ github.event_name == 'pull_request' }}
+    needs: [check_publish_targets]
+    if: ${{ github.event_name == 'pull_request' && needs.check_publish_targets.outputs.all_feeds_published != 'true' }}
     uses: ./.github/workflows/build-pr-template.yml
     permissions:
       contents: read
@@ -20,8 +112,8 @@ jobs:
 
   publish_prerelease_when_changed:
     name: Publish prerelease if changed
-    needs: [check_pr_publish_version]
-    if: ${{ github.event_name == 'pull_request' && needs.check_pr_publish_version.outputs.is-prerelease == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+    needs: [check_publish_targets, check_pr_publish_version]
+    if: ${{ github.event_name == 'pull_request' && needs.check_publish_targets.outputs.all_feeds_published != 'true' && needs.check_pr_publish_version.outputs['is-prerelease'] == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: ./.github/workflows/publish-template.yml
     permissions:
       id-token: write
@@ -32,7 +124,8 @@ jobs:
 
   publish_release_when_changed:
     name: Publish release if changed
-    if: ${{ github.event_name == 'push' }}
+    needs: [check_publish_targets]
+    if: ${{ github.event_name == 'push' && needs.check_publish_targets.outputs.all_feeds_published != 'true' }}
     uses: ./.github/workflows/publish-template.yml
     permissions:
       id-token: write
