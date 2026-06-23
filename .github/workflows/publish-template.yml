@@ -9,13 +9,15 @@ on:
         type: boolean
 
 jobs:
-  publish:
+  setup:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      id-token: write
-      contents: write
-      packages: write
+    outputs:
+      version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+      name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
+      npm_name: ${{ steps.npm_metadata.outputs.name }}
+      nuget_published: ${{ steps.nuget_version_check.outputs.published }}
+      npm_published: ${{ steps.npm_version_check.outputs.published }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
@@ -59,8 +61,28 @@ jobs:
             echo "published=false" >> $GITHUB_OUTPUT
           fi
 
+  publish-prerelease:
+    needs: setup
+    if: inputs.is-prerelease == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+
       - name: Publish npm package if not already published
-        if: steps.npm_version_check.outputs.published == 'false'
+        if: needs.setup.outputs.npm_published == 'false'
         working-directory: ./npm_publish
         run: |
           set -euo pipefail
@@ -76,24 +98,18 @@ jobs:
           fi
 
           cp --remove-destination "$types_source" types.d.ts
-          npm pkg set version="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
-
-          if [ "${{ inputs.is-prerelease }}" = "true" ]; then
-            npm publish --access public --tag next
-          else
-            npm publish --access public
-          fi
+          npm pkg set version="${{ needs.setup.outputs.version }}"
+          npm publish --access public --tag next
 
       - name: Publish nuget package if not already published
-        id: publish
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: needs.setup.outputs.nuget_published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@74f56a48df6466a1b1986cd298a71ed8a94311b6 # v3
         with:
           working-directory: ./Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: needs.setup.outputs.nuget_published == 'false'
         id: meta
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
         with:
@@ -102,18 +118,18 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=raw,value=${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+            type=raw,value=${{ needs.setup.outputs.version }}
 
       - name: Log in to GHCR
-        if: steps.nuget_version_check.outputs.published == 'false'
+        if: needs.setup.outputs.nuget_published == 'false'
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Build and push (GHCR)
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == true
+      - name: Build and push to GHCR
+        if: needs.setup.outputs.nuget_published == 'false'
         id: ghcr_build_push
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
@@ -122,19 +138,93 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Generate SBOM and sign GHCR image
+        if: needs.setup.outputs.nuget_published == 'false'
+        uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
+        with:
+          image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.ghcr_build_push.outputs.digest }}
+
+  publish-release:
+    needs: setup
+    if: inputs.is-prerelease == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Publish npm package if not already published
+        if: needs.setup.outputs.npm_published == 'false'
+        working-directory: ./npm_publish
+        run: |
+          set -euo pipefail
+
+          types_source="$(readlink types.d.ts || true)"
+          if [ -z "$types_source" ]; then
+            types_source="../generated/types.d.ts"
+          fi
+
+          if [ ! -f "$types_source" ]; then
+            echo "::error::Unable to materialize npm package types from types.d.ts symlink or ../generated/types.d.ts."
+            exit 1
+          fi
+
+          cp --remove-destination "$types_source" types.d.ts
+          npm pkg set version="${{ needs.setup.outputs.version }}"
+          npm publish --access public
+
+      - name: Publish nuget package if not already published
+        if: needs.setup.outputs.nuget_published == 'false'
+        uses: Arbeidstilsynet/action-dotnet-publish@74f56a48df6466a1b1986cd298a71ed8a94311b6 # v3
+        with:
+          working-directory: ./Publish/Receiver.Publish
+          nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
+
+      - name: Docker meta
+        if: needs.setup.outputs.nuget_published == 'false'
+        id: meta
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
+        with:
+          images: |
+            ghcr.io/arbeidstilsynet/receiver
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=${{ needs.setup.outputs.version }}
+
+      - name: Log in to GHCR
+        if: needs.setup.outputs.nuget_published == 'false'
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
       - name: Build and push image to NAIS registry
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: needs.setup.outputs.nuget_published == 'false'
         id: nais_build_push
         uses: nais/docker-build-push@05dbb6091b30bd84279c6d64a45ef8782fd410a5 # v0
         with:
           team: meldinger
           docker_context: ./
           dockerfile: ./Dockerfile
-          tag: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
+          tag: ${{ needs.setup.outputs.version }}
           salsa: true
 
       - name: Push image to GHCR (from NAIS image)
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: needs.setup.outputs.nuget_published == 'false'
+        id: ghcr_publish
         shell: bash
         run: |
           set -euo pipefail
@@ -152,25 +242,27 @@ jobs:
             args+=( -t "$tag" )
           done <<< '${{ steps.meta.outputs.tags }}'
 
-          docker buildx imagetools create "${args[@]}" "$src_image"
+          docker buildx imagetools create --metadata-file ghcr-metadata.json "${args[@]}" "$src_image"
+          ghcr_digest="$(jq -r '."containerimage.descriptor".digest' ghcr-metadata.json)"
+
+          if [ -z "$ghcr_digest" ] || [ "$ghcr_digest" = "null" ]; then
+            echo "::error::Unable to determine GHCR digest from imagetools metadata."
+            exit 1
+          fi
+
+          echo "digest=$ghcr_digest" >> $GITHUB_OUTPUT
 
       - name: Generate SBOM and sign GHCR image
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == true
+        if: needs.setup.outputs.nuget_published == 'false'
         uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
         with:
-          image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.ghcr_build_push.outputs.digest }}
-
-      - name: Generate SBOM and sign GHCR image
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
-        uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
-        with:
-          image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.nais_build_push.outputs.digest }}
+          image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.ghcr_publish.outputs.digest }}
 
       - name: Extract changelog section for current version
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: needs.setup.outputs.nuget_published == 'false'
         id: changelog
         run: |
-          VERSION="${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          VERSION="${{ needs.setup.outputs.version }}"
           if [ -f CHANGELOG.md ]; then
             awk -v ver="$VERSION" '
               BEGIN {found=0}
@@ -187,11 +279,11 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
+        if: needs.setup.outputs.nuget_published == 'false'
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
-          tag_name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
-          name: "${{ steps.get_metadata_from_csprojectfile.outputs.name }} v${{ steps.get_metadata_from_csprojectfile.outputs.version }}"
+          tag_name: "${{ needs.setup.outputs.name }}@${{ needs.setup.outputs.version }}"
+          name: "${{ needs.setup.outputs.name }} v${{ needs.setup.outputs.version }}"
           body: ${{ steps.changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
