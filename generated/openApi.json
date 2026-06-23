@@ -206,6 +206,87 @@
         }
       }
     },
+    "/altinn/instances/{instanceGuid}/data-elements": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "instanceGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataElement"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataElement"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataElement"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/altinn/instances/{instanceGuid}/data-elements/{dataElementId}": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "instanceGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "dataElementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/meldinger/{meldingId}/documents/{documentId}": {
       "get": {
         "tags": [
@@ -919,6 +1000,95 @@
           }
         }
       },
+      "DataElement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "instanceGuid": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "blobStoragePath": {
+            "type": "string"
+          },
+          "selfLinks": {
+            "$ref": "#/components/schemas/ResourceLinks"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "userDefinedMetadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KeyValueEntry"
+            }
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KeyValueEntry"
+            }
+          },
+          "deleteStatus": {
+            "$ref": "#/components/schemas/DeleteStatus"
+          },
+          "fileScanResult": {
+            "$ref": "#/components/schemas/FileScanResult"
+          }
+        }
+      },
+      "DeleteStatus": {
+        "type": "object",
+        "properties": {
+          "isHardDeleted": {
+            "type": "boolean"
+          },
+          "hardDeleted": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
       "Document": {
         "required": [
           "documentId",
@@ -972,6 +1142,15 @@
             "type": "string"
           }
         }
+      },
+      "FileScanResult": {
+        "enum": [
+          "NotApplicable",
+          "Pending",
+          "Clean",
+          "Infected"
+        ],
+        "type": "string"
       },
       "GetAllDocumentsResponse": {
         "type": "object",
@@ -1067,6 +1246,17 @@
       "IFormFile": {
         "type": "string",
         "format": "binary"
+      },
+      "KeyValueEntry": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
       },
       "Melding": {
         "required": [
@@ -1222,6 +1412,17 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "ResourceLinks": {
+        "type": "object",
+        "properties": {
+          "apps": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
           }
         }
       }

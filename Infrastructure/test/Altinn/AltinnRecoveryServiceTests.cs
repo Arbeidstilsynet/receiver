@@ -1,5 +1,6 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
+using Arbeidstilsynet.Common.Altinn.Ports.Clients;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
@@ -13,6 +14,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.Altinn;
 public class AltinnRecoveryServiceTests
 {
     private IAltinnAdapter _altinnAdapter = Substitute.For<IAltinnAdapter>();
+    private IAltinnStorageClient _altinnStorageClient = Substitute.For<IAltinnStorageClient>();
     private ISubscriptionsRepository _subscriptionsRepository =
         Substitute.For<ISubscriptionsRepository>();
     private ILogger<AltinnRecoveryService> _logger = Substitute.For<
@@ -46,7 +48,12 @@ public class AltinnRecoveryServiceTests
 
     public AltinnRecoveryServiceTests()
     {
-        _sut = new AltinnRecoveryService(_altinnAdapter, _subscriptionsRepository, _logger);
+        _sut = new AltinnRecoveryService(
+            _altinnAdapter,
+            _altinnStorageClient,
+            _subscriptionsRepository,
+            _logger
+        );
     }
 
     [Theory]
