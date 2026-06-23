@@ -155,16 +155,10 @@ jobs:
           docker buildx imagetools create "${args[@]}" "$src_image"
 
       - name: Generate SBOM and sign GHCR image
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == true
+        if: steps.nuget_version_check.outputs.published == 'false'
         uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
         with:
           image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.ghcr_build_push.outputs.digest }}
-
-      - name: Generate SBOM and sign GHCR image
-        if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
-        uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
-        with:
-          image_ref: ghcr.io/arbeidstilsynet/receiver@${{ steps.nais_build_push.outputs.digest }}
 
       - name: Extract changelog section for current version
         if: steps.nuget_version_check.outputs.published == 'false' && inputs.is-prerelease == false
