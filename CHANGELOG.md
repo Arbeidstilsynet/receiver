@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.6.1
+
+### Fixed
+
+- fix(ci): use the GHCR manifest digest after mirroring the release image from the NAIS registry, so SBOM attestation and signing target the actual GHCR image reference.
+
 ## 1.6.0
 
 ### Added
