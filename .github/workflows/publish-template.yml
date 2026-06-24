@@ -236,11 +236,30 @@ jobs:
 
           docker buildx imagetools create "${args[@]}" "$src_image"
 
+      - name: Prepare NAIS image reference
+        if: needs.setup.outputs.nuget_published == 'false'
+        id: nais_image_ref
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          src_image='${{ steps.nais_build_push.outputs.image }}'
+          if [ -z "$src_image" ]; then
+            echo "::error::nais/docker-build-push did not produce an image output."
+            exit 1
+          fi
+
+          # Normalize to repository-only so registry/repository changes are inherited
+          # from nais/docker-build-push output while we control the release tag.
+          image_repo="${src_image%@*}"
+          image_repo="${image_repo%:*}"
+          echo "image_repo=$image_repo" >> "$GITHUB_OUTPUT"
+
       - name: Generate SBOM and sign NAIS image
         if: needs.setup.outputs.nuget_published == 'false'
         uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
         with:
-          image_ref: europe-north1-docker.pkg.dev/nais-management-0c82/meldinger/receiver:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
+          image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
       - name: Extract changelog section for current version
         if: needs.setup.outputs.nuget_published == 'false'
