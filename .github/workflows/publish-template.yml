@@ -259,7 +259,7 @@ jobs:
         if: needs.setup.outputs.nuget_published == 'false'
         uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2
         with:
-          image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
+          image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}:${{ steps.nais_build_push.outputs.digest }}
 
       - name: Extract changelog section for current version
         if: needs.setup.outputs.nuget_published == 'false'
