@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.6.3
+
+### Fixed
+
+- fix(ci): attest SBOM against the version-tagged NAIS image reference (`:<version>@<digest>`) so it matches the deployed image identity.
+
 ## 1.6.2
 
 ### Fixed
