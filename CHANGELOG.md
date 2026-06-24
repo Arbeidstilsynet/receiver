@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.6.5
 
-- fix(ci): revert 1.6.4
-
+- fix(ci): restore SBOM attestation image reference format to `receiver:<version>@sha256:<digest>` (revert 1.6.4)
 ## 1.6.4
 
 - fix(ci): attest SBOM against the version-tagged NAIS image reference (`receiver:<version>:sha256:<digest>`) so it actually matches the deployed image identity. nth time's the charm.
