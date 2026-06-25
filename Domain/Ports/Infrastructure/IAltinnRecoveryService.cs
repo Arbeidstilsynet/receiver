@@ -16,6 +16,8 @@ public interface IAltinnRecoveryService
         Dictionary<string, IEnumerable<AltinnMetadata>>
     > GetMetadataForAllNonCompletedInstancesForRegisteredApps();
 
+    Task<AltinnInstance?> GetInstanceMetadata(Guid instanceGuid, CancellationToken ct = default);
+
     Task<IReadOnlyList<DataElement>?> GetDataElementsForInstance(
         Guid instanceGuid,
         CancellationToken ct = default

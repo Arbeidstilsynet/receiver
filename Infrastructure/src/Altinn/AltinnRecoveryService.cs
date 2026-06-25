@@ -63,29 +63,21 @@ internal class AltinnRecoveryService(
         );
     }
 
+    public Task<AltinnInstance?> GetInstanceMetadata(
+        Guid instanceGuid,
+        CancellationToken ct = default
+    )
+    {
+        return GetInstanceByGuid(instanceGuid, ct);
+    }
+
     public async Task<IReadOnlyList<DataElement>?> GetDataElementsForInstance(
         Guid instanceGuid,
         CancellationToken ct = default
     )
     {
         using var activity = Tracer.Source.StartActivity();
-        var instanceOwnerPartyId = await GetInstanceOwnerPartyId(instanceGuid);
-        if (instanceOwnerPartyId == null)
-        {
-            logger.LogWarning(
-                "Could not resolve instance owner for instance {InstanceGuid}",
-                instanceGuid
-            );
-            return null;
-        }
-
-        var instance = await altinnStorageClient.GetInstance(
-            new InstanceRequest
-            {
-                InstanceOwnerPartyId = instanceOwnerPartyId,
-                InstanceGuid = instanceGuid,
-            }
-        );
+        var instance = await GetInstanceByGuid(instanceGuid, ct);
         return instance?.Data;
     }
 
@@ -96,31 +88,18 @@ internal class AltinnRecoveryService(
     )
     {
         using var activity = Tracer.Source.StartActivity();
-        var instanceOwnerPartyId = await GetInstanceOwnerPartyId(instanceGuid);
-        if (instanceOwnerPartyId == null)
-        {
-            logger.LogWarning(
-                "Could not resolve instance owner for instance {InstanceGuid}",
-                instanceGuid
-            );
+        var instance = await GetInstanceByGuid(instanceGuid, ct);
+        if (instance == null)
             return null;
-        }
+        var instanceOwnerPartyId = instance.InstanceOwner?.PartyId;
+        if (string.IsNullOrWhiteSpace(instanceOwnerPartyId))
+            return null;
 
         var instanceRequest = new InstanceRequest
         {
             InstanceOwnerPartyId = instanceOwnerPartyId,
             InstanceGuid = instanceGuid,
         };
-        var instance = await altinnStorageClient.GetInstance(instanceRequest);
-        if (instance == null)
-        {
-            logger.LogWarning(
-                "Instance {InstanceOwnerPartyId}/{InstanceGuid} not found in Altinn",
-                instanceOwnerPartyId,
-                instanceGuid
-            );
-            return null;
-        }
 
         var dataElement = instance.Data.FirstOrDefault(d => d.Id == dataElementId.ToString());
         if (dataElement == null)
@@ -146,14 +125,70 @@ internal class AltinnRecoveryService(
         };
     }
 
-    private async Task<string?> GetInstanceOwnerPartyId(Guid instanceGuid)
+    private async Task<AltinnInstance?> GetInstanceByGuid(Guid instanceGuid, CancellationToken ct)
     {
-        var metadataByApp = await GetMetadataForAllNonCompletedInstancesForRegisteredApps();
-        var metadata = metadataByApp
-            .Values.SelectMany(instances => instances)
-            .FirstOrDefault(m => m.InstanceGuid == instanceGuid);
+        var registeredApps = await subscriptionRepository.GetAllActiveAltinnSubscriptions();
+        foreach (var appId in registeredApps.Select(s => s.AltinnAppId).Distinct())
+        {
+            string? continuationToken = null;
+            do
+            {
+                ct.ThrowIfCancellationRequested();
+                var page = await altinnStorageClient.GetInstances(
+                    new InstanceQueryParameters
+                    {
+                        AppId = appId,
+                        ContinuationToken = continuationToken,
+                    }
+                );
 
-        return metadata?.InstanceOwnerPartyId;
+                var matchingInstance = page.Instances.FirstOrDefault(instance =>
+                    TryParseInstanceGuid(instance.Id, out var parsedGuid)
+                    && parsedGuid == instanceGuid
+                );
+                if (matchingInstance != null)
+                {
+                    return matchingInstance;
+                }
+                continuationToken = GetContinuationToken(page.Next);
+            } while (!string.IsNullOrWhiteSpace(continuationToken));
+        }
+        logger.LogWarning(
+            "Could not resolve instance metadata for instance {InstanceGuid}",
+            instanceGuid
+        );
+        return null;
+    }
+
+    private static bool TryParseInstanceGuid(string? instanceId, out Guid instanceGuid)
+    {
+        instanceGuid = default;
+        if (string.IsNullOrWhiteSpace(instanceId))
+            return false;
+
+        var separatorIndex = instanceId.LastIndexOf('/');
+        if (separatorIndex < 0 || separatorIndex == instanceId.Length - 1)
+            return false;
+        return Guid.TryParse(instanceId[(separatorIndex + 1)..], out instanceGuid);
+    }
+
+    private static string? GetContinuationToken(string? next)
+    {
+        if (string.IsNullOrWhiteSpace(next))
+            return null;
+        const string tokenParameterName = "continuationToken=";
+        var continuationTokenIndex = next.IndexOf(
+            tokenParameterName,
+            StringComparison.OrdinalIgnoreCase
+        );
+        if (continuationTokenIndex < 0)
+            return null;
+
+        var token = next[(continuationTokenIndex + tokenParameterName.Length)..];
+        var ampersandIndex = token.IndexOf('&');
+        if (ampersandIndex >= 0)
+            token = token[..ampersandIndex];
+        return Uri.UnescapeDataString(token);
     }
 
     private async Task<

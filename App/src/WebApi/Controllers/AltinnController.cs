@@ -137,6 +137,16 @@ public class AltinnController(
             return NotFound();
         return File(result.Content, result.ContentType, result.Filename);
     }
+
+    [HttpGet("instances/{instanceGuid}/metadata")]
+    public async Task<ActionResult<AltinnInstance>> GetInstanceMetadata(
+        [FromRoute] Guid instanceGuid,
+        CancellationToken ct
+    )
+    {
+        var result = await altinnRecoveryService.GetInstanceMetadata(instanceGuid, ct);
+        return result != null ? Ok(result) : NotFound();
+    }
 }
 
 public record NonCompletedInstancesResult

@@ -287,6 +287,46 @@
         }
       }
     },
+    "/altinn/instances/{instanceGuid}/metadata": {
+      "get": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "instanceGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltinnInstance"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltinnInstance"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltinnInstance"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/meldinger/{meldingId}/documents/{documentId}": {
       "get": {
         "tags": [
@@ -880,6 +920,70 @@
           }
         }
       },
+      "AltinnInstance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "instanceOwner": {
+            "$ref": "#/components/schemas/InstanceOwner"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "selfLinks": {
+            "$ref": "#/components/schemas/ResourceLinks"
+          },
+          "dueBefore": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "visibleAfter": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "process": {
+            "$ref": "#/components/schemas/ProcessState"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InstanceStatus"
+          },
+          "completeConfirmations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompleteConfirmation"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataElement"
+            }
+          },
+          "presentationTexts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "dataValues": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AltinnMetadata": {
         "required": [
           "instanceGuid",
@@ -948,6 +1052,18 @@
           },
           "messageSource": {
             "$ref": "#/components/schemas/MessageSource"
+          }
+        }
+      },
+      "CompleteConfirmation": {
+        "type": "object",
+        "properties": {
+          "stakeholderId": {
+            "type": "string"
+          },
+          "confirmedOn": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -1247,6 +1363,64 @@
         "type": "string",
         "format": "binary"
       },
+      "InstanceOwner": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "string"
+          },
+          "personNumber": {
+            "type": "string"
+          },
+          "organisationNumber": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "InstanceStatus": {
+        "type": "object",
+        "properties": {
+          "isArchived": {
+            "type": "boolean"
+          },
+          "archived": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isSoftDeleted": {
+            "type": "boolean"
+          },
+          "softDeleted": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isHardDeleted": {
+            "type": "boolean"
+          },
+          "hardDeleted": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "readStatus": {
+            "$ref": "#/components/schemas/ReadStatus"
+          },
+          "substatus": {
+            "$ref": "#/components/schemas/Substatus"
+          }
+        }
+      },
       "KeyValueEntry": {
         "type": "object",
         "properties": {
@@ -1388,6 +1562,39 @@
           }
         }
       },
+      "ProcessState": {
+        "type": "object",
+        "properties": {
+          "started": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "startEvent": {
+            "type": "string"
+          },
+          "ended": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "endEvent": {
+            "type": "string"
+          }
+        }
+      },
+      "ReadStatus": {
+        "enum": [
+          "Unread",
+          "Read",
+          "UpdatedSinceLastReview"
+        ],
+        "type": "string"
+      },
       "RecoveryJobResult": {
         "required": [
           "appId"
@@ -1422,6 +1629,17 @@
             "type": "string"
           },
           "platform": {
+            "type": "string"
+          }
+        }
+      },
+      "Substatus": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           }
         }
