@@ -70,3 +70,22 @@ tests fail. Run them before assuming a change is correct.
 - Observability: each assembly has an `internal static Tracer` `ActivitySource`; wrap notable
   work in `using var activity = Tracer.Source.StartActivity();`. Metrics go through `ApiMeters`.
 - Run `dotnet csharpier format .` before committing.
+
+## Change checklist (API/release-sensitive work)
+
+When a change touches API surface, generated client types, or versioning/release metadata, complete
+this checklist before pushing:
+
+1. Regenerate OpenAPI + TS types:
+   ```sh
+   pnpm generate:types
+   ```
+2. Run relevant tests/builds:
+   ```sh
+   dotnet build
+   dotnet test
+   ```
+3. If version is bumped (`Publish/Receiver.Publish/Receiver.Publish.csproj`), update `CHANGELOG.md`
+   in the same change.
+4. Verify generated artifacts are committed when changed (`generated/openApi.json`,
+   `generated/types.d.ts`).
