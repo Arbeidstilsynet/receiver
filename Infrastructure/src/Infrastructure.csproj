@@ -11,7 +11,7 @@
     <PackageReference Include="Quartz.AspNetCore" Version="3.18.0" />
     <PackageReference Include="Quartz.Serialization.Json" Version="3.18.0" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.14.0" />
-    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="3.2.1" />
+    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="3.2.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.12.14" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
     <PackageReference
