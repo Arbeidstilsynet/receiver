@@ -217,15 +217,26 @@ internal class AltinnRecoveryService(
                 "Running recovery job for registered app '{AppIdentifier}'",
                 registeredApp
             );
-            var nonCompletedInstances = (
-                await getNonCompletedInstances(registeredApp.AltinnAppId)
-            ).ToList();
-            logger.LogInformation(
-                "Found {Count} non completed instances for app '{AppIdentifier}'.",
-                nonCompletedInstances.Count,
-                registeredApp
-            );
-            allNonCompletedInstances.Add(registeredApp.AltinnAppId, nonCompletedInstances);
+            try
+            {
+                var nonCompletedInstances = (
+                    await getNonCompletedInstances(registeredApp.AltinnAppId)
+                ).ToList();
+                logger.LogInformation(
+                    "Found {Count} non completed instances for app '{AppIdentifier}'.",
+                    nonCompletedInstances.Count,
+                    registeredApp
+                );
+                allNonCompletedInstances.Add(registeredApp.AltinnAppId, nonCompletedInstances);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Failed to retrieve non-completed instances for app '{AppIdentifier}'. Skipping.",
+                    registeredApp
+                );
+            }
         }
         return allNonCompletedInstances;
     }

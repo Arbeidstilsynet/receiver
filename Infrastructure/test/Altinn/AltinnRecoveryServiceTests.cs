@@ -112,6 +112,31 @@ public class AltinnRecoveryServiceTests
     }
 
     [Fact]
+    public async Task GetAllNonCompletedInstancesForRegisteredApps_WhenOneAppThrows_SkipsThatAppAndContinues()
+    {
+        // arrange
+        _subscriptionsRepository
+            .GetAllActiveAltinnSubscriptions()
+            .Returns([SampleTestAppRegistration, SampleTestAppRegistration2]);
+        _altinnAdapter
+            .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
+            .Returns<IEnumerable<AltinnInstanceSummary>>(_ =>
+                throw new InvalidOperationException("Library threw while processing instances")
+            );
+        _altinnAdapter
+            .GetNonCompletedInstances(SampleTestAppRegistration2.AltinnAppId, true)
+            .Returns(GetDummyInstances(2));
+
+        // act
+        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps();
+
+        // assert: failed app is omitted; successful app is returned
+        result.Count.ShouldBe(1);
+        result.ContainsKey(SampleTestAppRegistration.AltinnAppId).ShouldBeFalse();
+        result[SampleTestAppRegistration2.AltinnAppId].Count().ShouldBe(2);
+    }
+
+    [Fact]
     public async Task GetInstanceMetadata_WhenInstanceExistsOnFirstPage_ReturnsInstance()
     {
         // arrange
