@@ -130,6 +130,7 @@ internal class AltinnRecoveryService(
         var registeredApps = await subscriptionRepository.GetAllActiveAltinnSubscriptions();
         foreach (var appId in registeredApps.Select(s => s.AltinnAppId).Distinct())
         {
+            var normalizedAppId = EnsureQualifiedAltinnAppId(appId);
             string? continuationToken = null;
             do
             {
@@ -137,7 +138,7 @@ internal class AltinnRecoveryService(
                 var page = await altinnStorageClient.GetInstances(
                     new InstanceQueryParameters
                     {
-                        AppId = appId,
+                        AppId = normalizedAppId,
                         ContinuationToken = continuationToken,
                     }
                 );
@@ -158,6 +159,13 @@ internal class AltinnRecoveryService(
             instanceGuid
         );
         return null;
+    }
+
+    private static string EnsureQualifiedAltinnAppId(string appId)
+    {
+        if (appId.Contains('/'))
+            return appId;
+        return $"dat/{appId}";
     }
 
     private static bool TryParseInstanceGuid(string? instanceId, out Guid instanceGuid)

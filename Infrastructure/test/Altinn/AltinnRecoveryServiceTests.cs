@@ -55,6 +55,13 @@ public class AltinnRecoveryServiceTests
         SubscriptionId = 1111111,
     };
 
+    private static readonly AltinnConnection SampleQualifiedAppRegistration = new AltinnConnection
+    {
+        InternalId = Guid.NewGuid(),
+        AltinnAppId = "dat/qualified",
+        SubscriptionId = 2222222,
+    };
+
     public AltinnRecoveryServiceTests()
     {
         _sut = new AltinnRecoveryService(
@@ -116,7 +123,7 @@ public class AltinnRecoveryServiceTests
         _altinnStorageClient
             .GetInstances(
                 Arg.Is<InstanceQueryParameters>(q =>
-                    q.AppId == SampleTestAppRegistration.AltinnAppId
+                    q.AppId == $"dat/{SampleTestAppRegistration.AltinnAppId}"
                     && string.IsNullOrEmpty(q.ContinuationToken)
                 )
             )
@@ -146,7 +153,7 @@ public class AltinnRecoveryServiceTests
         _altinnStorageClient
             .GetInstances(
                 Arg.Is<InstanceQueryParameters>(q =>
-                    q.AppId == SampleTestAppRegistration.AltinnAppId
+                    q.AppId == $"dat/{SampleTestAppRegistration.AltinnAppId}"
                     && string.IsNullOrEmpty(q.ContinuationToken)
                 )
             )
@@ -159,7 +166,7 @@ public class AltinnRecoveryServiceTests
         _altinnStorageClient
             .GetInstances(
                 Arg.Is<InstanceQueryParameters>(q =>
-                    q.AppId == SampleTestAppRegistration.AltinnAppId
+                    q.AppId == $"dat/{SampleTestAppRegistration.AltinnAppId}"
                     && q.ContinuationToken == continuationToken
                 )
             )
@@ -404,14 +411,14 @@ public class AltinnRecoveryServiceTests
         _altinnStorageClient
             .GetInstances(
                 Arg.Is<InstanceQueryParameters>(q =>
-                    q.AppId == SampleTestAppRegistration.AltinnAppId
+                    q.AppId == $"dat/{SampleTestAppRegistration.AltinnAppId}"
                 )
             )
             .Returns(CreatePage([instance], null));
         _altinnStorageClient
             .GetInstances(
                 Arg.Is<InstanceQueryParameters>(q =>
-                    q.AppId == SampleTestAppRegistration3.AltinnAppId
+                    q.AppId == $"dat/{SampleTestAppRegistration3.AltinnAppId}"
                 )
             )
             .Returns(CreatePage([], null));
@@ -428,7 +435,39 @@ public class AltinnRecoveryServiceTests
             .Received(1)
             .GetInstances(
                 Arg.Is<InstanceQueryParameters>(q =>
-                    q.AppId == SampleTestAppRegistration.AltinnAppId
+                    q.AppId == $"dat/{SampleTestAppRegistration.AltinnAppId}"
+                )
+            );
+    }
+
+    [Fact]
+    public async Task GetInstanceMetadata_WhenAppIdIsAlreadyQualified_DoesNotPrefixAgain()
+    {
+        // arrange
+        _subscriptionsRepository
+            .GetAllActiveAltinnSubscriptions()
+            .Returns([SampleQualifiedAppRegistration]);
+        _altinnStorageClient
+            .GetInstances(
+                Arg.Is<InstanceQueryParameters>(q =>
+                    q.AppId == SampleQualifiedAppRegistration.AltinnAppId
+                )
+            )
+            .Returns(CreatePage([], null));
+
+        // act
+        var result = await _sut.GetInstanceMetadata(
+            Guid.NewGuid(),
+            TestContext.Current.CancellationToken
+        );
+
+        // assert
+        result.ShouldBeNull();
+        await _altinnStorageClient
+            .Received(1)
+            .GetInstances(
+                Arg.Is<InstanceQueryParameters>(q =>
+                    q.AppId == SampleQualifiedAppRegistration.AltinnAppId
                 )
             );
     }
