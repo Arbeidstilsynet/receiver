@@ -193,6 +193,120 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/altinn/instances/{instanceGuid}/data-elements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    instanceGuid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DataElement"][];
+                        "application/json": components["schemas"]["DataElement"][];
+                        "text/json": components["schemas"]["DataElement"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/altinn/instances/{instanceGuid}/data-elements/{dataElementId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    instanceGuid: string;
+                    dataElementId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/altinn/instances/{instanceGuid}/metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    instanceGuid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AltinnInstance"];
+                        "application/json": components["schemas"]["AltinnInstance"];
+                        "text/json": components["schemas"]["AltinnInstance"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/meldinger/{meldingId}/documents/{documentId}": {
         parameters: {
             query?: never;
@@ -627,6 +741,27 @@ export interface components {
             created: string;
             validated: boolean;
         };
+        AltinnInstance: {
+            id?: string;
+            instanceOwner?: components["schemas"]["InstanceOwner"];
+            appId?: string;
+            org?: string;
+            selfLinks?: components["schemas"]["ResourceLinks"];
+            /** Format: date-time */
+            dueBefore?: null | string;
+            /** Format: date-time */
+            visibleAfter?: null | string;
+            process?: components["schemas"]["ProcessState"];
+            status?: components["schemas"]["InstanceStatus"];
+            completeConfirmations?: components["schemas"]["CompleteConfirmation"][];
+            data?: components["schemas"]["DataElement"][];
+            presentationTexts?: {
+                [key: string]: string;
+            };
+            dataValues?: {
+                [key: string]: string;
+            };
+        };
         AltinnMetadata: {
             /** Format: uuid */
             instanceGuid: string;
@@ -647,6 +782,11 @@ export interface components {
             appId: string;
             messageSource?: components["schemas"]["MessageSource"];
         };
+        CompleteConfirmation: {
+            stakeholderId?: string;
+            /** Format: date-time */
+            confirmedOn?: string;
+        };
         ConsumerManifest: {
             consumerName: string;
             appRegistrations?: components["schemas"]["AppRegistration"][];
@@ -657,6 +797,31 @@ export interface components {
             mediaType?: string;
             name?: null | string;
             parameters?: null | unknown[];
+        };
+        DataElement: {
+            id?: string;
+            instanceGuid?: string;
+            dataType?: string;
+            filename?: string;
+            contentType?: string;
+            blobStoragePath?: string;
+            selfLinks?: components["schemas"]["ResourceLinks"];
+            /** Format: int64 */
+            size?: number | string;
+            contentHash?: string;
+            locked?: boolean;
+            refs?: string[];
+            isRead?: boolean;
+            tags?: string[];
+            userDefinedMetadata?: components["schemas"]["KeyValueEntry"][];
+            metadata?: components["schemas"]["KeyValueEntry"][];
+            deleteStatus?: components["schemas"]["DeleteStatus"];
+            fileScanResult?: components["schemas"]["FileScanResult"];
+        };
+        DeleteStatus: {
+            isHardDeleted?: boolean;
+            /** Format: date-time */
+            hardDeleted?: null | string;
         };
         Document: {
             /** Format: uuid */
@@ -675,6 +840,8 @@ export interface components {
             fileName: string;
             contentType: string;
         };
+        /** @enum {string} */
+        FileScanResult: "NotApplicable" | "Pending" | "Clean" | "Infected";
         GetAllDocumentsResponse: {
             documents?: components["schemas"]["Document"][];
         };
@@ -697,6 +864,29 @@ export interface components {
         };
         /** Format: binary */
         IFormFile: string;
+        InstanceOwner: {
+            partyId?: string;
+            personNumber?: string;
+            organisationNumber?: string;
+            username?: string;
+        };
+        InstanceStatus: {
+            isArchived?: boolean;
+            /** Format: date-time */
+            archived?: null | string;
+            isSoftDeleted?: boolean;
+            /** Format: date-time */
+            softDeleted?: null | string;
+            isHardDeleted?: boolean;
+            /** Format: date-time */
+            hardDeleted?: null | string;
+            readStatus?: components["schemas"]["ReadStatus"];
+            substatus?: components["schemas"]["Substatus"];
+        };
+        KeyValueEntry: {
+            key?: string;
+            value?: string;
+        };
         Melding: {
             /** Format: uuid */
             id: string;
@@ -734,12 +924,30 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        ProcessState: {
+            /** Format: date-time */
+            started?: null | string;
+            startEvent?: string;
+            /** Format: date-time */
+            ended?: null | string;
+            endEvent?: string;
+        };
+        /** @enum {string} */
+        ReadStatus: "Unread" | "Read" | "UpdatedSinceLastReview";
         RecoveryJobResult: {
             appId: string;
             /** Format: int32 */
             originalCount?: number | string;
             /** Format: int32 */
             resolvedCount?: number | string;
+        };
+        ResourceLinks: {
+            apps?: string;
+            platform?: string;
+        };
+        Substatus: {
+            label?: string;
+            description?: string;
         };
     };
     responses: never;

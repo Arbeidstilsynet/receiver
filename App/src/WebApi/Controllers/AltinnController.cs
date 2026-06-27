@@ -1,4 +1,5 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
@@ -108,6 +109,43 @@ public class AltinnController(
             );
         }
         return resultList;
+    }
+
+    [HttpGet("instances/{instanceGuid}/data-elements")]
+    public async Task<ActionResult<IReadOnlyList<DataElement>>> GetInstanceDataElements(
+        [FromRoute] Guid instanceGuid,
+        CancellationToken ct
+    )
+    {
+        var result = await altinnRecoveryService.GetDataElementsForInstance(instanceGuid, ct);
+        return result != null ? Ok(result) : NotFound();
+    }
+
+    [HttpGet("instances/{instanceGuid}/data-elements/{dataElementId}")]
+    public async Task<ActionResult> DownloadInstanceDataElement(
+        [FromRoute] Guid instanceGuid,
+        [FromRoute] Guid dataElementId,
+        CancellationToken ct
+    )
+    {
+        var result = await altinnRecoveryService.DownloadDataElement(
+            instanceGuid,
+            dataElementId,
+            ct
+        );
+        if (result == null)
+            return NotFound();
+        return File(result.Content, result.ContentType, result.Filename);
+    }
+
+    [HttpGet("instances/{instanceGuid}/metadata")]
+    public async Task<ActionResult<AltinnInstance>> GetInstanceMetadata(
+        [FromRoute] Guid instanceGuid,
+        CancellationToken ct
+    )
+    {
+        var result = await altinnRecoveryService.GetInstanceMetadata(instanceGuid, ct);
+        return result != null ? Ok(result) : NotFound();
     }
 }
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.7.0
+
+### Added
+
+- feat(altinn): add `GET /altinn/instances/{instanceGuid}/metadata` to retrieve instance metadata including process status.
+- feat(altinn): add `GET /altinn/instances/{instanceGuid}/data-elements` to enumerate data elements on an instance.
+- feat(altinn): add `GET /altinn/instances/{instanceGuid}/data-elements/{dataElementId}` to download a specific data element.
+
+### Changed
+
+- feat(altinn): resolve instance lookups across registered apps via Altinn storage queries instead of limiting to non-completed instances.
+
 ## 1.6.5
 
 - fix(ci): restore SBOM attestation image reference format to `receiver:<version>@sha256:<digest>` (revert 1.6.4)
