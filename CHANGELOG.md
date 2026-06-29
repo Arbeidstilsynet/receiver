@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.8.0
+
+### Added
+
+- feat(altinn): add `POST /altinn/process/{appId}/{instanceGuid}` endpoint to process a single registered Altinn instance. Returns `200 OK` with the processed melding ID on success, `400 Bad Request` when the instance is not in a processable state (not a non-completed instance), and `404 Not Found` when the instance cannot be found within the app's registrations.
+
 ## 1.7.0
 
 ### Added

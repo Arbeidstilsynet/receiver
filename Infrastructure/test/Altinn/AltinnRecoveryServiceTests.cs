@@ -234,6 +234,58 @@ public class AltinnRecoveryServiceTests
     }
 
     [Fact]
+    public async Task GetInstanceMetadata_WhenAppIdIsRegistered_ReturnsInstanceForThatApp()
+    {
+        // arrange
+        var instanceGuid = Guid.NewGuid();
+        var instance = CreateInstance(instanceGuid, "1001");
+        _subscriptionsRepository
+            .GetActiveAltinnSubscription(SampleTestAppRegistration.AltinnAppId)
+            .Returns(SampleTestAppRegistration);
+        _altinnStorageClient
+            .GetInstances(
+                Arg.Is<InstanceQueryParameters>(q =>
+                    q.AppId == $"dat/{SampleTestAppRegistration.AltinnAppId}"
+                    && string.IsNullOrEmpty(q.ContinuationToken)
+                )
+            )
+            .Returns(CreatePage([instance], null));
+
+        // act
+        var result = await _sut.GetInstanceMetadata(
+            SampleTestAppRegistration.AltinnAppId,
+            instanceGuid,
+            TestContext.Current.CancellationToken
+        );
+
+        // assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(instance.Id);
+    }
+
+    [Fact]
+    public async Task GetInstanceMetadata_WhenAppIdIsNotRegistered_ReturnsNull()
+    {
+        // arrange
+        var instanceGuid = Guid.NewGuid();
+        const string missingAppId = "missing-app";
+        _subscriptionsRepository
+            .GetActiveAltinnSubscription(missingAppId)
+            .Returns((AltinnConnection?)null);
+
+        // act
+        var result = await _sut.GetInstanceMetadata(
+            missingAppId,
+            instanceGuid,
+            TestContext.Current.CancellationToken
+        );
+
+        // assert
+        result.ShouldBeNull();
+        await _altinnStorageClient.DidNotReceive().GetInstances(Arg.Any<InstanceQueryParameters>());
+    }
+
+    [Fact]
     public async Task GetDataElementsForInstance_WhenInstanceExists_ReturnsDataElements()
     {
         // arrange

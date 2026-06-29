@@ -4,6 +4,8 @@ using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
+using Arbeidstilsynet.Receiver.Model.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
@@ -109,6 +111,48 @@ public class AltinnController(
             );
         }
         return resultList;
+    }
+
+    [HttpPost("process/{appId}/{instanceGuid:guid}")]
+    [ProducesResponseType<PostMeldingResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<string>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PostMeldingResponse>> ProcessInstance(
+        [FromRoute] string appId,
+        [FromRoute] Guid instanceGuid,
+        CancellationToken cancellationToken
+    )
+    {
+        var processableInstance = (
+            await altinnRecoveryService.GetNonCompletedInstancesByAppId(appId)
+        )?.FirstOrDefault(instance => instance.Metadata.InstanceGuid == instanceGuid);
+
+        if (processableInstance == null)
+        {
+            var instanceMetadata = await altinnRecoveryService.GetInstanceMetadata(
+                appId,
+                instanceGuid,
+                cancellationToken
+            );
+
+            if (instanceMetadata == null)
+            {
+                return NotFound();
+            }
+
+            return BadRequest(
+                $"Instance '{instanceGuid}' for appId '{appId}' is not ready to be processed."
+            );
+        }
+
+        var melding = await processableInstance.ProcessSingleInstance(
+            appId,
+            meldingService,
+            apiMeters,
+            cancellationToken
+        );
+
+        return Ok(new PostMeldingResponse { MeldingId = melding.Id });
     }
 
     [HttpGet("instances/{instanceGuid}/data-elements")]

@@ -64,6 +64,15 @@ internal class AltinnRecoveryService(
     }
 
     public Task<AltinnInstance?> GetInstanceMetadata(
+        string appId,
+        Guid instanceGuid,
+        CancellationToken ct = default
+    )
+    {
+        return GetInstanceByGuidForAppId(appId, instanceGuid, ct);
+    }
+
+    public Task<AltinnInstance?> GetInstanceMetadata(
         Guid instanceGuid,
         CancellationToken ct = default
     )
@@ -130,34 +139,70 @@ internal class AltinnRecoveryService(
         var registeredApps = await subscriptionRepository.GetAllActiveAltinnSubscriptions();
         foreach (var appId in registeredApps.Select(s => s.AltinnAppId).Distinct())
         {
-            var normalizedAppId = EnsureQualifiedAltinnAppId(appId);
-            string? continuationToken = null;
-            do
+            var matchingInstance = await GetInstanceByGuidWithinApp(
+                EnsureQualifiedAltinnAppId(appId),
+                instanceGuid,
+                ct
+            );
+            if (matchingInstance != null)
             {
-                ct.ThrowIfCancellationRequested();
-                var page = await altinnStorageClient.GetInstances(
-                    new InstanceQueryParameters
-                    {
-                        AppId = normalizedAppId,
-                        ContinuationToken = continuationToken,
-                    }
-                );
-
-                var matchingInstance = page.Instances.FirstOrDefault(instance =>
-                    TryParseInstanceGuid(instance.Id, out var parsedGuid)
-                    && parsedGuid == instanceGuid
-                );
-                if (matchingInstance != null)
-                {
-                    return matchingInstance;
-                }
-                continuationToken = GetContinuationToken(page.Next);
-            } while (!string.IsNullOrWhiteSpace(continuationToken));
+                return matchingInstance;
+            }
         }
         logger.LogWarning(
             "Could not resolve instance metadata for instance {InstanceGuid}",
             instanceGuid
         );
+        return null;
+    }
+
+    private async Task<AltinnInstance?> GetInstanceByGuidForAppId(
+        string appId,
+        Guid instanceGuid,
+        CancellationToken ct
+    )
+    {
+        var appRegistration = await subscriptionRepository.GetActiveAltinnSubscription(appId);
+        if (appRegistration == null)
+        {
+            return null;
+        }
+
+        return await GetInstanceByGuidWithinApp(
+            EnsureQualifiedAltinnAppId(appRegistration.AltinnAppId),
+            instanceGuid,
+            ct
+        );
+    }
+
+    private async Task<AltinnInstance?> GetInstanceByGuidWithinApp(
+        string normalizedAppId,
+        Guid instanceGuid,
+        CancellationToken ct
+    )
+    {
+        string? continuationToken = null;
+        do
+        {
+            ct.ThrowIfCancellationRequested();
+            var page = await altinnStorageClient.GetInstances(
+                new InstanceQueryParameters
+                {
+                    AppId = normalizedAppId,
+                    ContinuationToken = continuationToken,
+                }
+            );
+
+            var matchingInstance = page.Instances.FirstOrDefault(instance =>
+                TryParseInstanceGuid(instance.Id, out var parsedGuid) && parsedGuid == instanceGuid
+            );
+            if (matchingInstance != null)
+            {
+                return matchingInstance;
+            }
+            continuationToken = GetContinuationToken(page.Next);
+        } while (!string.IsNullOrWhiteSpace(continuationToken));
+
         return null;
     }
 
