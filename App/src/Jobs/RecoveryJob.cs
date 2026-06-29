@@ -43,6 +43,22 @@ public record RecoveryJobResult
 
 internal static class RecoveryJobExtensions
 {
+    public static async Task<Melding> ProcessSingleInstance(
+        this AltinnInstanceSummary instance,
+        string appId,
+        IMeldingService meldingService,
+        ApiMeters apiMeters,
+        CancellationToken cancellationToken
+    )
+    {
+        var request = instance.MapAltinnSummaryToPostMeldingRequest();
+        apiMeters.MeldingReceived(MessageSource.Altinn, appId);
+        var melding = await meldingService.ProcessMelding(request, cancellationToken);
+        apiMeters.MeldingProcessed(melding);
+        apiMeters.RegisterMeldingDuration(melding);
+        return melding;
+    }
+
     public static async Task<RecoveryJobResult> RunRecoveryJob(
         this IEnumerable<AltinnInstanceSummary> instances,
         string appId,
@@ -78,11 +94,12 @@ internal static class RecoveryJobExtensions
 
             try
             {
-                var request = instance.MapAltinnSummaryToPostMeldingRequest();
-                apiMeters.MeldingReceived(MessageSource.Altinn, appId);
-                var melding = await meldingService.ProcessMelding(request, cancellationToken);
-                apiMeters.MeldingProcessed(melding);
-                apiMeters.RegisterMeldingDuration(melding);
+                await instance.ProcessSingleInstance(
+                    appId,
+                    meldingService,
+                    apiMeters,
+                    cancellationToken
+                );
                 jobsLeftForAppId--;
                 processedCount++;
             }
