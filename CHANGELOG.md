@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.8.1
+
+### Changed
+
+- chore(deps): updated all patch and minor dependencies
+
 ## 1.8.0
 
 ### Added
@@ -28,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 1.6.5
 
 - fix(ci): restore SBOM attestation image reference format to `receiver:<version>@sha256:<digest>` (revert 1.6.4)
+
 ## 1.6.4
 
 - fix(ci): attest SBOM against the version-tagged NAIS image reference (`receiver:<version>:sha256:<digest>`) so it actually matches the deployed image identity. nth time's the charm.
@@ -65,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - chore(ci): generate and sign SBOM attestations for Receiver images published to GHCR
+
 ## 1.5.1
 
 ### Added
