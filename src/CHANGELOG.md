@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - chore: moved the .NET solution into `src/` and updated build references
+- docs: rewrote the published package README with a consumer implementation guide
 
 ## 1.8.1
 
