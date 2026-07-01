@@ -2,7 +2,7 @@
   "name": "receiver-tooling",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.9.0",
   "types": "./generated/types.d.ts",
   "exports": {
     ".": {
@@ -15,7 +15,7 @@
     "generate:types": "pnpm generate:openapi && pnpm generate:ts"
   },
   "devDependencies": {
-    "openapi-typescript": "7.10.1",
+    "openapi-typescript": "7.13.0",
     "typescript": "6.0.3"
   }
 }
