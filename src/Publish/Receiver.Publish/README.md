@@ -10,6 +10,24 @@ meldinger, and download the structured data and documents that belong to them.
 > Domain terms are kept in Norwegian on purpose (e.g. `Melding`, `ConsumerManifest`) to stay
 > consistent with the naming used across the domain.
 
+## 📦 This client integrates with a MeldingerReceiver container
+
+This package is a **client** — it does not host the receiver itself. It talks to a running
+MeldingerReceiver service, distributed as the container image
+[`ghcr.io/arbeidstilsynet/receiver`](https://github.com/Arbeidstilsynet/receiver/pkgs/container/receiver).
+
+**Use the container image tag that matches this package's version.** The NuGet package and the
+container image are built and released together from the same version, so a given package
+version is verified against the container image carrying the same tag:
+
+```
+Arbeidstilsynet.Receiver  vX.Y.Z   ⟷   ghcr.io/arbeidstilsynet/receiver:X.Y.Z
+```
+
+Point `MeldingerReceiverApiConfiguration.BaseUrl` at that container, and connect both the
+container and this client to the same Valkey (Redis) instance. Running mismatched versions is
+not supported and may break message compatibility.
+
 ## 🧑‍💻 Getting started
 
 ### 1. Register the receiver
@@ -30,6 +48,10 @@ services.AddMeldingerReceiverWithBackgroundService<MyMeldingerConsumer>(
 Your consumer (`T`) is registered as a scoped `IMeldingerConsumer`. If you want to wire the
 dependencies yourself (for example in tests), call `AddMeldingerReceiver(...)` instead, which
 registers everything except the background listener.
+
+> `BaseUrl` must point at a MeldingerReceiver container whose tag matches this package's version
+> (see [above](#-this-client-integrates-with-a-meldingerreceiver-container)), and
+> `ConnectionString` must reference the same Valkey instance the container is connected to.
 
 ### 2. Implement `IMeldingerConsumer`
 
