@@ -36,21 +36,8 @@ jobs:
           include: |
             ./.config
             ./.dockerignore
-            ./src/App
-            ./src/ArchUnit.Tests
-            ./src/Domain
+            ./src
             ./Dockerfile
-            ./src/generated
-            ./src/Infrastructure
-            ./src/MeldingerReceiver.slnx
-            ./nuget.config
-            ./src/npm_publish
-            ./package.json
-            ./pnpm-lock.yaml
-            ./src/Publish
-            ./src/Tools
-            ./src/CHANGELOG.md
-            ./README.md
           exclude: |
             ./compose**.yaml
 

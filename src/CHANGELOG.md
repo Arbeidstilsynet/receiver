@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.8.2
+
+### Changed
+
+- chore: moved the .NET solution into `src/` and updated build references
+
 ## 1.8.1
 
 ### Changed

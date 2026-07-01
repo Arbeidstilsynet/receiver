@@ -7,7 +7,6 @@ WORKDIR /source
 ENV NUGET_XMLDOC_MODE=skip
 
 COPY src/MeldingerReceiver.slnx .
-COPY nuget.config .
 COPY src/global.json .
 
 # Copy project files first to maximize Docker layer caching for restore.

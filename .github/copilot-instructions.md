@@ -11,7 +11,7 @@ Norwegian on purpose (e.g. `Melding`, `Subscription`, `ConsumerManifest`).
 
 ## Documentation map
 
-- [README](../README.md) — getting started, project structure, logging, observability
+- [README](../src/README.md) — getting started, project structure, logging, observability
 - [documentation/architecture.md](../documentation/architecture.md) — how the publisher/consumer flow works
 - [documentation/configuration.md](../documentation/configuration.md) — environment variables and deployment
 
