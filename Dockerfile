@@ -6,26 +6,26 @@ WORKDIR /source
 # Improves restore speed by skipping XML docs.
 ENV NUGET_XMLDOC_MODE=skip
 
-COPY MeldingerReceiver.slnx .
+COPY src/MeldingerReceiver.slnx .
 COPY nuget.config .
-COPY global.json .
+COPY src/global.json .
 
 # Copy project files first to maximize Docker layer caching for restore.
-COPY App/src/App.csproj ./App/src/
-COPY Domain/Ports/App/Domain.Ports.App.csproj ./Domain/Ports/App/
-COPY Domain/Data/Domain.Data.csproj ./Domain/Data/
-COPY Domain/Logic/src/Domain.Logic.csproj ./Domain/Logic/src/
-COPY Domain/Ports/Infrastructure/Domain.Ports.Infrastructure.csproj ./Domain/Ports/Infrastructure/
-COPY Infrastructure/src/Infrastructure.csproj ./Infrastructure/src/
-COPY Publish/Receiver.Publish/Receiver.Publish.csproj ./Publish/Receiver.Publish/
+COPY src/App/src/App.csproj ./App/src/
+COPY src/Domain/Ports/App/Domain.Ports.App.csproj ./Domain/Ports/App/
+COPY src/Domain/Data/Domain.Data.csproj ./Domain/Data/
+COPY src/Domain/Logic/src/Domain.Logic.csproj ./Domain/Logic/src/
+COPY src/Domain/Ports/Infrastructure/Domain.Ports.Infrastructure.csproj ./Domain/Ports/Infrastructure/
+COPY src/Infrastructure/src/Infrastructure.csproj ./Infrastructure/src/
+COPY src/Publish/Receiver.Publish/Receiver.Publish.csproj ./Publish/Receiver.Publish/
 
 RUN dotnet restore ./App/src/App.csproj
 
 # Copy the remaining source code.
-COPY Domain/ ./Domain/
-COPY App/ ./App/
-COPY Infrastructure/ ./Infrastructure/
-COPY Publish/ ./Publish/
+COPY src/Domain/ ./Domain/
+COPY src/App/ ./App/
+COPY src/Infrastructure/ ./Infrastructure/
+COPY src/Publish/ ./Publish/
 
 RUN dotnet publish ./App/src/App.csproj -c Release -f net10.0 -o /app --no-restore
 

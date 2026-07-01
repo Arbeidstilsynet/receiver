@@ -36,20 +36,20 @@ jobs:
           include: |
             ./.config
             ./.dockerignore
-            ./App
-            ./ArchUnit.Tests
-            ./Domain
+            ./src/App
+            ./src/ArchUnit.Tests
+            ./src/Domain
             ./Dockerfile
-            ./generated
-            ./Infrastructure
-            ./MeldingerReceiver.slnx
+            ./src/generated
+            ./src/Infrastructure
+            ./src/MeldingerReceiver.slnx
             ./nuget.config
-            ./npm_publish
+            ./src/npm_publish
             ./package.json
             ./pnpm-lock.yaml
-            ./Publish
-            ./Tools
-            ./CHANGELOG.md
+            ./src/Publish
+            ./src/Tools
+            ./src/CHANGELOG.md
             ./README.md
           exclude: |
             ./compose**.yaml
@@ -64,7 +64,7 @@ jobs:
       - name: Build and Test .NET solution
         uses: Arbeidstilsynet/action-dotnet-build@0a55503485ec99ea192916a1804ddb7d91242bfe # v4
         with:
-          working-directory: ./
+          working-directory: ./src
       - uses: Arbeidstilsynet/action-pnpm-setup@618fbc6ee30a13d077086cafba92b4e6cdca0f78 # v1
 
       - name: Generate types
@@ -72,7 +72,7 @@ jobs:
 
       - name: Verify generated types are up to date
         run: |
-          if [ -n "$(git status --porcelain -- 'generated')" ]; then
+          if [ -n "$(git status --porcelain -- 'src/generated')" ]; then
             echo "::error::Generated types are out of date. Run 'pnpm generate:types' locally and commit the result."
             exit 1
           fi
@@ -94,7 +94,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
       - name: Check if version is prerelease
         id: prerelease_check
         run: |
@@ -182,10 +182,10 @@ jobs:
 
       - name: Fail if changelog is missing
         run: |
-          if [ -f CHANGELOG.md ]; then
+          if [ -f src/CHANGELOG.md ]; then
             echo "Changelog found."
             # Optionally, check if the changelog contains the version string
-            if grep -q "${{ needs.check_publish_version.outputs.publish-version }}" "CHANGELOG.md"; then
+            if grep -q "${{ needs.check_publish_version.outputs.publish-version }}" "src/CHANGELOG.md"; then
               echo "✅ Changelog contains entry for version ${{ needs.check_publish_version.outputs.publish-version }}."
             else
               echo "❌ Changelog does not contain entry for version ${{ needs.check_publish_version.outputs.publish-version }}."

@@ -16,6 +16,8 @@ Prerequisites:
 
 To test and debug locally, you need to run the following commands:
 
+> Run `dotnet` / `dotnet ef` commands from the `src/` directory (the solution `MeldingerReceiver.slnx` lives there). Run `docker compose` and `pnpm` commands from the repository root.
+
 ```terminal
 docker compose -f compose.infra.yaml --profile monitoring up -d
 ```
@@ -85,23 +87,28 @@ dotnet test
 <!-- prettier-ignore -->
 ```md
 .
-├── App
-│   ├── src
-│   └── test
-├── ArchUnit.Tests
-├── Domain
-│   ├── Data
-│   ├── Logic
-│   │   ├── src
-│   │   └── test
-│   └── Ports
-│       ├── App
-│       └── Infrastructure
-├── Infrastructure
-│   ├── src
-│   └── test
-└── Tools
-    └── Tools.GenerateOpenApi
+└── src
+    ├── App
+    │   ├── src
+    │   └── test
+    ├── ArchUnit.Tests
+    ├── Domain
+    │   ├── Data
+    │   ├── Logic
+    │   │   ├── src
+    │   │   └── test
+    │   └── Ports
+    │       ├── App
+    │       └── Infrastructure
+    ├── Infrastructure
+    │   ├── src
+    │   └── test
+    ├── Publish
+    │   └── Receiver.Publish
+    ├── Tools
+    │   └── Tools.GenerateOpenApi
+    ├── generated
+    └── npm_publish
 ```
 
 - ArchUnit.Tests
@@ -196,7 +203,7 @@ This template includes automated TypeScript type generation from your OpenAPI sp
 ### Setup and Customization
 
 1. **Type generation tooling** is configured in [package.json](./package.json).
-2. **Customize the OpenAPI specification** in [App/src/Extensions/StartupExtensions.cs](./App/src/Extensions/StartupExtensions.cs), where `ConfigureApi()` calls `ConfigureBasicOpenApiSpec(...)`.
+2. **Customize the OpenAPI specification** in [src/App/src/Extensions/StartupExtensions.cs](./src/App/src/Extensions/StartupExtensions.cs), where `ConfigureApi()` calls `ConfigureBasicOpenApiSpec(...)`.
 3. **Adjust TypeScript generation options** in [package.json](./package.json). Update the `generate:ts` script to customize [openapi-typescript](https://openapi-ts.dev/cli) behavior as needed.
 
 ### Generate TypeScript Types
@@ -210,12 +217,12 @@ pnpm generate:types
 
 This will:
 
-1. Generate the OpenAPI specification in `generated/openApi.json`
-2. Generate TypeScript type definitions in `generated/types.d.ts`
+1. Generate the OpenAPI specification in `src/generated/openApi.json`
+2. Generate TypeScript type definitions in `src/generated/types.d.ts`
 
 ### Publish TypeScript Types
 
-The publishable npm package root is [npm_publish](./npm_publish). It is published alongside receiver releases and uses the version from [Publish/Receiver.Publish/Receiver.Publish.csproj](./Publish/Receiver.Publish/Receiver.Publish.csproj), so the committed npm package version is only a placeholder and should not be bumped manually.
+The publishable npm package root is [src/npm_publish](./src/npm_publish). It is published alongside receiver releases and uses the version from [src/Publish/Receiver.Publish/Receiver.Publish.csproj](./src/Publish/Receiver.Publish/Receiver.Publish.csproj), so the committed npm package version is only a placeholder and should not be bumped manually.
 
 Prerelease receiver versions (`*-*`) are published with the `next` npm tag. Stable receiver versions use npm's default tag.
 

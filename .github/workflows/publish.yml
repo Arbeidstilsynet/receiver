@@ -27,7 +27,7 @@ jobs:
         id: csproj-metadata
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
 
       - name: Check if version is prerelease
         id: prerelease_check
@@ -57,7 +57,7 @@ jobs:
 
       - name: Get npm package name
         id: npm_metadata
-        working-directory: ./npm_publish
+        working-directory: ./src/npm_publish
         shell: bash
         run: |
           NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
