@@ -15,7 +15,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 schema: "quartz",
                 table: "qrtz_triggers",
                 type: "bigint",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
@@ -24,7 +25,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
             migrationBuilder.DropColumn(
                 name: "misfire_orig_fire_time",
                 schema: "quartz",
-                table: "qrtz_triggers");
+                table: "qrtz_triggers"
+            );
         }
     }
 }
