@@ -26,7 +26,7 @@ jobs:
         id: get_metadata_from_csprojectfile
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
 
       - name: Check if package version exists
         id: nuget_version_check
@@ -45,7 +45,7 @@ jobs:
 
       - name: Get npm package name
         id: npm_metadata
-        working-directory: ./npm_publish
+        working-directory: ./src/npm_publish
         run: |
           NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
 
@@ -82,7 +82,7 @@ jobs:
 
       - name: Publish npm package if not already published
         if: needs.setup.outputs.npm_published == 'false'
-        working-directory: ./npm_publish
+        working-directory: ./src/npm_publish
         run: |
           set -euo pipefail
 
@@ -104,7 +104,7 @@ jobs:
         if: needs.setup.outputs.nuget_published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@74f56a48df6466a1b1986cd298a71ed8a94311b6 # v3
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta
@@ -159,7 +159,7 @@ jobs:
 
       - name: Publish npm package if not already published
         if: needs.setup.outputs.npm_published == 'false'
-        working-directory: ./npm_publish
+        working-directory: ./src/npm_publish
         run: |
           set -euo pipefail
 
@@ -181,7 +181,7 @@ jobs:
         if: needs.setup.outputs.nuget_published == 'false'
         uses: Arbeidstilsynet/action-dotnet-publish@74f56a48df6466a1b1986cd298a71ed8a94311b6 # v3
         with:
-          working-directory: ./Publish/Receiver.Publish
+          working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta
@@ -266,14 +266,14 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ needs.setup.outputs.version }}"
-          if [ -f CHANGELOG.md ]; then
+          if [ -f src/CHANGELOG.md ]; then
             awk -v ver="$VERSION" '
               BEGIN {found=0}
               # Match headings like ## 1.2.3 or ## [1.2.3]
               $0 ~ "^##[[:space:]]*\\[?"ver"\\]?" {found=1; print; next}
               found && /^##[[:space:]]*\[?[0-9]+\.[0-9]+\.[0-9]+/ {exit}
               found {print}
-            ' CHANGELOG.md > section.txt
+            ' src/CHANGELOG.md > section.txt
             echo 'changelog<<EOF' >> $GITHUB_OUTPUT
             cat section.txt >> $GITHUB_OUTPUT
             echo 'EOF' >> $GITHUB_OUTPUT

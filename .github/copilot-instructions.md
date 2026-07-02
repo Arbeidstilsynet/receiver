@@ -11,13 +11,14 @@ Norwegian on purpose (e.g. `Melding`, `Subscription`, `ConsumerManifest`).
 
 ## Documentation map
 
-- [README](../README.md) — getting started, project structure, logging, observability
+- [README](../src/README.md) — getting started, project structure, logging, observability
 - [documentation/architecture.md](../documentation/architecture.md) — how the publisher/consumer flow works
 - [documentation/configuration.md](../documentation/configuration.md) — environment variables and deployment
 
 ## Build, run and test
 
-Run all commands from the repository root (solution: `MeldingerReceiver.slnx`).
+Run .NET commands (`dotnet`, `csharpier`, `dotnet ef`) from the `src/` directory
+(solution: `MeldingerReceiver.slnx`). Run `pnpm` and `docker` commands from the repository root.
 
 ```sh
 # Start infra (postgres, valkey, GCS emulator); add --profile monitoring for telemetry
@@ -36,7 +37,7 @@ dotnet csharpier check .
 ```
 
 - **SDK: .NET 10** (`global.json` is the source of truth). Test runner is `Microsoft.Testing.Platform`.
-- EF Core migrations (run from the repository root):
+- EF Core migrations (run from `src/`):
   ```sh
   dotnet ef migrations add <Name> --startup-project App/src --project Infrastructure/src -o Db/Migrations
   ```
@@ -85,7 +86,7 @@ this checklist before pushing:
    dotnet build
    dotnet test
    ```
-3. If version is bumped (`Publish/Receiver.Publish/Receiver.Publish.csproj`), update `CHANGELOG.md`
+3. If version is bumped (`src/Publish/Receiver.Publish/Receiver.Publish.csproj`), update `src/CHANGELOG.md`
    in the same change.
-4. Verify generated artifacts are committed when changed (`generated/openApi.json`,
-   `generated/types.d.ts`).
+4. Verify generated artifacts are committed when changed (`src/generated/openApi.json`,
+   `src/generated/types.d.ts`).
