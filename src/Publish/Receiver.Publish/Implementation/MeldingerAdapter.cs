@@ -8,7 +8,10 @@ namespace Arbeidstilsynet.Receiver.Implementation;
 internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<MeldingerAdapter> logger)
     : IMeldingerAdapter
 {
-    public async Task<TStructuredData?> FetchStructuredData<TStructuredData>(Melding melding)
+    public async Task<TStructuredData?> FetchStructuredData<TStructuredData>(
+        Melding melding,
+        JsonSerializerOptions? jsonSerializerOptions = null
+    )
     {
         if (melding.StructuredDataId is not { } structuredDataId)
             return default(TStructuredData);
@@ -60,7 +63,10 @@ internal class MeldingerAdapter(IMeldingerClient meldingerClient, ILogger<Meldin
 
         try
         {
-            var structuredData = JsonSerializer.Deserialize<TStructuredData>(document);
+            var structuredData = JsonSerializer.Deserialize<TStructuredData>(
+                document,
+                jsonSerializerOptions
+            );
 
             if (structuredData is null)
             {
