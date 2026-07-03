@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.8.3
+
+### Added
+
+- feat: enhanced `IMeldingerAdapter` to support providing of custom `JsonSerializerOptions`
+
 ## 1.8.2
 
 ### Changed

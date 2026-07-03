@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 
 namespace Arbeidstilsynet.Receiver.Ports;
@@ -12,5 +13,9 @@ public interface IMeldingerAdapter
     /// </summary>
     /// <typeparam name="TStructuredData">The type of the structured data.</typeparam>
     /// <param name="melding">The melding for which to retrieve the document.</param>
-    Task<TStructuredData?> FetchStructuredData<TStructuredData>(Melding melding);
+    /// <param name="jsonSerializerOptions">Optional json serializer options</param>
+    Task<TStructuredData?> FetchStructuredData<TStructuredData>(
+        Melding melding,
+        JsonSerializerOptions? jsonSerializerOptions = null
+    );
 }
