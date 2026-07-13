@@ -12,7 +12,7 @@
     <PackageReference Include="Quartz.Serialization.Json" Version="3.18.2" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.15.0" />
     <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="3.2.4" />
-    <PackageReference Include="StackExchange.Redis" Version="2.13.17" />
+    <PackageReference Include="StackExchange.Redis" Version="3.0.17" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
     <PackageReference
       Include="AppAny.Quartz.EntityFrameworkCore.Migrations.PostgreSQL"
