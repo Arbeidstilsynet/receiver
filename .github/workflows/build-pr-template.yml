@@ -41,6 +41,7 @@ jobs:
             ./Dockerfile
           exclude: |
             ./src/**/test/**
+            ./src/**/*.Test/**
             ./compose**.yaml
 
       - name: Testfiles changed?
@@ -49,6 +50,7 @@ jobs:
         with:
           base-ref: origin/main
           include: |
+            ./src/**/*.Test/**
             ./src/**/test/**
 
   build_dotnet:
