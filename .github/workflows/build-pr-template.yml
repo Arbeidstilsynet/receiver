@@ -39,6 +39,7 @@ jobs:
             ./src
             ./Dockerfile
           exclude: |
+            ./src/**/test/**
             ./compose**.yaml
 
   build_dotnet:
