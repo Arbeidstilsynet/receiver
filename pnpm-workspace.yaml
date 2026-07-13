@@ -7,7 +7,7 @@ peerDependencyRules:
     typescript: 6.0.3
 
 overrides:
-  js-yaml@<=4.1.1: ^4.1.2
+  js-yaml@<=4.1.1: ^5.0.0
 
 minimumReleaseAgeExclude:
   - js-yaml@4.1.2
