@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       backend: ${{ steps.backend.outputs.changes_detected }}
+      testfiles: ${{ steps.testfiles.outputs.changes_detected }}
     permissions:
       contents: read
       actions: read
@@ -42,10 +43,18 @@ jobs:
             ./src/**/test/**
             ./compose**.yaml
 
+      - name: Testfiles changed?
+        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
+        id: testfiles
+        with:
+          base-ref: origin/main
+          include: |
+            ./src/**/test/**
+
   build_dotnet:
     needs: [check_changes]
     runs-on: ubuntu-latest
-    if: needs.check_changes.outputs.backend == 'true'
+    if: needs.check_changes.outputs.backend == 'true' || needs.check_changes.outputs.testfiles == 'true'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
