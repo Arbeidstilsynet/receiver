@@ -39,7 +39,7 @@ services:
 
   file-storage:
     container_name: file-storage
-    image: fsouza/fake-gcs-server@sha256:3730da0e31f7e5186a90ec4899dc2c336104e7599df400411392ef17e684c31f
+    image: fsouza/fake-gcs-server@sha256:2845d1504bb4a5a4fe54b16dd70e398814eb139af49b01b07839e016120ff123
     networks:
       - meldinger_network
     ports:
