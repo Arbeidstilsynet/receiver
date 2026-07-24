@@ -257,7 +257,7 @@ jobs:
 
       - name: Generate SBOM and sign NAIS image
         if: needs.setup.outputs.nuget_published == 'false'
-        uses: nais/attest-sign@bb00e4baa4e7acd00b6aff2502b2dfed3d4fad40 # v2
+        uses: nais/attest-sign@257e2d7a5964fb8e35173227c9496ad2a098e9c6 # v2
         with:
           image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
