@@ -19,6 +19,8 @@ jobs:
       nuget-published: ${{ steps.nuget_version_check.outputs.published }}
       npm-published: ${{ steps.npm_version_check.outputs.published }}
       image-published: ${{ steps.ghcr_image_check.outputs.published }}
+      release-published: ${{ steps.release_check.outputs.published }}
+      all-published: ${{ steps.publish_status.outputs.all_published }}
     permissions:
       contents: read
       actions: read
@@ -108,16 +110,40 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Log publish status
+      - name: Check if GitHub Release exists
+        id: release_check
         shell: bash
         run: |
+          set -euo pipefail
+          TAG="${{ steps.csproj-metadata.outputs.name }}@${{ steps.csproj-metadata.outputs.version }}"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "published=true" >> $GITHUB_OUTPUT
+          else
+            echo "published=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Log publish status
+        id: publish_status
+        shell: bash
+        run: |
+          NUGET="${{ steps.nuget_version_check.outputs.published }}"
+          NPM="${{ steps.npm_version_check.outputs.published }}"
+          IMAGE="${{ steps.ghcr_image_check.outputs.published }}"
+          RELEASE="${{ steps.release_check.outputs.published }}"
           VERSION="${{ steps.csproj-metadata.outputs.version }}"
-          echo "Version $VERSION — NuGet: ${{ steps.nuget_version_check.outputs.published }}, npm: ${{ steps.npm_version_check.outputs.published }}, image: ${{ steps.ghcr_image_check.outputs.published }}"
+          echo "Version $VERSION — NuGet: $NUGET, npm: $NPM, image: $IMAGE, release: $RELEASE"
+          if [ "$NUGET" = "true" ] && [ "$NPM" = "true" ] && [ "$IMAGE" = "true" ] && [ "$RELEASE" = "true" ]; then
+            echo "all_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "all_published=false" >> $GITHUB_OUTPUT
+          fi
 
   already_published:
     name: Stop when already published
     needs: [check_publish_targets]
-    if: ${{ needs.check_publish_targets.outputs.nuget-published == 'true' && needs.check_publish_targets.outputs.npm-published == 'true' && needs.check_publish_targets.outputs.image-published == 'true' }}
+    if: ${{ needs.check_publish_targets.outputs.all-published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Report skipped publish
@@ -128,7 +154,7 @@ jobs:
   check_pr_publish_version:
     name: Check PR publish version
     needs: [check_publish_targets]
-    if: ${{ github.event_name == 'pull_request' && (needs.check_publish_targets.outputs.nuget-published != 'true' || needs.check_publish_targets.outputs.npm-published != 'true' || needs.check_publish_targets.outputs.image-published != 'true') }}
+    if: ${{ github.event_name == 'pull_request' && needs.check_publish_targets.outputs.all-published != 'true' }}
     uses: ./.github/workflows/build-pr-template.yml
     permissions:
       contents: read
@@ -137,7 +163,7 @@ jobs:
   publish_prerelease_when_changed:
     name: Publish prerelease if changed
     needs: [check_publish_targets, check_pr_publish_version]
-    if: ${{ github.event_name == 'pull_request' && (needs.check_publish_targets.outputs.nuget-published != 'true' || needs.check_publish_targets.outputs.npm-published != 'true' || needs.check_publish_targets.outputs.image-published != 'true') && needs.check_pr_publish_version.outputs['is-prerelease'] == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'pull_request' && needs.check_publish_targets.outputs.all-published != 'true' && needs.check_pr_publish_version.outputs['is-prerelease'] == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: ./.github/workflows/publish-template.yml
     permissions:
       id-token: write
@@ -148,11 +174,12 @@ jobs:
       nuget-published: ${{ needs.check_publish_targets.outputs.nuget-published == 'true' }}
       npm-published: ${{ needs.check_publish_targets.outputs.npm-published == 'true' }}
       image-published: ${{ needs.check_publish_targets.outputs.image-published == 'true' }}
+      release-published: ${{ needs.check_publish_targets.outputs.release-published == 'true' }}
 
   publish_release_when_changed:
     name: Publish release if changed
     needs: [check_publish_targets]
-    if: ${{ github.event_name == 'push' && (needs.check_publish_targets.outputs.nuget-published != 'true' || needs.check_publish_targets.outputs.npm-published != 'true' || needs.check_publish_targets.outputs.image-published != 'true') }}
+    if: ${{ github.event_name == 'push' && needs.check_publish_targets.outputs.all-published != 'true' }}
     uses: ./.github/workflows/publish-template.yml
     permissions:
       id-token: write
@@ -163,3 +190,4 @@ jobs:
       nuget-published: ${{ needs.check_publish_targets.outputs.nuget-published == 'true' }}
       npm-published: ${{ needs.check_publish_targets.outputs.npm-published == 'true' }}
       image-published: ${{ needs.check_publish_targets.outputs.image-published == 'true' }}
+      release-published: ${{ needs.check_publish_targets.outputs.release-published == 'true' }}

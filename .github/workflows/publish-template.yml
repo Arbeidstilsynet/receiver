@@ -19,6 +19,10 @@ on:
         description: "Whether the Docker image is already published"
         required: true
         type: boolean
+      release-published:
+        description: "Whether the GitHub Release is already created"
+        required: true
+        type: boolean
 
 jobs:
   setup:
@@ -250,7 +254,7 @@ jobs:
           image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
       - name: Extract changelog section for current version
-        if: inputs.nuget-published == false
+        if: inputs.release-published == false
         id: changelog
         run: |
           VERSION="${{ needs.setup.outputs.version }}"
@@ -270,7 +274,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: inputs.nuget-published == false
+        if: inputs.release-published == false
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: "${{ needs.setup.outputs.name }}@${{ needs.setup.outputs.version }}"
