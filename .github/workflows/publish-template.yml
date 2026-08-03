@@ -7,6 +7,18 @@ on:
         description: "Whether the version to publish is a prerelease"
         required: true
         type: boolean
+      nuget-published:
+        description: "Whether the NuGet package version is already published"
+        required: true
+        type: boolean
+      npm-published:
+        description: "Whether the npm package version is already published"
+        required: true
+        type: boolean
+      image-published:
+        description: "Whether the Docker image is already published"
+        required: true
+        type: boolean
 
 jobs:
   setup:
@@ -15,8 +27,6 @@ jobs:
     outputs:
       version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
       name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
-      nuget_published: ${{ steps.nuget_version_check.outputs.published }}
-      npm_published: ${{ steps.npm_version_check.outputs.published }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -27,38 +37,6 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-get-csproj-metadata@1ce26ff56a71e150145f2f95c235a0d18c899bb7 # v1
         with:
           working-directory: ./src/Publish/Receiver.Publish
-
-      - name: Check if package version exists
-        id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@2c621d26e55b8c30d294af5255e79356016a283a # v2
-        with:
-          name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
-          version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
-          source-feed: nuget
-          config-file: ./nuget.config
-
-      - name: Setup Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
-        with:
-          node-version: 24
-          package-manager-cache: false
-
-      - name: Get npm package name
-        id: npm_metadata
-        working-directory: ./src/npm_publish
-        run: |
-          NPM_PACKAGE_NAME="$(node -p "require('./package.json').name")"
-
-          echo "name=$NPM_PACKAGE_NAME" >> $GITHUB_OUTPUT
-
-      - name: Check if npm package version exists
-        id: npm_version_check
-        run: |
-          if npm view "${{ steps.npm_metadata.outputs.name }}@${{ steps.get_metadata_from_csprojectfile.outputs.version }}" version >/dev/null 2>&1; then
-            echo "published=true" >> $GITHUB_OUTPUT
-          else
-            echo "published=false" >> $GITHUB_OUTPUT
-          fi
 
   publish-prerelease:
     needs: setup
@@ -81,7 +59,7 @@ jobs:
           package-manager-cache: false
 
       - name: Publish npm package if not already published
-        if: needs.setup.outputs.npm_published == 'false'
+        if: inputs.npm-published == false
         working-directory: ./src/npm_publish
         run: |
           set -euo pipefail
@@ -101,14 +79,14 @@ jobs:
           npm publish --access public --tag next
 
       - name: Publish nuget package if not already published
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.nuget-published == false
         uses: Arbeidstilsynet/action-dotnet-publish@d6a7f116db746d388ef2ca8d52d8f3d66b7cac05 # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
@@ -120,7 +98,7 @@ jobs:
             type=raw,value=${{ needs.setup.outputs.version }}
 
       - name: Log in to GHCR
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ghcr.io
@@ -128,15 +106,15 @@ jobs:
           password: ${{ github.token }}
 
       - name: Set up QEMU
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
 
       - name: Set up Docker Buildx
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Build and push to GHCR
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         id: ghcr_build_push
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
@@ -167,7 +145,7 @@ jobs:
           package-manager-cache: false
 
       - name: Publish npm package if not already published
-        if: needs.setup.outputs.npm_published == 'false'
+        if: inputs.npm-published == false
         working-directory: ./src/npm_publish
         run: |
           set -euo pipefail
@@ -187,14 +165,14 @@ jobs:
           npm publish --access public
 
       - name: Publish nuget package if not already published
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.nuget-published == false
         uses: Arbeidstilsynet/action-dotnet-publish@d6a7f116db746d388ef2ca8d52d8f3d66b7cac05 # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
@@ -206,7 +184,7 @@ jobs:
             type=raw,value=${{ needs.setup.outputs.version }}
 
       - name: Log in to GHCR
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ghcr.io
@@ -214,7 +192,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push image to NAIS registry
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         id: nais_build_push
         uses: nais/docker-build-push@31c3a7321909bcb20799fdf46153fec721fd9512 # v0
         with:
@@ -226,7 +204,7 @@ jobs:
           salsa: true
 
       - name: Push image to GHCR (from NAIS image)
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         shell: bash
         run: |
           set -euo pipefail
@@ -247,7 +225,7 @@ jobs:
           docker buildx imagetools create "${args[@]}" "$src_image"
 
       - name: Prepare NAIS image reference
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         id: nais_image_ref
         shell: bash
         run: |
@@ -266,13 +244,13 @@ jobs:
           echo "image_repo=$image_repo" >> "$GITHUB_OUTPUT"
 
       - name: Generate SBOM and sign NAIS image
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.image-published == false
         uses: nais/attest-sign@257e2d7a5964fb8e35173227c9496ad2a098e9c6 # v2
         with:
           image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
       - name: Extract changelog section for current version
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.nuget-published == false
         id: changelog
         run: |
           VERSION="${{ needs.setup.outputs.version }}"
@@ -292,7 +270,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: needs.setup.outputs.nuget_published == 'false'
+        if: inputs.nuget-published == false
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: "${{ needs.setup.outputs.name }}@${{ needs.setup.outputs.version }}"
