@@ -46,7 +46,7 @@ jobs:
     needs: setup
     if: inputs.is-prerelease == true
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       id-token: write
       contents: write
@@ -127,12 +127,14 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   publish-release:
     needs: setup
     if: inputs.is-prerelease == false
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       id-token: write
       contents: write
@@ -227,31 +229,6 @@ jobs:
           done <<< '${{ steps.meta.outputs.tags }}'
 
           docker buildx imagetools create "${args[@]}" "$src_image"
-
-      - name: Prepare NAIS image reference
-        if: inputs.image-published == false
-        id: nais_image_ref
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          src_image='${{ steps.nais_build_push.outputs.image }}'
-          if [ -z "$src_image" ]; then
-            echo "::error::nais/docker-build-push did not produce an image output."
-            exit 1
-          fi
-
-          # Normalize to repository-only so registry/repository changes are inherited
-          # from nais/docker-build-push output while we control the release tag.
-          image_repo="${src_image%@*}"
-          image_repo="${image_repo%:*}"
-          echo "image_repo=$image_repo" >> "$GITHUB_OUTPUT"
-
-      - name: Generate SBOM and sign NAIS image
-        if: inputs.image-published == false
-        uses: nais/attest-sign@61e94c81cec0784078969aefa8e136bf343cfd7d # v2
-        with:
-          image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
       - name: Extract changelog section for current version
         if: inputs.release-published == false
