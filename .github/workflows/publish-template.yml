@@ -127,6 +127,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Set up QEMU
+        if: needs.setup.outputs.nuget_published == 'false'
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Docker Buildx
+        if: needs.setup.outputs.nuget_published == 'false'
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
       - name: Build and push to GHCR
         if: needs.setup.outputs.nuget_published == 'false'
         id: ghcr_build_push
@@ -134,6 +142,7 @@ jobs:
         with:
           context: ./
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -213,6 +222,7 @@ jobs:
           docker_context: ./
           dockerfile: ./Dockerfile
           tag: ${{ needs.setup.outputs.version }}
+          platforms: linux/amd64,linux/arm64
           salsa: true
 
       - name: Push image to GHCR (from NAIS image)
