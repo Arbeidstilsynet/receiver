@@ -64,7 +64,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-build@32a19735da87e3c99b80e4ef84c0cd28dac611e8 # v4
         with:
           working-directory: ./src
-      - uses: Arbeidstilsynet/action-pnpm-setup@1a30f29418c6d4a8c112c060c9f2af48e77377ba # v2
+      - uses: Arbeidstilsynet/action-pnpm-setup@185ab3d9b56f355b842d4efab78e52f4ec58242d # v2
 
       - name: Generate types
         run: pnpm generate:types
