@@ -64,7 +64,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-build@32a19735da87e3c99b80e4ef84c0cd28dac611e8 # v4
         with:
           working-directory: ./src
-      - uses: Arbeidstilsynet/action-pnpm-setup@1a30f29418c6d4a8c112c060c9f2af48e77377ba # v2
+      - uses: Arbeidstilsynet/action-pnpm-setup@185ab3d9b56f355b842d4efab78e52f4ec58242d # v2
 
       - name: Generate types
         run: pnpm generate:types
@@ -105,7 +105,7 @@ jobs:
           fi
       - name: Get last version
         id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@2c621d26e55b8c30d294af5255e79356016a283a # v2
+        uses: Arbeidstilsynet/action-nuget-check-published@e9d27df91e2e0a5c4b6b041dd111127ba02d7b22 # v2
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
