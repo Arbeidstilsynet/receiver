@@ -248,8 +248,13 @@ jobs:
           echo "image_repo=$image_repo" >> "$GITHUB_OUTPUT"
 
       - name: Generate SBOM and sign NAIS image
+<<<<<<< HEAD
         if: inputs.image-published == false
         uses: nais/attest-sign@257e2d7a5964fb8e35173227c9496ad2a098e9c6 # v2
+=======
+        if: needs.setup.outputs.nuget_published == 'false'
+        uses: nais/attest-sign@61e94c81cec0784078969aefa8e136bf343cfd7d # v2
+>>>>>>> origin/main
         with:
           image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
