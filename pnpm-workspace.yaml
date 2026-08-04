@@ -8,7 +8,7 @@ peerDependencyRules:
 
 overrides:
   js-yaml@<=4.1.1: ^4.1.2
-  js-yaml@>=4.0.0 <4.3.0: ^4.3.0
+  js-yaml@>=4.0.0 <4.3.0: ^5.0.0
 
 minimumReleaseAgeExclude:
   - js-yaml@4.1.2 || 4.3.0
