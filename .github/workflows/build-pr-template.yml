@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Build and Test .NET solution
-        uses: Arbeidstilsynet/action-dotnet-build@32a19735da87e3c99b80e4ef84c0cd28dac611e8 # v4
+        uses: Arbeidstilsynet/action-dotnet-build@2630a32a5e8f66f63ed0e0a54f861cd24562e67b # v4
         with:
           working-directory: ./src
       - uses: Arbeidstilsynet/action-pnpm-setup@185ab3d9b56f355b842d4efab78e52f4ec58242d # v2
