@@ -1,8 +1,7 @@
-using System.Net.Mime;
 using System.Text;
+using Arbeidstilsynet.Common.Altinn.Events.Models;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.Receiver.Model.Request;
@@ -10,6 +9,8 @@ using Bogus;
 using Microsoft.AspNetCore.Http;
 using static Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test.Extensions.FakerExtensions;
 using FileMetadata = Arbeidstilsynet.Common.Altinn.Model.Adapter.FileMetadata;
+using MediaTypeNames = System.Net.Mime.MediaTypeNames;
+using MimeContentType = System.Net.Mime.ContentType;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 
@@ -46,8 +47,8 @@ public static class TestData
             .RuleFor(r => r.MainContent, f => CreateUploadDocumentRequestFaker().Generate())
             .RuleFor(r => r.StructuredData, f => CreateUploadDocumentRequestFaker().Generate());
 
-    public static Faker<AltinnSubscription> CreateSubscriptionFaker() =>
-        CreateFaker<AltinnSubscription>().UseSeed(1337);
+    public static Faker<Subscription> CreateSubscriptionFaker() =>
+        CreateFaker<Subscription>().UseSeed(1337);
 
     public static Faker<FileMetadata> CreateAltinnFileMetadataFaker() =>
         CreateFaker<FileMetadata>()
@@ -77,7 +78,7 @@ public static class TestData
         var faker = CreateFaker<AltinnCloudEvent>()
             .RuleFor(
                 e => e.DataContentType,
-                new ContentType(MediaTypeNames.Application.Json)
+                new MimeContentType(MediaTypeNames.Application.Json)
                 {
                     Name = MediaTypeNames.Application.Json,
                 }

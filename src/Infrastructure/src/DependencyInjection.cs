@@ -85,6 +85,7 @@ public static class DependencyInjection
         }
         services.AddScoped<IAltinnRegistrationService, AltinnRegistrationService>();
         services.AddScoped<IAltinnRecoveryService, AltinnRecoveryService>();
+        services.AddScoped<IAltinnStorageService, AltinnStorageService>();
         services.AddScoped<ISubscriptionsRepository, SubscriptionsRepository>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         services.AddScoped<IPostMeldingPersistedAction, AltinnCompletionAction>();
