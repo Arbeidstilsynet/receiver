@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 
 internal class AltinnRegistrationService(
-    IAltinnAdapter altinnAdapter,
+    IAltinnSubscriptionAdapter altinnAdapter,
     IOptions<InfrastructureConfiguration> options,
     ILogger<AltinnRegistrationService> logger,
     IMapper mapper

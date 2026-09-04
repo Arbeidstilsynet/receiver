@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="4.0.0-alpha6" />
+    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="4.0.0-alpha7" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>

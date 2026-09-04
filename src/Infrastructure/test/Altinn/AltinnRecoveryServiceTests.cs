@@ -12,7 +12,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.Altinn;
 
 public class AltinnRecoveryServiceTests
 {
-    private IAltinnAdapter _altinnAdapter = Substitute.For<IAltinnAdapter>();
+    private IAltinnSubscriptionAdapter _altinnAdapter = Substitute.For<IAltinnSubscriptionAdapter>();
     private ISubscriptionsRepository _subscriptionsRepository =
         Substitute.For<ISubscriptionsRepository>();
     private ILogger<AltinnRecoveryService> _logger = Substitute.For<

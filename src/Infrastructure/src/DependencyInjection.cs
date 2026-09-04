@@ -31,6 +31,8 @@ public record InfrastructureConfiguration
 
     public virtual required AltinnConfiguration AltinnConfiguration { get; init; }
 
+    public virtual required AltinnClientsConfiguration AltinnClientsConfiguration { get; init; }
+
     public virtual required string AppDomain { get; init; }
 
     public virtual required bool SkipVirusScan { get; init; } = false;
@@ -43,6 +45,20 @@ public record DocumentStorageConfiguration
     public required bool AuthRequired { get; init; } = true;
 
     public required string BucketName { get; init; }
+}
+
+public record AltinnClientsConfiguration
+{
+    public required AltinnClientConfiguration Storage { get; init; }
+
+    public required AltinnClientConfiguration Events { get; init; }
+
+    public required AltinnClientConfiguration Apps { get; init; }
+}
+
+public record AltinnClientConfiguration
+{
+    public required string[] Scopes { get; init; }
 }
 
 public record PostgresConfiguration
@@ -85,7 +101,6 @@ public static class DependencyInjection
         }
         services.AddScoped<IAltinnRegistrationService, AltinnRegistrationService>();
         services.AddScoped<IAltinnRecoveryService, AltinnRecoveryService>();
-        services.AddScoped<IAltinnStorageService, AltinnStorageService>();
         services.AddScoped<ISubscriptionsRepository, SubscriptionsRepository>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         services.AddScoped<IPostMeldingPersistedAction, AltinnCompletionAction>();

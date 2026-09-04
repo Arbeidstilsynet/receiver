@@ -1,6 +1,7 @@
 using System.Diagnostics.Metrics;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
+using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
@@ -22,8 +23,8 @@ public class AltinnControllerTests
 {
     private readonly IAltinnRecoveryService _altinnRecoveryService =
         Substitute.For<IAltinnRecoveryService>();
-    private readonly IAltinnStorageService _altinnStorageService =
-        Substitute.For<IAltinnStorageService>();
+    private readonly IAltinnStorageAdapter _altinnStorageAdapter =
+        Substitute.For<IAltinnStorageAdapter>();
     private readonly IAltinnRegistrationService _altinnRegistrationService =
         Substitute.For<IAltinnRegistrationService>();
     private readonly IMeldingService _meldingService = Substitute.For<IMeldingService>();
@@ -41,7 +42,7 @@ public class AltinnControllerTests
 
         _sut = new AltinnController(
             _altinnRecoveryService,
-            _altinnStorageService,
+            _altinnStorageAdapter,
             _altinnRegistrationService,
             _meldingService,
             _subscriptionService,
@@ -58,7 +59,7 @@ public class AltinnControllerTests
         var instanceGuid = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
-        _altinnStorageService.GetInstance(instanceGuid, cancellationToken).Returns((AltinnInstance?)null);
+        _altinnStorageAdapter.GetInstance(instanceGuid, cancellationToken).Returns((AltinnInstance?)null);
 
         // act
         var result = await _sut.ProcessInstance(appId, instanceGuid, cancellationToken);
@@ -78,7 +79,7 @@ public class AltinnControllerTests
         var instanceGuid = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
-        _altinnStorageService
+        _altinnStorageAdapter
             .GetInstance(instanceGuid, cancellationToken)
             .Returns(new AltinnInstance { Id = $"1337/{instanceGuid}" });
 
@@ -136,7 +137,7 @@ public class AltinnControllerTests
                 ),
                 cancellationToken
             );
-        await _altinnStorageService.DidNotReceive().GetInstance(instanceGuid, cancellationToken);
+        await _altinnStorageAdapter.DidNotReceive().GetInstance(instanceGuid, cancellationToken);
     }
 
     private static AltinnInstanceSummary CreateAltinnSummary(string appId, Guid instanceGuid)

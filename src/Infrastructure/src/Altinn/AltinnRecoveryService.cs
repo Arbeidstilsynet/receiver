@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 
 internal class AltinnRecoveryService(
-    IAltinnAdapter altinnAdapter,
+    IAltinnSubscriptionAdapter altinnAdapter,
     ISubscriptionsRepository subscriptionRepository,
     ILogger<AltinnRecoveryService> logger
 ) : IAltinnRecoveryService

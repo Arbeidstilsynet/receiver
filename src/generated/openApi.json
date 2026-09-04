@@ -1012,56 +1012,59 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "instanceOwner": {
-            "$ref": "#/components/schemas/InstanceOwner"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InstanceOwner"
+              }
+            ]
           },
           "appId": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "org": {
-            "type": "string"
-          },
-          "selfLinks": {
-            "$ref": "#/components/schemas/ResourceLinks"
-          },
-          "dueBefore": {
             "type": [
               "null",
               "string"
-            ],
-            "format": "date-time"
-          },
-          "visibleAfter": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
+            ]
           },
           "process": {
-            "$ref": "#/components/schemas/ProcessState"
-          },
-          "status": {
-            "$ref": "#/components/schemas/InstanceStatus"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProcessState"
+              }
+            ]
           },
           "completeConfirmations": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/CompleteConfirmation"
             }
           },
           "data": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/DataElement"
-            }
-          },
-          "presentationTexts": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
             }
           },
           "dataValues": {
@@ -1147,10 +1150,16 @@
         "type": "object",
         "properties": {
           "stakeholderId": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "confirmedOn": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date-time"
           }
         }
@@ -1208,49 +1217,55 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "instanceGuid": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "dataType": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "filename": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "contentType": {
-            "type": "string"
-          },
-          "blobStoragePath": {
-            "type": "string"
-          },
-          "selfLinks": {
-            "$ref": "#/components/schemas/ResourceLinks"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "size": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
+              "null",
               "integer",
               "string"
             ],
             "format": "int64"
           },
           "contentHash": {
-            "type": "string"
-          },
-          "locked": {
-            "type": "boolean"
-          },
-          "refs": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "isRead": {
-            "type": "boolean"
+            "type": [
+              "null",
+              "boolean"
+            ]
           },
           "tags": {
             "type": "array",
@@ -1259,37 +1274,26 @@
             }
           },
           "userDefinedMetadata": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KeyValueEntry"
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
             }
           },
           "metadata": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KeyValueEntry"
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
             }
           },
-          "deleteStatus": {
-            "$ref": "#/components/schemas/DeleteStatus"
-          },
           "fileScanResult": {
-            "$ref": "#/components/schemas/FileScanResult"
-          }
-        }
-      },
-      "DeleteStatus": {
-        "type": "object",
-        "properties": {
-          "isHardDeleted": {
-            "type": "boolean"
-          },
-          "hardDeleted": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FileScanResult"
+              }
+            ]
           }
         }
       },
@@ -1455,68 +1459,28 @@
         "type": "object",
         "properties": {
           "partyId": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "personNumber": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "organisationNumber": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "username": {
-            "type": "string"
-          }
-        }
-      },
-      "InstanceStatus": {
-        "type": "object",
-        "properties": {
-          "isArchived": {
-            "type": "boolean"
-          },
-          "archived": {
             "type": [
               "null",
               "string"
-            ],
-            "format": "date-time"
-          },
-          "isSoftDeleted": {
-            "type": "boolean"
-          },
-          "softDeleted": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "isHardDeleted": {
-            "type": "boolean"
-          },
-          "hardDeleted": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "readStatus": {
-            "$ref": "#/components/schemas/ReadStatus"
-          },
-          "substatus": {
-            "$ref": "#/components/schemas/Substatus"
-          }
-        }
-      },
-      "KeyValueEntry": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
+            ]
           }
         }
       },
@@ -1661,7 +1625,10 @@
             "format": "date-time"
           },
           "startEvent": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "ended": {
             "type": [
@@ -1671,17 +1638,12 @@
             "format": "date-time"
           },
           "endEvent": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
-      },
-      "ReadStatus": {
-        "enum": [
-          "Unread",
-          "Read",
-          "UpdatedSinceLastReview"
-        ],
-        "type": "string"
       },
       "RecoveryJobResult": {
         "required": [
@@ -1707,28 +1669,6 @@
               "string"
             ],
             "format": "int32"
-          }
-        }
-      },
-      "ResourceLinks": {
-        "type": "object",
-        "properties": {
-          "apps": {
-            "type": "string"
-          },
-          "platform": {
-            "type": "string"
-          }
-        }
-      },
-      "Substatus": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
           }
         }
       }

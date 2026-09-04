@@ -25,7 +25,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 
 public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLifetime
 {
-    private readonly IAltinnAdapter _altinnAdapterMock = Substitute.For<IAltinnAdapter>();
+    private readonly IAltinnSubscriptionAdapter _altinnAdapterMock = Substitute.For<IAltinnSubscriptionAdapter>();
     private readonly IVirusScanService _virusScanServiceMock = Substitute.For<IVirusScanService>();
 
     private readonly PostgresDbDemoFixture _postgresDbDemoFixture = new();
@@ -94,7 +94,7 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
             services.Replace<ISchedulerFactory>();
             services.Replace<IVirusScanService>(_ => _virusScanServiceMock);
             services.Replace<IMeldingNotificationService>(_ => NotificationServiceMock);
-            services.Replace<IAltinnAdapter>(_ => _altinnAdapterMock);
+            services.Replace<IAltinnSubscriptionAdapter>(_ => _altinnAdapterMock);
 
             services.RemoveAll<IHostedService>();
 

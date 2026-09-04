@@ -13,7 +13,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 [Route("[controller]")]
 public class WebhookController(
     IMeldingService meldingService,
-    IAltinnAdapter altinnAdapter,
+    IAltinnSubscriptionAdapter altinnAdapter,
     IOptions<InfrastructureConfiguration> options,
     ApiMeters apiMeters
 ) : ControllerBase

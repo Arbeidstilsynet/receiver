@@ -1,5 +1,6 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
+using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
@@ -15,7 +16,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 [Route("[controller]")]
 public class AltinnController(
     IAltinnRecoveryService altinnRecoveryService,
-    IAltinnStorageService altinnStorageService,
+    IAltinnStorageAdapter altinnStorageAdapter,
     IAltinnRegistrationService altinnRegistrationService,
     IMeldingService meldingService,
     ISubscriptionService subscriptionService,
@@ -131,7 +132,7 @@ public class AltinnController(
 
         if (processableInstance == null)
         {
-            var instanceMetadata = await altinnStorageService.GetInstance(
+            var instanceMetadata = await altinnStorageAdapter.GetInstance(
                 instanceGuid,
                 cancellationToken
             );
@@ -162,7 +163,7 @@ public class AltinnController(
         CancellationToken ct
     )
     {
-        var result = await altinnStorageService.GetDataElements(instanceGuid, ct);
+        var result = await altinnStorageAdapter.GetDataElements(instanceGuid, ct);
         return result != null ? Ok(result) : NotFound();
     }
 
@@ -173,10 +174,10 @@ public class AltinnController(
         CancellationToken ct
     )
     {
-        var metadata = await altinnStorageService.GetDataElement(instanceGuid, dataElementId, ct);
+        var metadata = await altinnStorageAdapter.GetDataElement(instanceGuid, dataElementId, ct);
         if (metadata is not { ContentType: { Length: > 0 } contentType })
             return NotFound();
-        var content = await altinnStorageService.GetDataElementContent(
+        var content = await altinnStorageAdapter.GetDataElementContent(
             instanceGuid,
             dataElementId,
             ct
@@ -192,7 +193,7 @@ public class AltinnController(
         CancellationToken ct
     )
     {
-        var result = await altinnStorageService.GetInstance(instanceGuid, ct);
+        var result = await altinnStorageAdapter.GetInstance(instanceGuid, ct);
         return result != null ? Ok(result) : NotFound();
     }
 }
