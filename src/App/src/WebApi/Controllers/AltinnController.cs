@@ -175,7 +175,7 @@ public class AltinnController(
     )
     {
         var metadata = await altinnStorageAdapter.GetDataElement(instanceGuid, dataElementId, ct);
-        if (metadata is not { ContentType: { Length: > 0 } contentType })
+        if (metadata == null)
             return NotFound();
         var content = await altinnStorageAdapter.GetDataElementContent(
             instanceGuid,
@@ -184,6 +184,9 @@ public class AltinnController(
         );
         if (content == null)
             return NotFound();
+        var contentType = string.IsNullOrEmpty(metadata.ContentType)
+            ? "application/octet-stream"
+            : metadata.ContentType;
         return File(content, contentType, metadata.Filename ?? dataElementId.ToString());
     }
 

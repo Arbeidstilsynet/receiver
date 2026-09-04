@@ -59,7 +59,9 @@ public class AltinnControllerTests
         var instanceGuid = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
-        _altinnStorageAdapter.GetInstance(instanceGuid, cancellationToken).Returns((AltinnInstance?)null);
+        _altinnStorageAdapter
+            .GetInstance(instanceGuid, cancellationToken)
+            .Returns((AltinnInstance?)null);
 
         // act
         var result = await _sut.ProcessInstance(appId, instanceGuid, cancellationToken);
@@ -138,6 +140,35 @@ public class AltinnControllerTests
                 cancellationToken
             );
         await _altinnStorageAdapter.DidNotReceive().GetInstance(instanceGuid, cancellationToken);
+    }
+
+    [Fact]
+    public async Task DownloadInstanceDataElement_WhenContentTypeIsMissing_UsesOctetStream()
+    {
+        // arrange
+        var instanceGuid = Guid.NewGuid();
+        var dataElementId = Guid.NewGuid();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var content = new MemoryStream([1, 2, 3]);
+        _altinnStorageAdapter
+            .GetDataElement(instanceGuid, dataElementId, cancellationToken)
+            .Returns(new DataElement { Id = dataElementId.ToString(), Filename = "document.bin" });
+        _altinnStorageAdapter
+            .GetDataElementContent(instanceGuid, dataElementId, cancellationToken)
+            .Returns(content);
+
+        // act
+        var result = await _sut.DownloadInstanceDataElement(
+            instanceGuid,
+            dataElementId,
+            cancellationToken
+        );
+
+        // assert
+        var fileResult = result.ShouldBeOfType<FileStreamResult>();
+        fileResult.ContentType.ShouldBe("application/octet-stream");
+        fileResult.FileDownloadName.ShouldBe("document.bin");
+        fileResult.FileStream.ShouldBeSameAs(content);
     }
 
     private static AltinnInstanceSummary CreateAltinnSummary(string appId, Guid instanceGuid)

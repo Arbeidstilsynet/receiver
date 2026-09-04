@@ -27,7 +27,7 @@ internal class InfrastructureMapper : IRegister
         config
             .NewConfig<AltinnSubscription, AltinnEventsSubscription>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
-            .Map(target => target.Id, src => src.Id)
+            .Map(target => target.Id, src => src.GetRequiredId())
             .Map(target => target.CallbackUrl, src => src.EndPoint)
             .Map(target => target.SourceFilter, src => src.SourceFilter)
             .Map(target => target.Consumer, src => src.Consumer)
@@ -56,6 +56,12 @@ internal class InfrastructureMapper : IRegister
 
 file static class MappingExtensions
 {
+    public static int GetRequiredId(this AltinnSubscription subscription)
+    {
+        return subscription.Id
+            ?? throw new InvalidOperationException("Altinn subscription does not have an ID.");
+    }
+
     public static List<AppRegistration> ToAppRegistrations(this SubscriptionEntity subscription)
     {
         var altinnApps = subscription.RegisteredAltinnApps.Select(a => new AppRegistration
