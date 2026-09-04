@@ -1,5 +1,6 @@
 using System.Text;
 using Arbeidstilsynet.Common.Altinn.Events.Models;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
@@ -33,17 +34,19 @@ public class ApplicationFixture : WebApplicationFactory<IAssemblyInfo>, IAsyncLi
 
     public ApplicationFixture()
     {
-        var fakeAltinnSubscription = TestData.CreateSubscriptionFaker().Generate();
-        fakeAltinnSubscription.Id = 123;
+        var fakeAltinnSubscription = TestData.CreateSubscriptionFaker().Generate() with
+        {
+            Id = 123
+        };
         var fakeAltinnSubscriptionId = fakeAltinnSubscription.Id.Value;
         _altinnAdapterMock
             .SubscribeForCompletedProcessEvents(default!)
             .ReturnsForAnyArgs(fakeAltinnSubscription);
         _altinnAdapterMock.UnsubscribeForCompletedProcessEvents(default!).ReturnsForAnyArgs(true);
-        _altinnAdapterMock.GetAltinnSubscription(Arg.Any<int>()).Returns((Subscription?)null);
+        _altinnAdapterMock.GetAltinnSubscription(Arg.Any<int>()).Returns((AltinnSubscription?)null);
         _altinnAdapterMock
             .GetAltinnSubscription(fakeAltinnSubscriptionId)
-            .Returns(new Subscription { Id = fakeAltinnSubscriptionId });
+            .Returns(new AltinnSubscription { Id = fakeAltinnSubscriptionId });
         _altinnAdapterMock
             .GetSummary(default!)
             .ReturnsForAnyArgs(TestData.CreateAltinnInstanceSummaryFaker().Generate());

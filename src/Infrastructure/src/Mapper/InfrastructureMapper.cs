@@ -1,4 +1,5 @@
 using Arbeidstilsynet.Common.Altinn.Events.Models;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
@@ -24,7 +25,7 @@ internal class InfrastructureMapper : IRegister
             .Map(target => target.AppRegistrations, src => src.ToAppRegistrations());
 
         config
-            .NewConfig<Subscription, AltinnEventsSubscription>()
+            .NewConfig<AltinnSubscription, AltinnEventsSubscription>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.Id, src => src.Id)
             .Map(target => target.CallbackUrl, src => src.EndPoint)

@@ -2,6 +2,7 @@ using System.Text;
 using Arbeidstilsynet.Common.Altinn.Events.Models;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.Receiver.Model.Request;
@@ -47,8 +48,8 @@ public static class TestData
             .RuleFor(r => r.MainContent, f => CreateUploadDocumentRequestFaker().Generate())
             .RuleFor(r => r.StructuredData, f => CreateUploadDocumentRequestFaker().Generate());
 
-    public static Faker<Subscription> CreateSubscriptionFaker() =>
-        CreateFaker<Subscription>().UseSeed(1337);
+    public static Faker<AltinnSubscription> CreateSubscriptionFaker() =>
+        CreateFaker<AltinnSubscription>().UseSeed(1337);
 
     public static Faker<FileMetadata> CreateAltinnFileMetadataFaker() =>
         CreateFaker<FileMetadata>()
@@ -73,7 +74,7 @@ public static class TestData
                 f => f.Make(f.Random.Int(1, 5), () => CreateAltinnDocumentFaker().Generate())
             );
 
-    public static AltinnCloudEvent CloudEvent(Action<AltinnCloudEvent>? customize = null)
+    public static AltinnCloudEvent CloudEvent()
     {
         var faker = CreateFaker<AltinnCloudEvent>()
             .RuleFor(
@@ -84,11 +85,7 @@ public static class TestData
                 }
             );
 
-        var cloudEvent = faker.Generate();
-
-        customize?.Invoke(cloudEvent);
-
-        return cloudEvent;
+        return faker.Generate();
     }
 
     public static IFormFile CreateFormFile(

@@ -1,5 +1,6 @@
 using System.Diagnostics.Metrics;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
@@ -57,7 +58,7 @@ public class AltinnControllerTests
         var instanceGuid = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
-        _altinnStorageService.GetInstance(instanceGuid, cancellationToken).Returns((Instance?)null);
+        _altinnStorageService.GetInstance(instanceGuid, cancellationToken).Returns((AltinnInstance?)null);
 
         // act
         var result = await _sut.ProcessInstance(appId, instanceGuid, cancellationToken);
@@ -79,7 +80,7 @@ public class AltinnControllerTests
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
         _altinnStorageService
             .GetInstance(instanceGuid, cancellationToken)
-            .Returns(new Instance { Id = $"1337/{instanceGuid}" });
+            .Returns(new AltinnInstance { Id = $"1337/{instanceGuid}" });
 
         // act
         var result = await _sut.ProcessInstance(appId, instanceGuid, cancellationToken);

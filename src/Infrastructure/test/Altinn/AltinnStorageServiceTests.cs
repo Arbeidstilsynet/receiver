@@ -1,4 +1,5 @@
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Clients;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
@@ -66,7 +67,7 @@ public class AltinnStorageServiceTests
         var instanceId = Guid.NewGuid();
         _client
             .GetInstance(instanceId, TestContext.Current.CancellationToken)
-            .Returns((Instance?)null);
+            .Returns((AltinnInstance?)null);
 
         // act
         var result = await _sut.GetDataElements(instanceId, TestContext.Current.CancellationToken);
@@ -151,8 +152,8 @@ public class AltinnStorageServiceTests
         await _client.DidNotReceive().GetInstance(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
-    private static Instance CreateInstance(Guid instanceId, List<DataElement>? dataElements = null)
+    private static AltinnInstance CreateInstance(Guid instanceId, List<DataElement>? dataElements = null)
     {
-        return new Instance { Id = $"1337/{instanceId}", Data = dataElements ?? [] };
+        return new AltinnInstance { Id = $"1337/{instanceId}", Data = dataElements ?? [] };
     }
 }

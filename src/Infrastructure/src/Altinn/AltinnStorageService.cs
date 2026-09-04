@@ -1,4 +1,5 @@
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Clients;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
@@ -7,7 +8,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 
 internal class AltinnStorageService(IAltinnStorageClient client) : IAltinnStorageService
 {
-    public async Task<Instance?> GetInstance(
+    public async Task<AltinnInstance?> GetInstance(
         Guid instanceId,
         CancellationToken cancellationToken = default
     )
@@ -42,13 +43,20 @@ internal class AltinnStorageService(IAltinnStorageClient client) : IAltinnStorag
         CancellationToken cancellationToken = default
     )
     {
+        var instance = await GetInstance(instanceId, cancellationToken);
+        
+        if (instance is not {InstanceOwner.PartyId: { Length: > 0 } ownerId })
+        {
+            return null;
+        }
+        
         return await client.GetInstanceData(
             new InstanceDataRequest()
             {
                 InstanceRequest = new InstanceRequest()
                 {
                     InstanceGuid = instanceId,
-                    InstanceOwnerPartyId = string.Empty,
+                    InstanceOwnerPartyId = ownerId,
                 },
                 DataId = dataElementId,
             },

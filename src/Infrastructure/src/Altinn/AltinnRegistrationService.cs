@@ -1,4 +1,5 @@
 using Arbeidstilsynet.Common.Altinn.Events.Models;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
@@ -27,7 +28,7 @@ internal class AltinnRegistrationService(
             );
         }
         return await altinnAdapter.UnsubscribeForCompletedProcessEvents(
-            subscription ?? new Subscription() { Id = altinnSubscriptionId }
+            subscription ?? new AltinnSubscription() { Id = altinnSubscriptionId }
         );
     }
 

@@ -1,4 +1,5 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
@@ -186,7 +187,7 @@ public class AltinnController(
     }
 
     [HttpGet("instances/{instanceGuid:guid}/metadata")]
-    public async Task<ActionResult<Instance>> GetInstanceMetadata(
+    public async Task<ActionResult<AltinnInstance>> GetInstanceMetadata(
         [FromRoute] Guid instanceGuid,
         CancellationToken ct
     )
