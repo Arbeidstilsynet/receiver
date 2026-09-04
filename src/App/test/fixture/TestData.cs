@@ -1,5 +1,5 @@
-using System.Net.Mime;
 using System.Text;
+using Arbeidstilsynet.Common.Altinn.Events.Models;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Request;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
@@ -10,6 +10,8 @@ using Bogus;
 using Microsoft.AspNetCore.Http;
 using static Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test.Extensions.FakerExtensions;
 using FileMetadata = Arbeidstilsynet.Common.Altinn.Model.Adapter.FileMetadata;
+using MediaTypeNames = System.Net.Mime.MediaTypeNames;
+using MimeContentType = System.Net.Mime.ContentType;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 
@@ -72,22 +74,18 @@ public static class TestData
                 f => f.Make(f.Random.Int(1, 5), () => CreateAltinnDocumentFaker().Generate())
             );
 
-    public static AltinnCloudEvent CloudEvent(Action<AltinnCloudEvent>? customize = null)
+    public static AltinnCloudEvent CloudEvent()
     {
         var faker = CreateFaker<AltinnCloudEvent>()
             .RuleFor(
                 e => e.DataContentType,
-                new ContentType(MediaTypeNames.Application.Json)
+                new MimeContentType(MediaTypeNames.Application.Json)
                 {
                     Name = MediaTypeNames.Application.Json,
                 }
             );
 
-        var cloudEvent = faker.Generate();
-
-        customize?.Invoke(cloudEvent);
-
-        return cloudEvent;
+        return faker.Generate();
     }
 
     public static IFormFile CreateFormFile(

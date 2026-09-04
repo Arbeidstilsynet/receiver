@@ -1,6 +1,8 @@
 using System.Diagnostics.Metrics;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
+using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
+using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
@@ -21,6 +23,8 @@ public class AltinnControllerTests
 {
     private readonly IAltinnRecoveryService _altinnRecoveryService =
         Substitute.For<IAltinnRecoveryService>();
+    private readonly IAltinnStorageAdapter _altinnStorageAdapter =
+        Substitute.For<IAltinnStorageAdapter>();
     private readonly IAltinnRegistrationService _altinnRegistrationService =
         Substitute.For<IAltinnRegistrationService>();
     private readonly IMeldingService _meldingService = Substitute.For<IMeldingService>();
@@ -38,6 +42,7 @@ public class AltinnControllerTests
 
         _sut = new AltinnController(
             _altinnRecoveryService,
+            _altinnStorageAdapter,
             _altinnRegistrationService,
             _meldingService,
             _subscriptionService,
@@ -54,8 +59,8 @@ public class AltinnControllerTests
         var instanceGuid = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
-        _altinnRecoveryService
-            .GetInstanceMetadata(appId, instanceGuid, cancellationToken)
+        _altinnStorageAdapter
+            .GetInstance(instanceGuid, cancellationToken)
             .Returns((AltinnInstance?)null);
 
         // act
@@ -76,8 +81,8 @@ public class AltinnControllerTests
         var instanceGuid = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         _altinnRecoveryService.GetNonCompletedInstancesByAppId(appId).Returns([]);
-        _altinnRecoveryService
-            .GetInstanceMetadata(appId, instanceGuid, cancellationToken)
+        _altinnStorageAdapter
+            .GetInstance(instanceGuid, cancellationToken)
             .Returns(new AltinnInstance { Id = $"1337/{instanceGuid}" });
 
         // act
@@ -134,9 +139,36 @@ public class AltinnControllerTests
                 ),
                 cancellationToken
             );
-        await _altinnRecoveryService
-            .DidNotReceive()
-            .GetInstanceMetadata(appId, instanceGuid, cancellationToken);
+        await _altinnStorageAdapter.DidNotReceive().GetInstance(instanceGuid, cancellationToken);
+    }
+
+    [Fact]
+    public async Task DownloadInstanceDataElement_WhenContentTypeIsMissing_UsesOctetStream()
+    {
+        // arrange
+        var instanceGuid = Guid.NewGuid();
+        var dataElementId = Guid.NewGuid();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var content = new MemoryStream([1, 2, 3]);
+        _altinnStorageAdapter
+            .GetDataElement(instanceGuid, dataElementId, cancellationToken)
+            .Returns(new DataElement { Id = dataElementId.ToString(), Filename = "document.bin" });
+        _altinnStorageAdapter
+            .GetDataElementContent(instanceGuid, dataElementId, cancellationToken)
+            .Returns(content);
+
+        // act
+        var result = await _sut.DownloadInstanceDataElement(
+            instanceGuid,
+            dataElementId,
+            cancellationToken
+        );
+
+        // assert
+        var fileResult = result.ShouldBeOfType<FileStreamResult>();
+        fileResult.ContentType.ShouldBe("application/octet-stream");
+        fileResult.FileDownloadName.ShouldBe("document.bin");
+        fileResult.FileStream.ShouldBeSameAs(content);
     }
 
     private static AltinnInstanceSummary CreateAltinnSummary(string appId, Guid instanceGuid)

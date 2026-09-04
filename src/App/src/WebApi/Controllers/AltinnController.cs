@@ -1,5 +1,7 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
+using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
+using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
@@ -14,6 +16,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 [Route("[controller]")]
 public class AltinnController(
     IAltinnRecoveryService altinnRecoveryService,
+    IAltinnStorageAdapter altinnStorageAdapter,
     IAltinnRegistrationService altinnRegistrationService,
     IMeldingService meldingService,
     ISubscriptionService subscriptionService,
@@ -129,8 +132,7 @@ public class AltinnController(
 
         if (processableInstance == null)
         {
-            var instanceMetadata = await altinnRecoveryService.GetInstanceMetadata(
-                appId,
+            var instanceMetadata = await altinnStorageAdapter.GetInstance(
                 instanceGuid,
                 cancellationToken
             );
@@ -155,40 +157,46 @@ public class AltinnController(
         return Ok(new PostMeldingResponse { MeldingId = melding.Id });
     }
 
-    [HttpGet("instances/{instanceGuid}/data-elements")]
+    [HttpGet("instances/{instanceGuid:guid}/data-elements")]
     public async Task<ActionResult<IReadOnlyList<DataElement>>> GetInstanceDataElements(
         [FromRoute] Guid instanceGuid,
         CancellationToken ct
     )
     {
-        var result = await altinnRecoveryService.GetDataElementsForInstance(instanceGuid, ct);
+        var result = await altinnStorageAdapter.GetDataElements(instanceGuid, ct);
         return result != null ? Ok(result) : NotFound();
     }
 
-    [HttpGet("instances/{instanceGuid}/data-elements/{dataElementId}")]
+    [HttpGet("instances/{instanceGuid:guid}/data-elements/{dataElementId:guid}")]
     public async Task<ActionResult> DownloadInstanceDataElement(
         [FromRoute] Guid instanceGuid,
         [FromRoute] Guid dataElementId,
         CancellationToken ct
     )
     {
-        var result = await altinnRecoveryService.DownloadDataElement(
+        var metadata = await altinnStorageAdapter.GetDataElement(instanceGuid, dataElementId, ct);
+        if (metadata == null)
+            return NotFound();
+        var content = await altinnStorageAdapter.GetDataElementContent(
             instanceGuid,
             dataElementId,
             ct
         );
-        if (result == null)
+        if (content == null)
             return NotFound();
-        return File(result.Content, result.ContentType, result.Filename);
+        var contentType = string.IsNullOrEmpty(metadata.ContentType)
+            ? "application/octet-stream"
+            : metadata.ContentType;
+        return File(content, contentType, metadata.Filename ?? dataElementId.ToString());
     }
 
-    [HttpGet("instances/{instanceGuid}/metadata")]
+    [HttpGet("instances/{instanceGuid:guid}/metadata")]
     public async Task<ActionResult<AltinnInstance>> GetInstanceMetadata(
         [FromRoute] Guid instanceGuid,
         CancellationToken ct
     )
     {
-        var result = await altinnRecoveryService.GetInstanceMetadata(instanceGuid, ct);
+        var result = await altinnStorageAdapter.GetInstance(instanceGuid, ct);
         return result != null ? Ok(result) : NotFound();
     }
 }

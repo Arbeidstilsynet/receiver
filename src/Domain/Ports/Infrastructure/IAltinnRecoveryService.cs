@@ -1,6 +1,4 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
-using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 
@@ -15,23 +13,4 @@ public interface IAltinnRecoveryService
     Task<
         Dictionary<string, IEnumerable<AltinnMetadata>>
     > GetMetadataForAllNonCompletedInstancesForRegisteredApps();
-
-    Task<AltinnInstance?> GetInstanceMetadata(
-        string appId,
-        Guid instanceGuid,
-        CancellationToken ct = default
-    );
-
-    Task<AltinnInstance?> GetInstanceMetadata(Guid instanceGuid, CancellationToken ct = default);
-
-    Task<IReadOnlyList<DataElement>?> GetDataElementsForInstance(
-        Guid instanceGuid,
-        CancellationToken ct = default
-    );
-
-    Task<DataElementDownload?> DownloadDataElement(
-        Guid instanceGuid,
-        Guid dataElementId,
-        CancellationToken ct = default
-    );
 }

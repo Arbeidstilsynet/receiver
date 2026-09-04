@@ -1,3 +1,5 @@
+using Arbeidstilsynet.Common.Altinn.Events.Models;
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
@@ -9,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Altinn;
 
 internal class AltinnRegistrationService(
-    IAltinnAdapter altinnAdapter,
+    IAltinnSubscriptionAdapter altinnAdapter,
     IOptions<InfrastructureConfiguration> options,
     ILogger<AltinnRegistrationService> logger,
     IMapper mapper
@@ -26,11 +28,7 @@ internal class AltinnRegistrationService(
             );
         }
         return await altinnAdapter.UnsubscribeForCompletedProcessEvents(
-            subscription
-                ?? new Common.Altinn.Model.Api.Response.AltinnSubscription
-                {
-                    Id = altinnSubscriptionId,
-                }
+            subscription ?? new AltinnSubscription() { Id = altinnSubscriptionId }
         );
     }
 

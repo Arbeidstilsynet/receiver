@@ -219,14 +219,14 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     public async Task WebhookController_ValidateSubscription_ReturnsOk()
     {
         // Arrange
-        var cloudEvent = TestData.CloudEvent(e =>
+        var cloudEvent = TestData.CloudEvent() with
         {
-            e.Type = "platform.events.validatesubscription";
-            e.DataContentType = new ContentType(MediaTypeNames.Application.Json)
+            Type = "platform.events.validatesubscription",
+            DataContentType = new ContentType(MediaTypeNames.Application.Json)
             {
                 Name = "application/json",
-            };
-        });
+            },
+        };
 
         // Act
         var response = await _client.PostAsJsonAsync(
@@ -242,13 +242,14 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     public async Task WebhookController_ReceiveMelding_ReturnsMeldingId()
     {
         // Arrange
-        var cloudEvent = TestData.CloudEvent(e =>
+        var cloudEvent = TestData.CloudEvent() with
         {
-            e.DataContentType = new ContentType(MediaTypeNames.Application.Json)
+            DataContentType = new ContentType(MediaTypeNames.Application.Json)
             {
                 Name = "application/json",
-            };
-        });
+            },
+        };
+        
         var subscriptionResponse = await _client.PostAsJsonAsync(
             $"/subscriptions",
             new ConsumerManifest
