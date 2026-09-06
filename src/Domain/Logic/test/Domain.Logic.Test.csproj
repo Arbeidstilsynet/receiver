@@ -12,12 +12,12 @@
     <RootNamespace>Arbeidstilsynet.MeldingerReceiver.Domain.Logic.Test</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.8.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
-    <PackageReference Include="NSubstitute" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
+    <PackageReference Include="NSubstitute" Version="6.2.0" />
     <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
-    <PackageReference Include="Xunit.Microsoft.DependencyInjection" Version="10.0.4" />
+    <PackageReference Include="Xunit.Microsoft.DependencyInjection" Version="10.1.0" />
     <PackageReference Include="Bogus" Version="35.6.5" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
