@@ -46,7 +46,7 @@ public class AltinnController(
     }
 
     [HttpPost(
-        "non-completed-instances/{appId}/complete/{instanceOwnerPartyId:string}/{instanceGuid:guid}"
+        "non-completed-instances/{appId}/complete/{instanceOwnerPartyId}/{instanceGuid:guid}"
     )]
     public async Task<ActionResult> CompleteNonCompletedInstance(
         [FromRoute] string appId,
