@@ -46,7 +46,7 @@ jobs:
     needs: setup
     if: inputs.is-prerelease == true
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: write
@@ -132,7 +132,7 @@ jobs:
     needs: setup
     if: inputs.is-prerelease == false
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: write
