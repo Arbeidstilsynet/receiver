@@ -80,6 +80,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/altinn/non-completed-instances/{appId}/complete/{instanceOwnerPartyId}/{instanceGuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    appId: string;
+                    instanceOwnerPartyId: string;
+                    instanceGuid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/altinn/subscriptions/{appId}": {
         parameters: {
             query?: never;
