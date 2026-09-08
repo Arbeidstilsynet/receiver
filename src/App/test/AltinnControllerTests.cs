@@ -1,6 +1,7 @@
 using System.Diagnostics.Metrics;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
+using Arbeidstilsynet.Common.Altinn.Ports.Clients;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
@@ -23,6 +24,8 @@ public class AltinnControllerTests
         Substitute.For<IAltinnRecoveryService>();
     private readonly IAltinnRegistrationService _altinnRegistrationService =
         Substitute.For<IAltinnRegistrationService>();
+
+    private readonly IAltinnAppsClient _altinnAppsClient = Substitute.For<IAltinnAppsClient>();
     private readonly IMeldingService _meldingService = Substitute.For<IMeldingService>();
     private readonly ISubscriptionService _subscriptionService =
         Substitute.For<ISubscriptionService>();
@@ -39,6 +42,7 @@ public class AltinnControllerTests
         _sut = new AltinnController(
             _altinnRecoveryService,
             _altinnRegistrationService,
+            _altinnAppsClient,
             _meldingService,
             _subscriptionService,
             new ApiMeters(meterFactory),
