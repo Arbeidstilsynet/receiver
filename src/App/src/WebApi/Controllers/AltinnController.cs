@@ -65,7 +65,7 @@ public class AltinnController(
         return result != null
             ? Ok(result)
             : NotFound(
-                $"No non-completed instance found for appId '{appId}' with instanceGuid '{instanceGuid}'."
+                $"No non-completed instance found for appId '{appId}' with instanceOwnerPartyId '{instanceOwnerPartyId}' and instanceGuid '{instanceGuid}'."
             );
     }
 
