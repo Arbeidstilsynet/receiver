@@ -249,7 +249,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
                 Name = "application/json",
             },
         };
-        
+
         var subscriptionResponse = await _client.PostAsJsonAsync(
             $"/subscriptions",
             new ConsumerManifest
