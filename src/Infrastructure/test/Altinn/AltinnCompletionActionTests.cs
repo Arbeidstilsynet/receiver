@@ -63,9 +63,11 @@ public class AltinnCompletionActionTests
             .CompleteInstance(
                 "altinn-app",
                 Arg.Is<InstanceRequest>(request =>
-                    request.InstanceGuid == altinnMetadata.InstanceGuid
+                    request != null
+                    && request.InstanceGuid == altinnMetadata.InstanceGuid
                     && request.InstanceOwnerPartyId == altinnMetadata.InstanceOwnerPartyId
-                )
+                ),
+                TestContext.Current.CancellationToken
             );
     }
 
@@ -76,7 +78,11 @@ public class AltinnCompletionActionTests
         //arrange
         _altinnStorageClient.ClearReceivedCalls();
         _altinnStorageClient
-            .CompleteInstance("altinn-app", Arg.Any<InstanceRequest>())
+            .CompleteInstance(
+                "altinn-app",
+                Arg.Any<InstanceRequest>(),
+                TestContext.Current.CancellationToken
+            )
             .ThrowsAsync<HttpRequestException>();
         var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
@@ -89,9 +95,11 @@ public class AltinnCompletionActionTests
             .CompleteInstance(
                 "altinn-app",
                 Arg.Is<InstanceRequest>(request =>
-                    request.InstanceGuid == altinnMetadata.InstanceGuid
+                    request != null
+                    && request.InstanceGuid == altinnMetadata.InstanceGuid
                     && request.InstanceOwnerPartyId == altinnMetadata.InstanceOwnerPartyId
-                )
+                ),
+                TestContext.Current.CancellationToken
             );
     }
 
@@ -121,6 +129,10 @@ public class AltinnCompletionActionTests
         await act.ShouldNotThrowAsync();
         await _altinnStorageClient
             .DidNotReceive()
-            .CompleteInstance("altinn-app", Arg.Any<InstanceRequest>());
+            .CompleteInstance(
+                "altinn-app",
+                Arg.Any<InstanceRequest>(),
+                TestContext.Current.CancellationToken
+            );
     }
 }
