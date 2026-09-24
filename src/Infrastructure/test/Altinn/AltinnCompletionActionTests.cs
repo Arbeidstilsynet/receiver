@@ -56,7 +56,7 @@ public class AltinnCompletionActionTests
         var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
         //act
-        await _sut.RunPostActionFor(melding);
+        await _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert
         await _altinnStorageClient
             .Received(1)
@@ -87,7 +87,7 @@ public class AltinnCompletionActionTests
         var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
         //act
-        var act = () => _sut.RunPostActionFor(melding);
+        var act = () => _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert
         await act.ShouldThrowAsync<HttpRequestException>();
         await _altinnStorageClient
@@ -112,7 +112,7 @@ public class AltinnCompletionActionTests
             Tags = [],
         };
         //act
-        var act = () => _sut.RunPostActionFor(melding);
+        var act = () => _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert
         await act.ShouldThrowAsync<InvalidOperationException>();
     }
@@ -124,7 +124,8 @@ public class AltinnCompletionActionTests
         var altinnMelding = SampleMelding(SampleAltinnMetadata());
         var nonAltinnMelding = altinnMelding with { Source = MessageSource.Api };
         //act
-        var act = () => _sut.RunPostActionFor(nonAltinnMelding);
+        var act = () =>
+            _sut.RunPostActionFor(nonAltinnMelding, TestContext.Current.CancellationToken);
         //assert
         await act.ShouldNotThrowAsync();
         await _altinnStorageClient
