@@ -6,7 +6,7 @@ networks:
 
 services:
   valkey:
-    image: valkey/valkey:latest@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
+    image: valkey/valkey:latest@sha256:c123e3715db63d06d4ad6964884037aa0d5d4d703939b9929954112889708e1d
     networks:
       - meldinger_network
     volumes:
@@ -39,7 +39,7 @@ services:
 
   file-storage:
     container_name: file-storage
-    image: fsouza/fake-gcs-server@sha256:91afded49de804aa61b5f3eb6c7cd65205acf9e5c5e047cf0ba7d9507af806c8
+    image: fsouza/fake-gcs-server@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef
     networks:
       - meldinger_network
     ports:
@@ -88,7 +88,7 @@ services:
       retries: 5
 
   clamav:
-    image: clamav/clamav@sha256:78810772a92b4a9168115bc6b2e0ffd702640893b9577f8c3d0432762d2655c4
+    image: clamav/clamav@sha256:1fdfd24c6f0a0fb60788481487459a6d4eda8a9b448641594e04db8410d34422
     environment:
       MODE: clamd
     networks:
@@ -108,7 +108,7 @@ services:
       retries: 10
 
   clamav-web:
-    image: europe-north1-docker.pkg.dev/nais-io/nais/images/clamav-rest:latest@sha256:1d727694fa9301dd41c14e476d6ab9e27e741e1f952ea2bd7ced8555f36237a6
+    image: europe-north1-docker.pkg.dev/nais-io/nais/images/clamav-rest:latest@sha256:d0b5ffd843d6e3c9990fdcad601271e9761a12c42e4e7de452ddda95b77c6d16
     container_name: clamav-web
     environment:
       DAEMON_ENDPOINT: clamav:3310

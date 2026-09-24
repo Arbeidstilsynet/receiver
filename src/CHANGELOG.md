@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## 1.8.7
+
+### Added
+
+- feat: altinn endpoint to complete single, non completed instance (for testing or cleaning up)
+
 ## 1.8.6
 
 ### Changed

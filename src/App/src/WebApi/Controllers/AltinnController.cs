@@ -1,6 +1,7 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
+using Arbeidstilsynet.Common.Altinn.Ports.Clients;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
@@ -18,6 +19,7 @@ public class AltinnController(
     IAltinnRecoveryService altinnRecoveryService,
     IAltinnStorageAdapter altinnStorageAdapter,
     IAltinnRegistrationService altinnRegistrationService,
+    IAltinnAppsClient altinnAppsClient,
     IMeldingService meldingService,
     ISubscriptionService subscriptionService,
     ApiMeters apiMeters,
@@ -44,6 +46,30 @@ public class AltinnController(
     )
     {
         return Ok(await altinnRecoveryService.GetMetadataForNonCompletedInstancesByAppId(appId));
+    }
+
+    [HttpPost(
+        "non-completed-instances/{appId}/complete/{instanceOwnerPartyId}/{instanceGuid:guid}"
+    )]
+    public async Task<ActionResult> CompleteNonCompletedInstance(
+        [FromRoute] string appId,
+        [FromRoute] string instanceOwnerPartyId,
+        [FromRoute] Guid instanceGuid
+    )
+    {
+        var result = await altinnAppsClient.CompleteInstance(
+            appId,
+            new Common.Altinn.Model.Api.Request.InstanceRequest
+            {
+                InstanceOwnerPartyId = instanceOwnerPartyId,
+                InstanceGuid = instanceGuid,
+            }
+        );
+        return result != null
+            ? Ok(result)
+            : NotFound(
+                $"No non-completed instance found for appId '{appId}' with instanceOwnerPartyId '{instanceOwnerPartyId}' and instanceGuid '{instanceGuid}'."
+            );
     }
 
     [HttpGet("subscriptions/{appId}")]

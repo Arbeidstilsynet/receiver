@@ -92,6 +92,45 @@
         }
       }
     },
+    "/altinn/non-completed-instances/{appId}/complete/{instanceOwnerPartyId}/{instanceGuid}": {
+      "post": {
+        "tags": [
+          "Altinn"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instanceOwnerPartyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instanceGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/altinn/subscriptions/{appId}": {
       "get": {
         "tags": [
