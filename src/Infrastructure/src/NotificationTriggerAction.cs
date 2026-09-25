@@ -11,7 +11,7 @@ internal class NotificationTriggerAction(
 {
     public string Name => nameof(NotificationTriggerAction);
 
-    public async Task RunPostActionFor(Melding melding)
+    public async Task RunPostActionFor(Melding melding, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity("run NotificationTriggerAction");
         logger.LogInformation("Trigger melding notification...");

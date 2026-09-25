@@ -1,3 +1,4 @@
+using Arbeidstilsynet.Common.Altinn.Events.Models;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Ports.Adapter;
@@ -13,7 +14,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.Altinn;
 
 public class AltinnRegistrationServiceTests
 {
-    private IAltinnAdapter _altinnAdapter = Substitute.For<IAltinnAdapter>();
+    private IAltinnSubscriptionAdapter _altinnAdapter =
+        Substitute.For<IAltinnSubscriptionAdapter>();
     private ILogger<AltinnRegistrationService> _logger = Substitute.For<
         ILogger<AltinnRegistrationService>
     >();
@@ -65,7 +67,7 @@ public class AltinnRegistrationServiceTests
         var notExistingId = 123;
         _altinnAdapter
             .GetAltinnSubscription(notExistingId)
-            .Returns(Task.FromResult((AltinnSubscription?)null));
+            .Returns(Task.FromResult<AltinnSubscription?>(null));
         _altinnAdapter
             .UnsubscribeForCompletedProcessEvents(new AltinnSubscription { Id = notExistingId })
             .Returns(false);
@@ -81,10 +83,12 @@ public class AltinnRegistrationServiceTests
         //arrange
         _altinnAdapter.ClearReceivedCalls();
         var existingId = 123;
-        var subscriptionResponseMock = Substitute.For<AltinnSubscription?>();
-        _altinnAdapter.GetAltinnSubscription(existingId).Returns(subscriptionResponseMock);
+        var subscription = new AltinnSubscription { Id = existingId };
+        _altinnAdapter.GetAltinnSubscription(existingId).Returns(subscription);
         _altinnAdapter
-            .UnsubscribeForCompletedProcessEvents(subscriptionResponseMock!)
+            .UnsubscribeForCompletedProcessEvents(
+                Arg.Is<AltinnSubscription>(candidate => candidate.Id == existingId)
+            )
             .Returns(true);
         //act
         var result = await _sut.UnsubscribeAltinnApplication(existingId);
