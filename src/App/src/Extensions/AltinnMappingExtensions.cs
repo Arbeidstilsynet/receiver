@@ -38,6 +38,10 @@ internal static class AltinnMappingExtensions
     {
         return new UploadDocumentRequest
         {
+            DocumentId =
+                altinnDocument.FileMetadata.AltinnId == Guid.Empty
+                    ? null
+                    : altinnDocument.FileMetadata.AltinnId,
             FileMetadata = altinnDocument.FileMetadata.ToDocumentMetadata(),
             InputStream = altinnDocument.DocumentContent,
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),

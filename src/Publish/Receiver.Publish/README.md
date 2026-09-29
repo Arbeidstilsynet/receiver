@@ -148,6 +148,10 @@ using it (as shown above). `TStructuredData` is your own DTO that mirrors the fo
 | `Tags`             | `Dictionary<string, string>` | Tags supplied by the sender.                                                               |
 | `InternalTags`     | `Dictionary<string, string>` | Tags added internally by the receiver.                                                     |
 
+For meldinger received from Altinn, `MainContentId`, `StructuredDataId`, and each value in
+`AttachmentIds` are the IDs of the corresponding Altinn data elements. This lets consumers use
+the same ID to identify a document in the receiver and its source data element in Altinn.
+
 ## ♻️ Delivery and redrive semantics
 
 - Delivery is **push-based** over a Valkey stream; the `PollInterval` job is only a backup.
