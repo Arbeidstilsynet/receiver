@@ -63,7 +63,7 @@ internal class MeldingService : IMeldingService
         var existingMelding = await _meldingRepository.GetMelding(meldingId, cancellationToken);
         if (existingMelding != null)
         {
-            await RunPostActions(existingMelding);
+            await RunPostActions(existingMelding, cancellationToken);
             return existingMelding;
         }
 
@@ -88,7 +88,7 @@ internal class MeldingService : IMeldingService
             cancellationToken
         );
 
-        await RunPostActions(melding);
+        await RunPostActions(melding, cancellationToken);
         return melding;
     }
 
@@ -152,14 +152,14 @@ internal class MeldingService : IMeldingService
         return (mainDocumentUpload, structuredDocumentUpload, attachmentUploads);
     }
 
-    private async Task RunPostActions(Melding melding)
+    private async Task RunPostActions(Melding melding, CancellationToken cancellationToken)
     {
         using var activity = Tracer.Source.StartActivity("Executing Post Actions");
         foreach (var action in _postMeldingActions)
         {
             try
             {
-                await action.RunPostActionFor(melding);
+                await action.RunPostActionFor(melding, cancellationToken);
             }
             catch (Exception exception)
             {

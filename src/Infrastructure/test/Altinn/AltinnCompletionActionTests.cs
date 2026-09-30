@@ -56,16 +56,18 @@ public class AltinnCompletionActionTests
         var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
         //act
-        await _sut.RunPostActionFor(melding);
+        await _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert
         await _altinnStorageClient
             .Received(1)
             .CompleteInstance(
                 "altinn-app",
                 Arg.Is<InstanceRequest>(request =>
-                    request.InstanceGuid == altinnMetadata.InstanceGuid
+                    request != null
+                    && request.InstanceGuid == altinnMetadata.InstanceGuid
                     && request.InstanceOwnerPartyId == altinnMetadata.InstanceOwnerPartyId
-                )
+                ),
+                TestContext.Current.CancellationToken
             );
     }
 
@@ -76,12 +78,16 @@ public class AltinnCompletionActionTests
         //arrange
         _altinnStorageClient.ClearReceivedCalls();
         _altinnStorageClient
-            .CompleteInstance("altinn-app", Arg.Any<InstanceRequest>())
+            .CompleteInstance(
+                "altinn-app",
+                Arg.Any<InstanceRequest>(),
+                TestContext.Current.CancellationToken
+            )
             .ThrowsAsync<HttpRequestException>();
         var altinnMetadata = SampleAltinnMetadata();
         var melding = SampleMelding(altinnMetadata);
         //act
-        var act = () => _sut.RunPostActionFor(melding);
+        var act = () => _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert
         await act.ShouldThrowAsync<HttpRequestException>();
         await _altinnStorageClient
@@ -89,9 +95,11 @@ public class AltinnCompletionActionTests
             .CompleteInstance(
                 "altinn-app",
                 Arg.Is<InstanceRequest>(request =>
-                    request.InstanceGuid == altinnMetadata.InstanceGuid
+                    request != null
+                    && request.InstanceGuid == altinnMetadata.InstanceGuid
                     && request.InstanceOwnerPartyId == altinnMetadata.InstanceOwnerPartyId
-                )
+                ),
+                TestContext.Current.CancellationToken
             );
     }
 
@@ -104,7 +112,7 @@ public class AltinnCompletionActionTests
             Tags = [],
         };
         //act
-        var act = () => _sut.RunPostActionFor(melding);
+        var act = () => _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert
         await act.ShouldThrowAsync<InvalidOperationException>();
     }
@@ -116,11 +124,16 @@ public class AltinnCompletionActionTests
         var altinnMelding = SampleMelding(SampleAltinnMetadata());
         var nonAltinnMelding = altinnMelding with { Source = MessageSource.Api };
         //act
-        var act = () => _sut.RunPostActionFor(nonAltinnMelding);
+        var act = () =>
+            _sut.RunPostActionFor(nonAltinnMelding, TestContext.Current.CancellationToken);
         //assert
         await act.ShouldNotThrowAsync();
         await _altinnStorageClient
             .DidNotReceive()
-            .CompleteInstance("altinn-app", Arg.Any<InstanceRequest>());
+            .CompleteInstance(
+                "altinn-app",
+                Arg.Any<InstanceRequest>(),
+                TestContext.Current.CancellationToken
+            );
     }
 }

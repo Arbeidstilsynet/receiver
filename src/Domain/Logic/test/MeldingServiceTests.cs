@@ -232,7 +232,9 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
                 ),
                 Arg.Any<CancellationToken>()
             );
-        await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
+        await _postMeldingPersistedAction
+            .Received(1)
+            .RunPostActionFor(Arg.Any<Melding>(), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -251,7 +253,9 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         //assert
         await _documentStorage.DidNotReceiveWithAnyArgs().Upload(default!, default!);
         await _meldingRepository.DidNotReceiveWithAnyArgs().CreateMelding(default!, default!);
-        await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
+        await _postMeldingPersistedAction
+            .Received(1)
+            .RunPostActionFor(Arg.Any<Melding>(), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -260,7 +264,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         // Arrange
         var request = SampleMeldingRequest;
         _postMeldingPersistedAction
-            .RunPostActionFor(Arg.Any<Melding>())
+            .RunPostActionFor(Arg.Any<Melding>(), TestContext.Current.CancellationToken)
             .Throws(new Exception("Test exception"));
 
         _meldingRepository
@@ -329,7 +333,9 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
         // Act & Assert
         _ = _sut.ProcessMelding(request, TestContext.Current.CancellationToken).ShouldNotThrow();
 
-        await _postMeldingPersistedAction.Received(1).RunPostActionFor(Arg.Any<Melding>());
+        await _postMeldingPersistedAction
+            .Received(1)
+            .RunPostActionFor(Arg.Any<Melding>(), TestContext.Current.CancellationToken);
     }
 
     [Fact]

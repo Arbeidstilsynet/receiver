@@ -1,3 +1,4 @@
+using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
@@ -5,6 +6,7 @@ using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
 using Argon;
 using Bogus;
 using MapsterMapper;
+using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
 namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.Mapper;
@@ -122,6 +124,20 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         var result = _mapper.Map<AltinnConnection>(altinnSubscriptionEntity);
         //assert
         await Verify(result, _verifySettings);
+    }
+
+    [Fact]
+    public void Map_AltinnSubscriptionWithoutId_ToAltinnEventsSubscription_Throws()
+    {
+        // arrange
+        var subscription = new AltinnSubscription();
+
+        // act
+        var act = () => _mapper.Map<AltinnEventsSubscription>(subscription);
+
+        // assert
+        act.ShouldThrow<InvalidOperationException>()
+            .Message.ShouldBe("Altinn subscription does not have an ID.");
     }
 
     [Fact]

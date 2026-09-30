@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Build and Test .NET solution
-        uses: Arbeidstilsynet/action-dotnet-build@2630a32a5e8f66f63ed0e0a54f861cd24562e67b # v4
+        uses: Arbeidstilsynet/action-dotnet-build@32a19735da87e3c99b80e4ef84c0cd28dac611e8 # v4
         with:
           working-directory: ./src
       - uses: Arbeidstilsynet/action-pnpm-setup@aa6683c3137594dc38a60b539dbdabb5a4531edd # v4
@@ -105,7 +105,7 @@ jobs:
           fi
       - name: Get last version
         id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@e9d27df91e2e0a5c4b6b041dd111127ba02d7b22 # v2
+        uses: Arbeidstilsynet/action-nuget-check-published@2c621d26e55b8c30d294af5255e79356016a283a # v2
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}

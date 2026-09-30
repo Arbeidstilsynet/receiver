@@ -11,7 +11,7 @@ internal class AltinnCompletionAction(IAltinnAppsClient altinnStorageClient)
 {
     public string Name => nameof(AltinnCompletionAction);
 
-    public async Task RunPostActionFor(Melding melding)
+    public async Task RunPostActionFor(Melding melding, CancellationToken cancellationToken)
     {
         if (melding.Source == MessageSource.Altinn)
         {
@@ -33,7 +33,8 @@ internal class AltinnCompletionAction(IAltinnAppsClient altinnStorageClient)
                 {
                     InstanceGuid = ParseGuidOrThrow(instanceGuid, melding.Id),
                     InstanceOwnerPartyId = instanceOwnerPartyId,
-                }
+                },
+                cancellationToken
             );
         }
     }

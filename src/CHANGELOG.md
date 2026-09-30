@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.0
+
+### Changed
+
+- feat(altinn): use Arbeidstilsynet.Common.Altinn 4.0.0 API clients and package-provided storage and subscription adapters.
+- feat(altinn): configure explicit target environments and per-client Maskinporten scopes.
+- fix: propagate cancellation tokens through post-persistence actions.
+
 ## 1.8.8
 
 ### Changed

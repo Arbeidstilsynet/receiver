@@ -11,6 +11,9 @@
 | Infrastructure__MaskinportenConfiguration__IntegrationId         | yes*     |                                                                                       |
 | Infrastructure__MaskinportenConfiguration__CertificatePrivateKey | yes*     |                                                                                       |
 | Infrastructure__MaskinportenConfiguration__CertificateChain      | yes*     |                                                                                       |
+| Infrastructure__AltinnClientsConfiguration__Storage__Scopes__0   | yes      | altinn:serviceowner/instances.read                                                     |
+| Infrastructure__AltinnClientsConfiguration__Events__Scopes__0    | yes      | altinn:events.subscribe                                                               |
+| Infrastructure__AltinnClientsConfiguration__Apps__Scopes__0      | yes      | altinn:serviceowner/instances.write                                                    |
 | Infrastructure__PostgresConfiguration__ConnectionString          | yes      | Host=postgres-receiver;Port=5432;Database=demo_db;Username=postgres;Password=postgres |
 | Infrastructure__DocumentStorageConfiguration__BaseUrl            | no       | <http://file-storage:4443/storage/v1/>                                                |
 | Infrastructure__DocumentStorageConfiguration__AuthRequired       | no       | true                                                                                  |

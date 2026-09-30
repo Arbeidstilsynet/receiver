@@ -841,22 +841,13 @@ export interface components {
             validated: boolean;
         };
         AltinnInstance: {
-            id?: string;
-            instanceOwner?: components["schemas"]["InstanceOwner"];
-            appId?: string;
-            org?: string;
-            selfLinks?: components["schemas"]["ResourceLinks"];
-            /** Format: date-time */
-            dueBefore?: null | string;
-            /** Format: date-time */
-            visibleAfter?: null | string;
-            process?: components["schemas"]["ProcessState"];
-            status?: components["schemas"]["InstanceStatus"];
-            completeConfirmations?: components["schemas"]["CompleteConfirmation"][];
-            data?: components["schemas"]["DataElement"][];
-            presentationTexts?: {
-                [key: string]: string;
-            };
+            id?: null | string;
+            instanceOwner?: null | components["schemas"]["InstanceOwner"];
+            appId?: null | string;
+            org?: null | string;
+            process?: null | components["schemas"]["ProcessState"];
+            completeConfirmations?: null | components["schemas"]["CompleteConfirmation"][];
+            data?: null | components["schemas"]["DataElement"][];
             dataValues?: {
                 [key: string]: string;
             };
@@ -882,9 +873,9 @@ export interface components {
             messageSource?: components["schemas"]["MessageSource"];
         };
         CompleteConfirmation: {
-            stakeholderId?: string;
+            stakeholderId?: null | string;
             /** Format: date-time */
-            confirmedOn?: string;
+            confirmedOn?: null | string;
         };
         ConsumerManifest: {
             consumerName: string;
@@ -898,29 +889,23 @@ export interface components {
             parameters?: null | unknown[];
         };
         DataElement: {
-            id?: string;
-            instanceGuid?: string;
-            dataType?: string;
-            filename?: string;
-            contentType?: string;
-            blobStoragePath?: string;
-            selfLinks?: components["schemas"]["ResourceLinks"];
+            id?: null | string;
+            instanceGuid?: null | string;
+            dataType?: null | string;
+            filename?: null | string;
+            contentType?: null | string;
             /** Format: int64 */
-            size?: number | string;
-            contentHash?: string;
-            locked?: boolean;
-            refs?: string[];
-            isRead?: boolean;
+            size?: null | number | string;
+            contentHash?: null | string;
+            isRead?: null | boolean;
             tags?: string[];
-            userDefinedMetadata?: components["schemas"]["KeyValueEntry"][];
-            metadata?: components["schemas"]["KeyValueEntry"][];
-            deleteStatus?: components["schemas"]["DeleteStatus"];
-            fileScanResult?: components["schemas"]["FileScanResult"];
-        };
-        DeleteStatus: {
-            isHardDeleted?: boolean;
-            /** Format: date-time */
-            hardDeleted?: null | string;
+            userDefinedMetadata?: {
+                [key: string]: string;
+            };
+            metadata?: {
+                [key: string]: string;
+            };
+            fileScanResult?: null | components["schemas"]["FileScanResult"];
         };
         Document: {
             /** Format: uuid */
@@ -964,27 +949,10 @@ export interface components {
         /** Format: binary */
         IFormFile: string;
         InstanceOwner: {
-            partyId?: string;
-            personNumber?: string;
-            organisationNumber?: string;
-            username?: string;
-        };
-        InstanceStatus: {
-            isArchived?: boolean;
-            /** Format: date-time */
-            archived?: null | string;
-            isSoftDeleted?: boolean;
-            /** Format: date-time */
-            softDeleted?: null | string;
-            isHardDeleted?: boolean;
-            /** Format: date-time */
-            hardDeleted?: null | string;
-            readStatus?: components["schemas"]["ReadStatus"];
-            substatus?: components["schemas"]["Substatus"];
-        };
-        KeyValueEntry: {
-            key?: string;
-            value?: string;
+            partyId?: null | string;
+            personNumber?: null | string;
+            organisationNumber?: null | string;
+            username?: null | string;
         };
         Melding: {
             /** Format: uuid */
@@ -1026,27 +994,17 @@ export interface components {
         ProcessState: {
             /** Format: date-time */
             started?: null | string;
-            startEvent?: string;
+            startEvent?: null | string;
             /** Format: date-time */
             ended?: null | string;
-            endEvent?: string;
+            endEvent?: null | string;
         };
-        /** @enum {string} */
-        ReadStatus: "Unread" | "Read" | "UpdatedSinceLastReview";
         RecoveryJobResult: {
             appId: string;
             /** Format: int32 */
             originalCount?: number | string;
             /** Format: int32 */
             resolvedCount?: number | string;
-        };
-        ResourceLinks: {
-            apps?: string;
-            platform?: string;
-        };
-        Substatus: {
-            label?: string;
-            description?: string;
         };
     };
     responses: never;
