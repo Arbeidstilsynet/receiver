@@ -6,7 +6,7 @@ networks:
 
 services:
   valkey:
-    image: valkey/valkey:latest@sha256:c123e3715db63d06d4ad6964884037aa0d5d4d703939b9929954112889708e1d
+    image: valkey/valkey:latest@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
     networks:
       - meldinger_network
     volumes:
@@ -20,7 +20,7 @@ services:
       - 6379:6379
 
   postgres-receiver:
-    image: postgres:17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     networks:
       - meldinger_network
     ports:
@@ -88,7 +88,7 @@ services:
       retries: 5
 
   clamav:
-    image: clamav/clamav@sha256:1fdfd24c6f0a0fb60788481487459a6d4eda8a9b448641594e04db8410d34422
+    image: clamav/clamav@sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0
     environment:
       MODE: clamd
     networks:

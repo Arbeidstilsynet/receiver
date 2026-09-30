@@ -52,6 +52,7 @@ public class AltinnMapperTests
         //assert
         result.MainContent.ShouldNotBeNull();
         result.MainContent.InputStream.ShouldBeSameAs(summary.SkjemaAsPdf.DocumentContent);
+        result.MainContent.DocumentId.ShouldBe(new Guid(MainContentId));
     }
 
     [Fact]
@@ -64,6 +65,7 @@ public class AltinnMapperTests
         //assert
         result.StructuredData.ShouldNotBeNull();
         result.StructuredData.InputStream.ShouldBeSameAs(summary.StructuredData!.DocumentContent);
+        result.StructuredData.DocumentId.ShouldBe(new Guid(StructuredDataId));
     }
 
     [Fact]
@@ -76,6 +78,7 @@ public class AltinnMapperTests
         //assert
         result.Attachments.ShouldHaveSingleItem();
         result.Attachments[0].InputStream.ShouldBeSameAs(summary.Attachments[0].DocumentContent);
+        result.Attachments[0].DocumentId.ShouldBe(new Guid(AttachmentId));
     }
 
     [Fact]

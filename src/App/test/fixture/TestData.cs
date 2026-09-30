@@ -60,7 +60,10 @@ public static class TestData
     public static Faker<AltinnDocument> CreateAltinnDocumentFaker() =>
         CreateFaker<AltinnDocument>()
             .UseSeed(1337)
-            .RuleFor(d => d.FileMetadata, _ => CreateAltinnFileMetadataFaker().Generate())
+            .RuleFor(
+                d => d.FileMetadata,
+                _ => CreateAltinnFileMetadataFaker().Generate() with { AltinnId = Guid.NewGuid() }
+            )
             .RuleFor(d => d.DocumentContent, f => f.CreateStream(f.Random.Int(100, 1000)));
 
     public static Faker<AltinnInstanceSummary> CreateAltinnInstanceSummaryFaker() =>
