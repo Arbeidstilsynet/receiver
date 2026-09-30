@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.1
+
+### Fixed
+
+- fix(altinn): request the shared Maskinporten scopes (`altinn:serviceowner/instances.read` and `altinn:serviceowner/instances.write`) for all Altinn clients again, replacing the per-client scopes. The `altinn:events.subscribe` scope requested by the events client was rejected by Maskinporten with a 400.
+
 ## 1.9.0
 
 ### Changed
