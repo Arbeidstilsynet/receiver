@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.4
+
+### Fixed
+
+- fix(altinn): request `altinn:serviceowner/instances.read` in addition to `altinn:events.subscribe` for the Altinn events client.
+
 ## 1.9.3
 
 ### Fixed
