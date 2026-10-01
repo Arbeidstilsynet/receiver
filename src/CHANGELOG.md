@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.2
+
+### Changed
+
+- Temporarily use `Arbeidstilsynet.Common.Altinn` 4.0.1-alpha1 to include Maskinporten's error
+  response in token-request exceptions, so the receiver logs can identify why Maskinporten rejects
+  the grant.
+
 ## 1.9.1
 
 ### Fixed
