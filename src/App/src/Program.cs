@@ -48,9 +48,15 @@ services
         appSettings.InfrastructureConfig.MaskinportenConfiguration,
         appSettings.InfrastructureConfig.AltinnConfiguration
     )
-    .AddStorage()
-    .AddEvents()
-    .AddApps()
+    .AddStorage(o =>
+        o.Scopes = appSettings.InfrastructureConfig.AltinnClientsConfiguration.Storage.Scopes
+    )
+    .AddEvents(o =>
+        o.Scopes = appSettings.InfrastructureConfig.AltinnClientsConfiguration.Events.Scopes
+    )
+    .AddApps(o =>
+        o.Scopes = appSettings.InfrastructureConfig.AltinnClientsConfiguration.Apps.Scopes
+    )
     .AddSubscriptionAdapter()
     .AddStorageAdapter();
 services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.ConnectionString, env);

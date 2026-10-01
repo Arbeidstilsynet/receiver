@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.2
+
+### Changed
+
+- feat(altinn): update Arbeidstilsynet.Common.Altinn to 4.0.1-alpha1 for improved exception messages.
+
+### Fixed
+
+- fix(altinn): restore per-client Maskinporten scopes, including the required `altinn:events.subscribe` scope for creating and reading event subscriptions.
+
 ## 1.9.1
 
 ### Fixed
