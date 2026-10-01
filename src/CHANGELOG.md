@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.3
+
+### Fixed
+
+- fix(altinn): update Arbeidstilsynet.Common.Altinn to 4.0.2, which generates unique Maskinporten grants (`jti`) and shares the token cache across scopes. Fixes the Maskinporten 400 `invalid_grant` "Grant has been used before" (MP-012).
+
 ## 1.9.2
 
 ### Changed
