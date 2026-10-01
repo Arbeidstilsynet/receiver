@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- feat(altinn): update Arbeidstilsynet.Common.Altinn to 4.0.1-alpha1 for improved exception messages.
+- feat(altinn): update Arbeidstilsynet.Common.Altinn to 4.0.1 for improved exception messages.
 
 ### Fixed
 
