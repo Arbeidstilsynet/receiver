@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.9.5
+
+### Fixed
+
+- fix(altinn): propagate file metadata to document tags for main content, structured data and attachments.
+- fix(altinn): retain canonical `AltinnId` and `AltinnDataType` tags on metadata collisions, logging a warning only when the values differ without exposing metadata values.
+
+### Changed
+
+- chore(deps): update Arbeidstilsynet.Common.Altinn from 4.0.3 to 4.0.5.
+
 ## 1.9.4
 
 ### Fixed

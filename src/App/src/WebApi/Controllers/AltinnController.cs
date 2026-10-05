@@ -177,6 +177,7 @@ public class AltinnController(
             appId,
             meldingService,
             apiMeters,
+            logger,
             cancellationToken
         );
 

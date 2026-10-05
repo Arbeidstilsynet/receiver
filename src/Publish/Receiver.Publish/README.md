@@ -152,6 +152,13 @@ For meldinger received from Altinn, `MainContentId`, `StructuredDataId`, and eac
 `AttachmentIds` are the IDs of the corresponding Altinn data elements. This lets consumers use
 the same ID to identify a document in the receiver and its source data element in Altinn.
 
+Altinn file metadata is copied into `Document.Tags` for main content, structured data and
+attachments. The receiver also adds `AltinnId` and `AltinnDataType` when available. These
+canonical tags take precedence over application metadata with the same key. Conflicting
+values produce a warning containing the key and document ID, but not the metadata values;
+identical values do not produce a warning. This applies to webhook ingestion, recovery and
+manual instance processing.
+
 ## ♻️ Delivery and redrive semantics
 
 - Delivery is **push-based** over a Valkey stream; the `PollInterval` job is only a backup.
