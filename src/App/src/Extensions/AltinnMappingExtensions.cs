@@ -12,7 +12,8 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 internal static class AltinnMappingExtensions
 {
     public static CreateMeldingRequest MapAltinnSummaryToPostMeldingRequest(
-        this AltinnInstanceSummary altinnInstanceSummary
+        this AltinnInstanceSummary altinnInstanceSummary,
+        ILogger logger
     )
     {
         return new CreateMeldingRequest
@@ -25,17 +26,22 @@ internal static class AltinnMappingExtensions
                     "Could not find app name in metadata. This is required in order to succeed."
                 ),
             Metadata = altinnInstanceSummary.ToMetadataDictionary(),
-            MainContent = altinnInstanceSummary.SkjemaAsPdf.ToUploadDocumentRequest().AsClean(),
+            MainContent = altinnInstanceSummary
+                .SkjemaAsPdf.ToUploadDocumentRequest(logger)
+                .AsClean(),
             StructuredData = altinnInstanceSummary
-                .StructuredData?.ToUploadDocumentRequest()
+                .StructuredData?.ToUploadDocumentRequest(logger)
                 .AsClean(),
             Attachments = altinnInstanceSummary
-                .Attachments.Select(attachment => attachment.ToUploadDocumentRequest())
+                .Attachments.Select(attachment => attachment.ToUploadDocumentRequest(logger))
                 .ToList(),
         };
     }
 
-    private static UploadDocumentRequest ToUploadDocumentRequest(this AltinnDocument altinnDocument)
+    private static UploadDocumentRequest ToUploadDocumentRequest(
+        this AltinnDocument altinnDocument,
+        ILogger logger
+    )
     {
         return new UploadDocumentRequest
         {
@@ -46,7 +52,7 @@ internal static class AltinnMappingExtensions
             FileMetadata = altinnDocument.FileMetadata.ToDocumentMetadata(),
             InputStream = altinnDocument.DocumentContent,
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),
-            Tags = altinnDocument.FileMetadata.ToDocumentTags(),
+            Tags = altinnDocument.FileMetadata.ToDocumentTags(logger),
         };
     }
 
@@ -68,7 +74,10 @@ internal static class AltinnMappingExtensions
         };
     }
 
-    private static Dictionary<string, string> ToDocumentTags(this AltinnFileMetadata fileMetadata)
+    private static Dictionary<string, string> ToDocumentTags(
+        this AltinnFileMetadata fileMetadata,
+        ILogger logger
+    )
     {
         var tags = new Dictionary<string, string>();
 
@@ -80,6 +89,18 @@ internal static class AltinnMappingExtensions
         if (fileMetadata.AltinnDataType is { Length: > 0 } dataType)
         {
             tags.Add("AltinnDataType", dataType);
+        }
+
+        foreach (var (key, value) in fileMetadata.Metadata)
+        {
+            if (!tags.TryAdd(key, value) && tags[key] != value)
+            {
+                logger.LogWarning(
+                    "Ignoring conflicting Altinn file metadata key {MetadataKey} for document {DocumentId}; the canonical tag value is retained.",
+                    key,
+                    fileMetadata.AltinnId
+                );
+            }
         }
 
         return tags;

@@ -15,7 +15,8 @@ public class WebhookController(
     IMeldingService meldingService,
     IAltinnSubscriptionAdapter altinnAdapter,
     IOptions<InfrastructureConfiguration> options,
-    ApiMeters apiMeters
+    ApiMeters apiMeters,
+    ILogger<WebhookController> logger
 ) : ControllerBase
 {
     [HttpPost("receive-altinn-cloudevent")]
@@ -43,6 +44,6 @@ public class WebhookController(
     {
         using var activity = Tracer.Source.StartActivity();
         var altinnSummary = await altinnAdapter.GetSummary(cloudEvent);
-        return altinnSummary.MapAltinnSummaryToPostMeldingRequest();
+        return altinnSummary.MapAltinnSummaryToPostMeldingRequest(logger);
     }
 }

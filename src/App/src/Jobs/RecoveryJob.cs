@@ -48,10 +48,11 @@ internal static class RecoveryJobExtensions
         string appId,
         IMeldingService meldingService,
         ApiMeters apiMeters,
+        ILogger logger,
         CancellationToken cancellationToken
     )
     {
-        var request = instance.MapAltinnSummaryToPostMeldingRequest();
+        var request = instance.MapAltinnSummaryToPostMeldingRequest(logger);
         apiMeters.MeldingReceived(MessageSource.Altinn, appId);
         var melding = await meldingService.ProcessMelding(request, cancellationToken);
         apiMeters.MeldingProcessed(melding);
@@ -98,6 +99,7 @@ internal static class RecoveryJobExtensions
                     appId,
                     meldingService,
                     apiMeters,
+                    logger,
                     cancellationToken
                 );
                 jobsLeftForAppId--;
