@@ -1,8 +1,8 @@
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Argon;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
@@ -10,7 +10,9 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.Db;
 
 public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteTestFixtureWithDb>
 {
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     private readonly IMeldingRepository _meldingRepository;
 
@@ -21,13 +23,6 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
         : base(testOutputHelper, fixtureWithDb)
     {
         _meldingRepository = fixtureWithDb.GetService<IMeldingRepository>(testOutputHelper)!;
-
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]
@@ -80,7 +75,7 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
         );
 
         savedMelding.ShouldBeEquivalentTo(result);
-        await Verify(savedMelding, _verifySettings);
+        await Snapshot.Verify(savedMelding, _snapshotSettings);
     }
 
     [Fact]
@@ -125,6 +120,6 @@ public class MeldingerRepositoryWriteTests : TestBed<InfrastructureAdapterWriteT
         );
 
         savedMelding.ShouldBeEquivalentTo(result);
-        await Verify(savedMelding, _verifySettings);
+        await Snapshot.Verify(savedMelding, _snapshotSettings);
     }
 }
