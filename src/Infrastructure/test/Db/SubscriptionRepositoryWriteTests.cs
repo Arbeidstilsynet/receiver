@@ -1,7 +1,7 @@
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Argon;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
@@ -11,7 +11,9 @@ public class SubscriptionRepositoryWriteTests : TestBed<InfrastructureAdapterWri
 {
     private readonly ISubscriptionsRepository _subscriptionRepository;
 
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     public SubscriptionRepositoryWriteTests(
         ITestOutputHelper testOutputHelper,
@@ -22,12 +24,6 @@ public class SubscriptionRepositoryWriteTests : TestBed<InfrastructureAdapterWri
         _subscriptionRepository = fixtureWithDb.GetService<ISubscriptionsRepository>(
             testOutputHelper
         )!;
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]
@@ -45,9 +41,9 @@ public class SubscriptionRepositoryWriteTests : TestBed<InfrastructureAdapterWri
         {
             await _subscriptionRepository.CreateSubscription(newConsumer);
             //assert
-            await Verify(
+            await Snapshot.Verify(
                 await _subscriptionRepository.GetPersistedSubscription(newConsumer.ConsumerName),
-                _verifySettings
+                _snapshotSettings
             );
         }
         finally
@@ -75,9 +71,9 @@ public class SubscriptionRepositoryWriteTests : TestBed<InfrastructureAdapterWri
         {
             await _subscriptionRepository.CreateSubscription(newConsumer);
             //assert
-            await Verify(
+            await Snapshot.Verify(
                 await _subscriptionRepository.GetPersistedSubscription(newConsumer.ConsumerName),
-                _verifySettings
+                _snapshotSettings
             );
         }
         finally

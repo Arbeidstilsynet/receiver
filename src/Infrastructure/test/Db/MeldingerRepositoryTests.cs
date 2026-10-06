@@ -1,8 +1,8 @@
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Argon;
 using Bogus;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
@@ -70,7 +70,9 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         );
 
     internal static List<MeldingEntity> Seed = MeldingEntityFaker.Generate(SeedSize);
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
     private readonly IMeldingRepository _meldingRepository;
 
     public MeldingerRepositoryTests(
@@ -80,13 +82,6 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         : base(testOutputHelper, fixtureWithDb)
     {
         _meldingRepository = fixtureWithDb.GetService<IMeldingRepository>(testOutputHelper)!;
-
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]
@@ -100,7 +95,7 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
             TestContext.Current.CancellationToken
         );
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]

@@ -3,13 +3,13 @@ using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
-using Argon;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
@@ -17,7 +17,9 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
 public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
 {
     private readonly HttpClient _client;
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -28,12 +30,6 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
     public IntegrationWriteTests(ApplicationFixture factory)
     {
         _client = factory.CreateClient();
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]

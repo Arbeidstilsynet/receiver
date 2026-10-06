@@ -2,10 +2,10 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Model.Response;
-using Argon;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
@@ -13,7 +13,9 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
 public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
 {
     private readonly HttpClient _client;
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -24,12 +26,6 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
     public IntegrationReadOnlyTest(ApplicationFixture factory)
     {
         _client = factory.CreateClient();
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]
@@ -43,7 +39,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
         );
 
         // Assert
-        await Verify(content, _verifySettings);
+        await Snapshot.Verify(content, _snapshotSettings);
     }
 
     [Theory]
@@ -63,7 +59,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
         );
 
         // Assert
-        await Verify(content, _verifySettings).UseParameters(pageNumber, pageSize);
+        await Snapshot.Verify(content, _snapshotSettings);
     }
 
     [Theory]
@@ -96,7 +92,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
         );
 
         // Assert
-        await Verify(content, _verifySettings);
+        await Snapshot.Verify(content, _snapshotSettings);
     }
 
     [Fact]
@@ -180,7 +176,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
         );
 
         // Assert
-        await Verify(content, _verifySettings);
+        await Snapshot.Verify(content, _snapshotSettings);
     }
 
     [Fact]
@@ -213,7 +209,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
 
-        await Verify(response, _verifySettings);
+        await Snapshot.Verify(response, _snapshotSettings);
     }
 
     [Fact]
@@ -230,7 +226,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
 
-        await Verify(response, _verifySettings);
+        await Snapshot.Verify(response, _snapshotSettings);
     }
 
     [Fact]
@@ -247,7 +243,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
 
-        await Verify(response, _verifySettings);
+        await Snapshot.Verify(response, _snapshotSettings);
     }
 
     [Fact]
@@ -299,7 +295,7 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
 
-        await Verify(content, _verifySettings);
+        await Snapshot.Verify(content, _snapshotSettings);
     }
 
     [Fact]
@@ -345,6 +341,6 @@ public class IntegrationReadOnlyTest : IClassFixture<ApplicationFixture>
         );
 
         // Assert
-        await Verify(content, _verifySettings);
+        await Snapshot.Verify(content, _snapshotSettings);
     }
 }

@@ -1,7 +1,7 @@
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Argon;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
@@ -11,7 +11,9 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
 {
     private IDocumentRepository _documentRepository;
     private ReceiverDbContext _dbContext;
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     public DocumentRepositoryTests(
         ITestOutputHelper testOutputHelper,
@@ -21,13 +23,6 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
     {
         _documentRepository = fixtureWithDb.GetService<IDocumentRepository>(testOutputHelper)!;
         _dbContext = fixtureWithDb.GetService<ReceiverDbContext>(testOutputHelper)!;
-
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]
@@ -41,7 +36,7 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
             TestContext.Current.CancellationToken
         );
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -69,7 +64,7 @@ public class DocumentRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTest
             TestContext.Current.CancellationToken
         );
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]

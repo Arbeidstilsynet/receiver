@@ -1,9 +1,9 @@
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
-using Argon;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
@@ -21,19 +21,12 @@ public class AltinnMapperTests
     private const string StructuredDataId = "da158178-b7e1-44a1-bd20-7de5ef2fbc7a";
     private const string AttachmentId = "a013a210-e65d-46cb-8eb8-d41d41756be6";
 
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .DontScrubGuids()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues()
+        .ScrubMembers("InputStream");
     private readonly ILogger _logger = Substitute.For<ILogger>();
-
-    public AltinnMapperTests()
-    {
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.DontScrubGuids();
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
-    }
 
     [Fact]
     async Task MapAltinnSummaryToPostMeldingRequest_VerifyResult()
@@ -43,7 +36,7 @@ public class AltinnMapperTests
         //act
         var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -93,7 +86,7 @@ public class AltinnMapperTests
         //act
         var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]

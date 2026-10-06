@@ -1,8 +1,8 @@
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Argon;
 using Bogus;
 using Shouldly;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
@@ -15,7 +15,9 @@ public class SubscriptionRepositoryReadOnlyTests
     private static int SeedSize = 10;
     private ISubscriptionsRepository _subscriptionRepository;
 
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     private static Faker<AltinnSubscriptionEntity> AltinnSubscriptionEntityFaker(
         int Seed,
@@ -65,12 +67,6 @@ public class SubscriptionRepositoryReadOnlyTests
         _subscriptionRepository = fixtureWithDb.GetService<ISubscriptionsRepository>(
             testOutputHelper
         )!;
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     internal static List<SubscriptionEntity> Seed = SubscriptionEntityFaker.Generate(SeedSize);
@@ -83,7 +79,7 @@ public class SubscriptionRepositoryReadOnlyTests
         //act
         var result = await _subscriptionRepository.GetPersistedSubscription(existingConsumerName);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -106,7 +102,7 @@ public class SubscriptionRepositoryReadOnlyTests
         //act
         var result = await _subscriptionRepository.GetSubscriptions();
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -116,7 +112,7 @@ public class SubscriptionRepositoryReadOnlyTests
         //act
         var result = await _subscriptionRepository.GetAllActiveAltinnSubscriptions();
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -129,7 +125,7 @@ public class SubscriptionRepositoryReadOnlyTests
         //act
         var result = await _subscriptionRepository.GetActiveAltinnSubscription(existingAltinnAppId);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]

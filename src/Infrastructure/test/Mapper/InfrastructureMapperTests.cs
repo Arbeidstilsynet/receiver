@@ -1,9 +1,9 @@
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
+using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Test.fixtures;
-using Argon;
 using Bogus;
 using MapsterMapper;
 using Shouldly;
@@ -21,7 +21,9 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
             .RuleForType(typeof(Uri), faker => new Uri(faker.Internet.Url()));
 
     private readonly IMapper _mapper;
-    private readonly VerifySettings _verifySettings = new();
+    private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
+        .UseDirectory("Snapshots")
+        .IncludeDefaultValues();
 
     public InfrastructureMapperTests(
         ITestOutputHelper testOutputHelper,
@@ -30,13 +32,6 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         : base(testOutputHelper, fixture)
     {
         _mapper = fixture.GetService<IMapper>(testOutputHelper)!;
-
-        _verifySettings.UseDirectory("Snapshots");
-        _verifySettings.AddExtraSettings(jsonSettings =>
-        {
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        });
     }
 
     [Fact]
@@ -85,7 +80,7 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         //act
         var result = _mapper.Map<Melding>(meldingEntity);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -104,7 +99,7 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         //act
         var result = _mapper.Map<Document>(mainDocumentEntity);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -123,7 +118,7 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         //act
         var result = _mapper.Map<AltinnConnection>(altinnSubscriptionEntity);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 
     [Fact]
@@ -183,6 +178,6 @@ public class InfrastructureMapperTests : TestBed<InfrastructureAdapterTestFixtur
         //act
         var result = _mapper.Map<ConsumerManifest>(subscriptionEntity);
         //assert
-        await Verify(result, _verifySettings);
+        await Snapshot.Verify(result, _snapshotSettings);
     }
 }
