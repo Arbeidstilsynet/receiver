@@ -20,7 +20,9 @@ public interface ISubscriptionsRepository
 
     public Task DeleteSubscription(ConsumerManifest consumerManifest);
 
-    public Task<IEnumerable<AltinnConnection>> GetAllActiveAltinnSubscriptions();
+    public Task<IEnumerable<AltinnConnection>> GetAllActiveAltinnSubscriptions(
+        CancellationToken cancellationToken = default
+    );
 
     public Task<AltinnConnection?> GetActiveAltinnSubscription(string altinnAppId);
 

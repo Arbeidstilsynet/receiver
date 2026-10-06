@@ -31,6 +31,7 @@ RUN dotnet publish ./App/src/App.csproj -c Release -f net10.0 -o /app --no-resto
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:f62a272ac1b46e83f56b8ed0416572f31cd1128e2c4a5e63eb34d348e4a36095
 WORKDIR /app
-RUN apk add --no-cache curl
+# tzdata: RecoveryJob is scheduled in Europe/Oslo
+RUN apk add --no-cache curl tzdata
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "MeldingerReceiver.App.dll"]

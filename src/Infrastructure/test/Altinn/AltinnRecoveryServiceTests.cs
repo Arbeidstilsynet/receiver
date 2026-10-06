@@ -64,7 +64,7 @@ public class AltinnRecoveryServiceTests
     {
         //arrange
         _subscriptionsRepository
-            .GetAllActiveAltinnSubscriptions()
+            .GetAllActiveAltinnSubscriptions(Arg.Any<CancellationToken>())
             .Returns([SampleTestAppRegistration, SampleTestAppRegistration2]);
         _altinnAdapter
             .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
@@ -73,7 +73,9 @@ public class AltinnRecoveryServiceTests
             .GetNonCompletedInstances(SampleTestAppRegistration2.AltinnAppId, true)
             .Returns(GetDummyInstances(nonCompletedInstancesForSecondAppCount));
         //act
-        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps();
+        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps(
+            TestContext.Current.CancellationToken
+        );
         //assert
         result.SelectMany(s => s.Value).Count().ShouldBe(expectedResultCount);
     }
@@ -82,9 +84,13 @@ public class AltinnRecoveryServiceTests
     public async Task GetAllNonCompletedInstancesForRegisteredApps_WhenCalledWithoutRegisteredApps_ReturnsEmptyList()
     {
         //arrange
-        _subscriptionsRepository.GetAllActiveAltinnSubscriptions().Returns([]);
+        _subscriptionsRepository
+            .GetAllActiveAltinnSubscriptions(Arg.Any<CancellationToken>())
+            .Returns([]);
         //act
-        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps();
+        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps(
+            TestContext.Current.CancellationToken
+        );
         //assert
         result.Count.ShouldBe(0);
     }
@@ -94,7 +100,7 @@ public class AltinnRecoveryServiceTests
     {
         // arrange
         _subscriptionsRepository
-            .GetAllActiveAltinnSubscriptions()
+            .GetAllActiveAltinnSubscriptions(Arg.Any<CancellationToken>())
             .Returns([SampleTestAppRegistration, SampleTestAppRegistration2]);
         _altinnAdapter
             .GetNonCompletedInstances(SampleTestAppRegistration.AltinnAppId, true)
@@ -106,7 +112,9 @@ public class AltinnRecoveryServiceTests
             .Returns(GetDummyInstances(2));
 
         // act
-        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps();
+        var result = await _sut.GetAllNonCompletedInstancesForRegisteredApps(
+            TestContext.Current.CancellationToken
+        );
 
         // assert: failed app is omitted; successful app is returned
         result.Count.ShouldBe(1);

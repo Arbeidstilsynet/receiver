@@ -8,9 +8,11 @@ public interface IAltinnRecoveryService
     Task<IEnumerable<AltinnInstanceSummary>?> GetNonCompletedInstancesByAppId(string appId);
     Task<
         Dictionary<string, IEnumerable<AltinnInstanceSummary>>
-    > GetAllNonCompletedInstancesForRegisteredApps();
+    > GetAllNonCompletedInstancesForRegisteredApps(CancellationToken cancellationToken = default);
 
     Task<
         Dictionary<string, IEnumerable<AltinnMetadata>>
-    > GetMetadataForAllNonCompletedInstancesForRegisteredApps();
+    > GetMetadataForAllNonCompletedInstancesForRegisteredApps(
+        CancellationToken cancellationToken = default
+    );
 }

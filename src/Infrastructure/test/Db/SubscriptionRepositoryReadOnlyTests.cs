@@ -110,7 +110,9 @@ public class SubscriptionRepositoryReadOnlyTests
     {
         //arrange
         //act
-        var result = await _subscriptionRepository.GetAllActiveAltinnSubscriptions();
+        var result = await _subscriptionRepository.GetAllActiveAltinnSubscriptions(
+            TestContext.Current.CancellationToken
+        );
         //assert
         await Snapshot.Verify(result, _snapshotSettings);
     }

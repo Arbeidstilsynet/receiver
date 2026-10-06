@@ -59,12 +59,14 @@ internal class SubscriptionsRepository(ReceiverDbContext dbContext, IMapper mapp
         return result == null ? null : mapper.Map<ConsumerManifest>(result);
     }
 
-    public async Task<IEnumerable<AltinnConnection>> GetAllActiveAltinnSubscriptions()
+    public async Task<IEnumerable<AltinnConnection>> GetAllActiveAltinnSubscriptions(
+        CancellationToken cancellationToken = default
+    )
     {
         return await dbContext
             .AltinnApps.Where(w => w.SubscriptionId != null)
             .Select(s => mapper.Map<AltinnConnection>(s))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<AltinnConnection?> GetActiveAltinnSubscription(string altinnAppId)
