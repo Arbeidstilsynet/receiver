@@ -6,9 +6,11 @@ using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi;
 using OpenTelemetry.Trace;
 using Quartz;
+using Quartz.Diagnostics;
 using Quartz.Impl.AdoJobStore;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Extensions;
@@ -46,10 +48,14 @@ internal static class StartupExtensions
         //add custom instrumentation
         services
             .AddOpenTelemetry()
-            .WithMetrics(options => options.AddMeter(ApiMeters.MeterName))
+            .WithMetrics(options =>
+            {
+                options.AddMeter(ApiMeters.MeterName);
+                options.AddMeter(QuartzInstrumentation.MeterName);
+            })
             .WithTracing(options =>
             {
-                options.AddQuartzInstrumentation();
+                options.AddSource(QuartzInstrumentation.ActivitySourceName);
                 options.AddRedisInstrumentation();
             });
 
@@ -75,39 +81,43 @@ internal static class StartupExtensions
 
     internal static IServiceCollection AddQuartz(
         this IServiceCollection services,
-        string serviceConnection,
-        IWebHostEnvironment webHostEnvironment
+        string serviceConnection
     )
     {
         services.AddQuartz(q =>
         {
+            // Unique cluster node id per pod (hostname + start time), like instanceId = AUTO in 3.x.
+            q.ConfigureScheduler(o => o.GenerateInstanceId = true);
             q.UsePersistentStore(c =>
             {
-                c.RetryInterval = TimeSpan.FromMinutes(2);
-                c.UseProperties = true;
-                c.PerformSchemaValidation = true;
-                c.UseNewtonsoftJsonSerializer();
-                c.UsePostgres(postgres =>
+                // Every pod joins the cluster; each firing runs on exactly one pod.
+                c.UseClustering();
+                c.ConfigureStore(store =>
                 {
-                    postgres.ConnectionString = serviceConnection;
-                    postgres.UseDriverDelegate<PostgreSQLDelegate>();
-                    postgres.TablePrefix = "quartz.qrtz_";
+                    store.DbRetryInterval = TimeSpan.FromMinutes(2);
+                    store.StoreJobDataAsStrings = true;
+                    store.SchemaProvisioning = SchemaProvisioning.Validate;
+                    store.TablePrefix = "quartz.qrtz_";
                 });
+                c.UseSystemTextJsonSerializer();
+                c.UsePostgres(serviceConnection);
+                c.UseDriverDelegate<PostgreSQLDelegate>();
             });
-            // Just use the name of your job that you created in the Jobs folder.
+            // A failing scheduler should be visible, but must not take the API out of rotation.
+            q.AddQuartzHealthChecks(o => o.FailureStatus = HealthStatus.Degraded);
+
             var jobKey = new JobKey("RecoveryJob");
             q.AddJob<RecoveryJob>(opts => opts.WithIdentity(jobKey));
             q.AddTrigger(opts =>
                 opts.ForJob(jobKey)
                     .WithIdentity("RecoveryJob-trigger")
-                    // run every weekday from 8-16
-                    .WithDailyTimeIntervalSchedule(
-                        1,
-                        IntervalUnit.Hour,
-                        s =>
-                            s.OnMondayThroughFriday()
-                                .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(8, 0))
-                                .EndingDailyAfterCount(8)
+                    // Hourly on weekdays, 08:00-15:00 Norwegian time (8 firings)
+                    .WithDailyTimeIntervalSchedule(s =>
+                        s.WithInterval(1, IntervalUnit.Hour)
+                            .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Europe/Oslo"))
+                            .OnMondayThroughFriday()
+                            .StartingDailyAt(new TimeOnly(8, 0))
+                            .EndingDailyAfterCount(8)
                     )
             );
         });

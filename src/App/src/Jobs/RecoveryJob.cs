@@ -8,6 +8,7 @@ using Quartz;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 
+[DisallowConcurrentExecution]
 internal class RecoveryJob(
     IAltinnRecoveryService altinnRecoveryService,
     IMeldingService meldingService,
@@ -15,10 +16,15 @@ internal class RecoveryJob(
     ApiMeters apiMeters
 ) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async ValueTask Execute(
+        IJobExecutionContext context,
+        CancellationToken cancellationToken = default
+    )
     {
         var nonCompletedInstances =
-            await altinnRecoveryService.GetAllNonCompletedInstancesForRegisteredApps();
+            await altinnRecoveryService.GetAllNonCompletedInstancesForRegisteredApps(
+                cancellationToken
+            );
 
         foreach (var (appId, instances) in nonCompletedInstances)
         {
@@ -27,7 +33,7 @@ internal class RecoveryJob(
                 meldingService,
                 logger,
                 apiMeters,
-                context.CancellationToken
+                cancellationToken
             );
         }
     }

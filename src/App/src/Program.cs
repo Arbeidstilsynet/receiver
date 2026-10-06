@@ -59,7 +59,7 @@ services
     )
     .AddSubscriptionAdapter()
     .AddStorageAdapter();
-services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.ConnectionString, env);
+services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.ConnectionString);
 services.AddValidatorsFromAssemblyContaining<Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo>(
     includeInternalTypes: true
 );

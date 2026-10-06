@@ -27,10 +27,11 @@ internal class AltinnRecoveryService(
 
     public Task<
         Dictionary<string, IEnumerable<AltinnInstanceSummary>>
-    > GetAllNonCompletedInstancesForRegisteredApps()
+    > GetAllNonCompletedInstancesForRegisteredApps(CancellationToken cancellationToken = default)
     {
         return GetAllNonCompletedInstancesForRegisteredAppsInternal<AltinnInstanceSummary>(
-            (appId) => altinnAdapter.GetNonCompletedInstances(appId, true)
+            (appId) => altinnAdapter.GetNonCompletedInstances(appId, true),
+            cancellationToken
         );
     }
 
@@ -52,24 +53,31 @@ internal class AltinnRecoveryService(
 
     public Task<
         Dictionary<string, IEnumerable<AltinnMetadata>>
-    > GetMetadataForAllNonCompletedInstancesForRegisteredApps()
+    > GetMetadataForAllNonCompletedInstancesForRegisteredApps(
+        CancellationToken cancellationToken = default
+    )
     {
         return GetAllNonCompletedInstancesForRegisteredAppsInternal<AltinnMetadata>(
-            (appId) => altinnAdapter.GetMetadataForNonCompletedInstances(appId, true)
+            (appId) => altinnAdapter.GetMetadataForNonCompletedInstances(appId, true),
+            cancellationToken
         );
     }
 
     private async Task<
         Dictionary<string, IEnumerable<T>>
     > GetAllNonCompletedInstancesForRegisteredAppsInternal<T>(
-        Func<string, Task<IEnumerable<T>>> getNonCompletedInstances
+        Func<string, Task<IEnumerable<T>>> getNonCompletedInstances,
+        CancellationToken cancellationToken
     )
     {
         using var activity = Tracer.Source.StartActivity();
         Dictionary<string, IEnumerable<T>> allNonCompletedInstances = [];
-        var registeredApps = await subscriptionRepository.GetAllActiveAltinnSubscriptions();
+        var registeredApps = await subscriptionRepository.GetAllActiveAltinnSubscriptions(
+            cancellationToken
+        );
         foreach (var registeredApp in registeredApps)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             using var registeredAppActivity = Tracer.Source.StartActivity(
                 $"getAllNonCompletedInstancesFor {registeredApp}"
             );
@@ -89,7 +97,7 @@ internal class AltinnRecoveryService(
                 );
                 allNonCompletedInstances.Add(registeredApp.AltinnAppId, nonCompletedInstances);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 logger.LogError(
                     ex,

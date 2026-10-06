@@ -109,7 +109,9 @@ public class AltinnController(
         if (string.IsNullOrEmpty(appId))
         {
             var allInstancesResult =
-                await altinnRecoveryService.GetAllNonCompletedInstancesForRegisteredApps();
+                await altinnRecoveryService.GetAllNonCompletedInstancesForRegisteredApps(
+                    cancellationToken
+                );
             foreach (var (app, instances) in allInstancesResult)
             {
                 resultList.Add(
