@@ -18,21 +18,3 @@ The following diagram illustrates with which kind of external services the **rec
 ## Event driven `Melding` distribution
 
 ![valkey](./diagrams/stream.svg)
-
-## Altinn attachment filenames
-
-Newly received Altinn attachments use
-`{sanitizedDataType}_{dataElementId}{extension}` rather than the original filename.
-DataType retains only ASCII letters, digits, hyphens, and underscores; other characters
-become underscores, with leading/trailing underscores removed. An empty result uses
-`document`. If an attachment has no Altinn data element ID, Receiver generates a document ID and uses
-the same ID in the filename.
-
-Extensions come exclusively from a fixed Content-Type allowlist covering PDF, JSON,
-XML, plain text, CSV, JPEG, PNG, GIF, TIFF, Microsoft Office, OpenDocument, and ZIP.
-Matching ignores case and media-type parameters. Unknown types, including
-`application/octet-stream`, have no extension; the original filename is never consulted.
-Content-Type is retained unchanged. This naming policy does not validate the file's
-actual format or replace virus scanning. PDF main content and structured data retain
-their existing stable filenames. Existing stored documents are not renamed, and direct
-(non-Altinn) uploads retain their existing naming behavior.
