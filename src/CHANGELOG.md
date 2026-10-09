@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.10.2
+
+### Fixed
+
+- fix(altinn): stop storing user-supplied filenames for attachments. Use sanitized data types and document IDs instead, preserving the stable filenames of PDF main content and structured data.
+- fix(altinn): derive canonical file extensions from an explicit Content-Type allowlist, omitting extensions for unknown types without consulting the original filename.
+
+### Changed
+
+- Altinn attachments without a data type use `document` in the generated filename. Attachments without an Altinn data element ID use a generated Receiver document ID in both the document and filename.
+- Existing stored documents and direct (non-Altinn) uploads keep their existing filenames.
+
 ## 1.10.1
 
 ### Changed

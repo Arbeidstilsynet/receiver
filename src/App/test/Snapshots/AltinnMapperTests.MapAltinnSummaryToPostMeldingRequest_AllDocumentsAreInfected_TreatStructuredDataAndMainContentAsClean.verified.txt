@@ -31,7 +31,7 @@
   Attachments: [
     {
       FileMetadata: {
-        FileName: etellerannet.pdf,
+        FileName: some-type_a013a210-e65d-46cb-8eb8-d41d41756be6.pdf,
         ContentType: application/pdf
       },
       InputStream: {Scrubbed},
