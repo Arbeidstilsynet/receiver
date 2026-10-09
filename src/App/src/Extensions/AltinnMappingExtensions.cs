@@ -33,23 +33,34 @@ internal static class AltinnMappingExtensions
                 .StructuredData?.ToUploadDocumentRequest(logger)
                 .AsClean(),
             Attachments = altinnInstanceSummary
-                .Attachments.Select(attachment => attachment.ToUploadDocumentRequest(logger))
+                .Attachments.Select(attachment =>
+                    attachment.ToUploadDocumentRequest(logger, sanitizeFilename: true)
+                )
                 .ToList(),
         };
     }
 
     private static UploadDocumentRequest ToUploadDocumentRequest(
         this AltinnDocument altinnDocument,
-        ILogger logger
+        ILogger logger,
+        bool sanitizeFilename = false
     )
     {
+        Guid? documentId =
+            altinnDocument.FileMetadata.AltinnId == Guid.Empty
+                ? null
+                : altinnDocument.FileMetadata.AltinnId;
+        if (sanitizeFilename)
+        {
+            documentId ??= Guid.NewGuid();
+        }
+
         return new UploadDocumentRequest
         {
-            DocumentId =
-                altinnDocument.FileMetadata.AltinnId == Guid.Empty
-                    ? null
-                    : altinnDocument.FileMetadata.AltinnId,
-            FileMetadata = altinnDocument.FileMetadata.ToDocumentMetadata(),
+            DocumentId = documentId,
+            FileMetadata = altinnDocument.FileMetadata.ToDocumentMetadata(
+                sanitizeFilename ? documentId : null
+            ),
             InputStream = altinnDocument.DocumentContent,
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),
             Tags = altinnDocument.FileMetadata.ToDocumentTags(logger),
@@ -61,18 +72,68 @@ internal static class AltinnMappingExtensions
         return uploadDocumentRequest with { ScanResult = DocumentScanResult.Clean };
     }
 
-    private static DocumentFileMetadata ToDocumentMetadata(this AltinnFileMetadata fileMetadata)
+    private static DocumentFileMetadata ToDocumentMetadata(
+        this AltinnFileMetadata fileMetadata,
+        Guid? sanitizedDocumentId
+    )
     {
+        var contentType =
+            fileMetadata.ContentType
+            ?? throw new ArgumentException("ContentType is required in order to succeed.");
+
         return new DocumentFileMetadata
         {
-            ContentType =
-                fileMetadata.ContentType
-                ?? throw new ArgumentException("ContentType is required in order to succeed."),
-            FileName =
-                fileMetadata.Filename
-                ?? throw new ArgumentException("Filename is required in order to succeed."),
+            ContentType = contentType,
+            FileName = sanitizedDocumentId is { } documentId
+                ? fileMetadata.GetSanitizedFilename(documentId, contentType)
+                : fileMetadata.Filename
+                    ?? throw new ArgumentException("Filename is required in order to succeed."),
         };
     }
+
+    private static string GetSanitizedFilename(
+        this AltinnFileMetadata fileMetadata,
+        Guid documentId,
+        string contentType
+    )
+    {
+        var dataType = new string(
+            (fileMetadata.AltinnDataType ?? "")
+                .Select(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_' ? c : '_')
+                .ToArray()
+        ).Trim('_');
+        if (dataType.Length == 0)
+        {
+            dataType = "document";
+        }
+
+        return $"{dataType}_{documentId}{GetFileExtension(contentType)}";
+    }
+
+    private static string GetFileExtension(string contentType) =>
+        contentType.Split(';', 2)[0].Trim().ToLowerInvariant() switch
+        {
+            "application/pdf" => ".pdf",
+            "application/json" => ".json",
+            "application/xml" or "text/xml" => ".xml",
+            "text/plain" => ".txt",
+            "text/csv" => ".csv",
+            "image/jpeg" => ".jpg",
+            "image/png" => ".png",
+            "image/gif" => ".gif",
+            "image/tiff" => ".tif",
+            "application/msword" => ".doc",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => ".docx",
+            "application/vnd.ms-excel" => ".xls",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => ".xlsx",
+            "application/vnd.ms-powerpoint" => ".ppt",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation" => ".pptx",
+            "application/vnd.oasis.opendocument.text" => ".odt",
+            "application/vnd.oasis.opendocument.spreadsheet" => ".ods",
+            "application/vnd.oasis.opendocument.presentation" => ".odp",
+            "application/zip" => ".zip",
+            _ => "",
+        };
 
     private static Dictionary<string, string> ToDocumentTags(
         this AltinnFileMetadata fileMetadata,

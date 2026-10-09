@@ -118,20 +118,189 @@ public class AltinnMapperTests
             .Message.ShouldContain("ContentType");
     }
 
-    [Fact]
-    public void MapAltinnSummaryToPostMeldingRequest_WhenFilenameIsNull_ThrowsArgumentException()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("private-personal-information.secret")]
+    [InlineData(@"C:\private\personal-information.exe")]
+    public void MapAltinnSummaryToPostMeldingRequest_IgnoresOriginalAttachmentFilename(
+        string? filename
+    )
     {
         var summary = GetCompleteAltinnSummary();
         summary = summary with
         {
-            SkjemaAsPdf = summary.SkjemaAsPdf with
-            {
-                FileMetadata = summary.SkjemaAsPdf.FileMetadata with { Filename = null },
-            },
+            Attachments =
+            [
+                summary.Attachments[0] with
+                {
+                    FileMetadata = summary.Attachments[0].FileMetadata with { Filename = filename },
+                },
+            ],
         };
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+
+        result.MainContent.FileMetadata.FileName.ShouldBe("main-data.pdf");
+        result.StructuredData!.FileMetadata.FileName.ShouldBe("structured-data.json");
+        result.Attachments[0].FileMetadata.FileName.ShouldBe($"some-type_{AttachmentId}.pdf");
+    }
+
+    [Theory]
+    [InlineData("main")]
+    [InlineData("structured")]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenStableFilenameIsNull_ThrowsArgumentException(
+        string documentType
+    )
+    {
+        var summary = GetCompleteAltinnSummary();
+        var document = GetDocument(summary, documentType);
+        var withoutFilename = document with
+        {
+            FileMetadata = document.FileMetadata with { Filename = null },
+        };
+        summary =
+            documentType == "main"
+                ? summary with
+                {
+                    SkjemaAsPdf = withoutFilename,
+                }
+                : summary with
+                {
+                    StructuredData = withoutFilename,
+                };
+
         Should
             .Throw<ArgumentException>(() => summary.MapAltinnSummaryToPostMeldingRequest(_logger))
             .Message.ShouldContain("Filename");
+    }
+
+    [Theory]
+    [InlineData("application/pdf", ".pdf")]
+    [InlineData("application/json", ".json")]
+    [InlineData("application/xml", ".xml")]
+    [InlineData("text/xml", ".xml")]
+    [InlineData("text/plain", ".txt")]
+    [InlineData("text/csv", ".csv")]
+    [InlineData("image/jpeg", ".jpg")]
+    [InlineData("image/png", ".png")]
+    [InlineData("image/gif", ".gif")]
+    [InlineData("image/tiff", ".tif")]
+    [InlineData("application/msword", ".doc")]
+    [InlineData("application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx")]
+    [InlineData("application/vnd.ms-excel", ".xls")]
+    [InlineData("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx")]
+    [InlineData("application/vnd.ms-powerpoint", ".ppt")]
+    [InlineData(
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        ".pptx"
+    )]
+    [InlineData("application/vnd.oasis.opendocument.text", ".odt")]
+    [InlineData("application/vnd.oasis.opendocument.spreadsheet", ".ods")]
+    [InlineData("application/vnd.oasis.opendocument.presentation", ".odp")]
+    [InlineData("application/zip", ".zip")]
+    [InlineData(" Application/PDF ; charset=utf-8", ".pdf")]
+    [InlineData("application/json; charset=utf-8", ".json")]
+    [InlineData("application/octet-stream", "")]
+    [InlineData("application/x-private-format", "")]
+    [InlineData("application/pdf-private", "")]
+    public void MapAltinnSummaryToPostMeldingRequest_DerivesExtensionFromContentType(
+        string contentType,
+        string extension
+    )
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary = summary with
+        {
+            Attachments =
+            [
+                summary.Attachments[0] with
+                {
+                    FileMetadata = summary.Attachments[0].FileMetadata with
+                    {
+                        ContentType = contentType,
+                        Filename = "private-name.secret",
+                    },
+                },
+            ],
+        };
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+
+        result
+            .Attachments[0]
+            .FileMetadata.FileName.ShouldBe($"some-type_{AttachmentId}{extension}");
+        result.Attachments[0].FileMetadata.ContentType.ShouldBe(contentType);
+    }
+
+    [Theory]
+    [InlineData("ref-data-as-pdf", "ref-data-as-pdf")]
+    [InlineData("type_with_underscores", "type_with_underscores")]
+    [InlineData("../folder\\file: name", "folder_file__name")]
+    [InlineData("type\r\n\"<>|?*", "type")]
+    [InlineData("skjema\u00e6", "skjema")]
+    [InlineData(null, "document")]
+    [InlineData("", "document")]
+    [InlineData("   ", "document")]
+    [InlineData("../", "document")]
+    public void MapAltinnSummaryToPostMeldingRequest_SanitizesDataType(
+        string? dataType,
+        string expectedDataType
+    )
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary = summary with
+        {
+            Attachments =
+            [
+                summary.Attachments[0] with
+                {
+                    FileMetadata = summary.Attachments[0].FileMetadata with
+                    {
+                        AltinnDataType = dataType,
+                    },
+                },
+            ],
+        };
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+
+        result
+            .Attachments[0]
+            .FileMetadata.FileName.ShouldBe($"{expectedDataType}_{AttachmentId}.pdf");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenAttachmentIdIsMissing_UsesGeneratedDocumentId(
+        string? dataType
+    )
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary = summary with
+        {
+            Attachments =
+            [
+                summary.Attachments[0] with
+                {
+                    FileMetadata = summary.Attachments[0].FileMetadata with
+                    {
+                        AltinnId = Guid.Empty,
+                        AltinnDataType = dataType,
+                        Filename = null,
+                    },
+                },
+            ],
+        };
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+        var attachment = result.Attachments[0];
+
+        attachment.DocumentId.ShouldNotBeNull();
+        attachment.DocumentId.Value.ShouldNotBe(Guid.Empty);
+        attachment.FileMetadata.FileName.ShouldBe($"document_{attachment.DocumentId}.pdf");
+        attachment.Tags.ShouldBeEmpty();
     }
 
     [Theory]
