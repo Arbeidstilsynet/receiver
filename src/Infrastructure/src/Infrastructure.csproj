@@ -8,10 +8,10 @@
       Version="10.0.12"
     />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-    <PackageReference Include="Quartz" Version="4.3.0" />
+    <PackageReference Include="Quartz" Version="4.4.0" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="5.0.0" />
-    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="4.0.6" />
-    <PackageReference Include="StackExchange.Redis" Version="3.3.1" />
+    <PackageReference Include="Arbeidstilsynet.Common.Altinn" Version="4.0.7" />
+    <PackageReference Include="StackExchange.Redis" Version="3.4.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
     <PackageReference
       Include="AppAny.Quartz.EntityFrameworkCore.Migrations.PostgreSQL"
