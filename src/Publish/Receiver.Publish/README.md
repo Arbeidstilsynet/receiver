@@ -153,9 +153,10 @@ For meldinger received from Altinn, `MainContentId`, `StructuredDataId`, and eac
 the same ID to identify a document in the receiver and its source data element in Altinn.
 
 Altinn file metadata is copied into `Document.Tags` for main content, structured data and
-attachments. The receiver also adds `AltinnId` and `AltinnDataType` when available. These
-canonical tags take precedence over application metadata with the same key. Conflicting
-values produce a warning containing the key and document ID, but not the metadata values;
+attachments. The receiver also adds `AltinnId` and `AltinnDataType` when available. If the
+Altinn instance has `UnntattOffentlighet` metadata, it is also applied to `Document.Tags`
+for main content and structured data (with document file metadata taking precedence in case of conflict).
+Conflicting values produce a warning containing the key and document ID, but not the metadata values;
 identical values do not produce a warning. This applies to webhook ingestion, recovery and
 manual instance processing.
 

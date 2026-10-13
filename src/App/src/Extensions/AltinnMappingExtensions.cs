@@ -11,11 +11,17 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 
 internal static class AltinnMappingExtensions
 {
+    private const string UnntattOffentlighetKey = "UnntattOffentlighet";
+
     public static CreateMeldingRequest MapAltinnSummaryToPostMeldingRequest(
         this AltinnInstanceSummary altinnInstanceSummary,
         ILogger logger
     )
     {
+        var instanceUnntattOffentlighet = GetInstanceUnntattOffentlighet(
+            altinnInstanceSummary.Metadata
+        );
+
         return new CreateMeldingRequest
         {
             MeldingId = altinnInstanceSummary.Metadata.InstanceGuid,
@@ -27,10 +33,16 @@ internal static class AltinnMappingExtensions
                 ),
             Metadata = altinnInstanceSummary.ToMetadataDictionary(),
             MainContent = altinnInstanceSummary
-                .SkjemaAsPdf.ToUploadDocumentRequest(logger)
+                .SkjemaAsPdf.ToUploadDocumentRequest(
+                    logger,
+                    instanceUnntattOffentlighet: instanceUnntattOffentlighet
+                )
                 .AsClean(),
             StructuredData = altinnInstanceSummary
-                .StructuredData?.ToUploadDocumentRequest(logger)
+                .StructuredData?.ToUploadDocumentRequest(
+                    logger,
+                    instanceUnntattOffentlighet: instanceUnntattOffentlighet
+                )
                 .AsClean(),
             Attachments = altinnInstanceSummary
                 .Attachments.Select(attachment =>
@@ -43,7 +55,8 @@ internal static class AltinnMappingExtensions
     private static UploadDocumentRequest ToUploadDocumentRequest(
         this AltinnDocument altinnDocument,
         ILogger logger,
-        bool sanitizeFilename = false
+        bool sanitizeFilename = false,
+        string? instanceUnntattOffentlighet = null
     )
     {
         Guid? documentId =
@@ -55,6 +68,22 @@ internal static class AltinnMappingExtensions
             documentId ??= Guid.NewGuid();
         }
 
+        var tags = altinnDocument.FileMetadata.ToDocumentTags(logger);
+        if (instanceUnntattOffentlighet is not null)
+        {
+            if (
+                !tags.TryAdd(UnntattOffentlighetKey, instanceUnntattOffentlighet)
+                && tags[UnntattOffentlighetKey] != instanceUnntattOffentlighet
+            )
+            {
+                logger.LogWarning(
+                    "Ignoring conflicting Altinn instance metadata key {MetadataKey} for document {DocumentId}; the document tag value is retained.",
+                    UnntattOffentlighetKey,
+                    altinnDocument.FileMetadata.AltinnId
+                );
+            }
+        }
+
         return new UploadDocumentRequest
         {
             DocumentId = documentId,
@@ -63,8 +92,27 @@ internal static class AltinnMappingExtensions
             ),
             InputStream = altinnDocument.DocumentContent,
             ScanResult = altinnDocument.FileMetadata.FileScanResult.MapToDocumentScanResult(),
-            Tags = altinnDocument.FileMetadata.ToDocumentTags(logger),
+            Tags = tags,
         };
+    }
+
+    private static string? GetInstanceUnntattOffentlighet(AltinnMetadata? metadata)
+    {
+        if (metadata?.DataValues is null)
+        {
+            return null;
+        }
+
+        if (metadata.DataValues.TryGetValue(UnntattOffentlighetKey, out var exactValue))
+        {
+            return exactValue;
+        }
+
+        var entry = metadata.DataValues.FirstOrDefault(kvp =>
+            string.Equals(kvp.Key, UnntattOffentlighetKey, StringComparison.OrdinalIgnoreCase)
+        );
+
+        return entry.Key is not null ? entry.Value : null;
     }
 
     private static UploadDocumentRequest AsClean(this UploadDocumentRequest uploadDocumentRequest)

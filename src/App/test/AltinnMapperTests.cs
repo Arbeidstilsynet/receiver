@@ -1,3 +1,4 @@
+using Arbeidstilsynet.Common.Altinn.Extensions;
 using Arbeidstilsynet.Common.Altinn.Model.Adapter;
 using Arbeidstilsynet.Common.Altinn.Model.Api.Response;
 using Arbeidstilsynet.Common.Altinn.Storage.Models;
@@ -458,6 +459,104 @@ public class AltinnMapperTests
 
         result.MainContent.DocumentId.ShouldBeNull();
         result.MainContent.Tags.ShouldBeEmpty();
+        _logger.ReceivedCalls().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenInstanceHasUnntattOffentlighet_AppliesToMainContentAndStructuredData()
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary.Metadata.DataValues.Add("UnntattOffentlighet", "true");
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+
+        result.MainContent.Tags["UnntattOffentlighet"].ShouldBe("true");
+        result.StructuredData!.Tags["UnntattOffentlighet"].ShouldBe("true");
+        result.Attachments[0].Tags.ContainsKey("UnntattOffentlighet").ShouldBeFalse();
+
+        result.MainContent.Tags["AltinnId"].ShouldBe(MainContentId);
+        result.MainContent.Tags["AltinnDataType"].ShouldBe("ref-data-as-pdf");
+        result.StructuredData.Tags["AltinnId"].ShouldBe(StructuredDataId);
+        result.StructuredData.Tags["AltinnDataType"].ShouldBe("structured-data");
+
+        _logger.ReceivedCalls().ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("UnntattOffentlighet")]
+    [InlineData("unntattoffentlighet")]
+    [InlineData("unntattOffentlighet")]
+    [InlineData("UNNTATTOFFENTLIGHET")]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenInstanceHasUnntattOffentlighetAnyCasing_AppliesCanonicalKey(
+        string metadataKey
+    )
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary.Metadata.DataValues.Add(metadataKey, "true");
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+
+        result.MainContent.Tags["UnntattOffentlighet"].ShouldBe("true");
+        result.StructuredData!.Tags["UnntattOffentlighet"].ShouldBe("true");
+        _logger.ReceivedCalls().ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("main", true)]
+    [InlineData("main", false)]
+    [InlineData("structured", true)]
+    [InlineData("structured", false)]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenDocumentAlreadyHasUnntattOffentlighet_KeepsDocumentTag(
+        string documentType,
+        bool identicalValue
+    )
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary.Metadata.DataValues.Add("UnntattOffentlighet", "instance-value");
+
+        var document = GetDocument(summary, documentType);
+        var documentValue = identicalValue ? "instance-value" : "document-specific-value";
+        document.FileMetadata.Metadata.Add("UnntattOffentlighet", documentValue);
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+        var tags = GetDocumentTags(result, documentType);
+
+        tags["UnntattOffentlighet"].ShouldBe(documentValue);
+
+        if (identicalValue)
+        {
+            _logger.ReceivedCalls().ShouldBeEmpty();
+        }
+        else
+        {
+            var call = _logger.ReceivedCalls().ShouldHaveSingleItem();
+            call.GetMethodInfo().Name.ShouldBe(nameof(ILogger.Log));
+            var arguments = call.GetArguments();
+            arguments[0].ShouldBe(LogLevel.Warning);
+            var state = arguments[2]
+                .ShouldBeAssignableTo<IEnumerable<KeyValuePair<string, object?>>>();
+            state.ShouldContain(pair =>
+                pair.Key == "MetadataKey" && Equals(pair.Value, "UnntattOffentlighet")
+            );
+            state.ShouldContain(pair =>
+                pair.Key == "DocumentId" && Equals(pair.Value, document.FileMetadata.AltinnId)
+            );
+            state.ShouldNotContain(pair => Equals(pair.Value, "instance-value"));
+            state.ShouldNotContain(pair => Equals(pair.Value, documentValue));
+        }
+    }
+
+    [Fact]
+    public void MapAltinnSummaryToPostMeldingRequest_WhenStructuredDataIsNullAndInstanceHasUnntattOffentlighet_AppliesToMainContent()
+    {
+        var summary = GetCompleteAltinnSummary();
+        summary = summary with { StructuredData = null };
+        summary.Metadata.DataValues.Add("UnntattOffentlighet", "true");
+
+        var result = summary.MapAltinnSummaryToPostMeldingRequest(_logger);
+
+        result.MainContent.Tags["UnntattOffentlighet"].ShouldBe("true");
+        result.StructuredData.ShouldBeNull();
         _logger.ReceivedCalls().ShouldBeEmpty();
     }
 
