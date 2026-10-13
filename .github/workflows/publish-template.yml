@@ -198,7 +198,7 @@ jobs:
       - name: Build and push image to NAIS registry
         if: inputs.image-published == false
         id: nais_build_push
-        uses: nais/docker-build-push@bfe52e3ad6d0e96fd1056a03acb7b619aaffb39d # v0
+        uses: nais/docker-build-push@dd7421d5068057a020ca46ead966c26190c516b1 # v0
         with:
           team: meldinger
           docker_context: ./
