@@ -7,6 +7,11 @@ public interface IMeldingRepository
 {
     Task<Melding> CreateMelding(CreateMeldingRequest request, CancellationToken cancellationToken);
     Task<Melding?> GetMelding(Guid meldingId, CancellationToken cancellationToken);
+    Task<AttachmentDetachmentResponse> DetachAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Returns all meldinger whose GUID ends with the given short id (the trailing 12 hex characters).
