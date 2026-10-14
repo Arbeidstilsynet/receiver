@@ -100,15 +100,6 @@ internal class MeldingService : IMeldingService
         return await _meldingRepository.GetMelding(request.MeldingId, cancellationToken);
     }
 
-    public Task<AttachmentDetachmentResponse> DetachAttachment(
-        Guid meldingId,
-        AttachmentDetachmentRequest request,
-        CancellationToken cancellationToken
-    )
-    {
-        return _meldingRepository.DetachAttachment(meldingId, request, cancellationToken);
-    }
-
     public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
         string shortId,
         CancellationToken cancellationToken

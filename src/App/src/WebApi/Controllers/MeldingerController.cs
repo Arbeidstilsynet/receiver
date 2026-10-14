@@ -1,17 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Arbeidstilsynet.MeldingerReceiver.App.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.App;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
 using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 
@@ -21,23 +17,17 @@ public partial class MeldingerController : ControllerBase
 {
     private readonly ApiMeters _apiMeters;
     private readonly IValidator<PostMeldingBody> _postMeldingValidator;
-    private readonly IValidator<AttachmentDetachmentRequest> _attachmentDetachmentValidator;
     private readonly IMeldingService _meldingService;
-    private readonly ILogger<MeldingerController> _logger;
 
     public MeldingerController(
         IValidator<PostMeldingBody> postMeldingValidator,
-        IValidator<AttachmentDetachmentRequest> attachmentDetachmentValidator,
         IMeldingService meldingService,
-        ApiMeters apiMeters,
-        ILogger<MeldingerController> logger
+        ApiMeters apiMeters
     )
     {
         _postMeldingValidator = postMeldingValidator;
-        _attachmentDetachmentValidator = attachmentDetachmentValidator;
         _meldingService = meldingService;
         _apiMeters = apiMeters;
-        _logger = logger;
     }
 
     [HttpPost]
@@ -104,55 +94,6 @@ public partial class MeldingerController : ControllerBase
             return NotFound();
 
         return new GetMeldingResponse { Melding = melding };
-    }
-
-    /// <summary>
-    /// Detaches one explicitly selected attachment from a supported Altinn melding.
-    /// </summary>
-    /// <remarks>
-    /// The default request is a dry-run. Set <c>apply</c> to true and pass the revision returned
-    /// by a current preview to persist the detachment.
-    /// </remarks>
-    [Authorize]
-    [HttpPost("{meldingId:guid}/attachment-detachments")]
-    public async Task<ActionResult<AttachmentDetachmentResponse>> DetachAttachment(
-        [Required] [FromRoute] Guid meldingId,
-        [FromBody] AttachmentDetachmentRequest request,
-        CancellationToken cancellationToken
-    )
-    {
-        var validationResult = await _attachmentDetachmentValidator.ValidateAsync(
-            request,
-            cancellationToken
-        );
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.ToString());
-        }
-
-        var response = await _meldingService.DetachAttachment(
-            meldingId,
-            request,
-            cancellationToken
-        );
-        var actor =
-            User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("azp")?.Value
-            ?? User.Identity?.Name
-            ?? "authenticated";
-        _logger.LogInformation(
-            "Attachment detachment completed for {MeldingId} and {DocumentId}: applied {Applied}, already detached {AlreadyDetached}; attachments before {AttachmentIdsBefore}, after {AttachmentIdsAfter}; actor {Actor}",
-            response.MeldingId,
-            response.DocumentId,
-            response.Applied,
-            response.AlreadyDetached,
-            response.AttachmentIdsBefore,
-            response.AttachmentIdsAfter,
-            actor
-        );
-
-        return Ok(response);
     }
 
     /// <summary>

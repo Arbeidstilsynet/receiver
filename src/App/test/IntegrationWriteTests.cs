@@ -7,11 +7,9 @@ using Arbeidstilsynet.Common.TestExtensions.Snapshots;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
-using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
-using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
@@ -19,7 +17,6 @@ namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
 public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
 {
     private readonly HttpClient _client;
-    private readonly ApplicationFixture _fixture;
     private readonly SnapshotSettings _snapshotSettings = new SnapshotSettings()
         .UseDirectory("Snapshots")
         .IncludeDefaultValues();
@@ -32,7 +29,6 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
 
     public IntegrationWriteTests(ApplicationFixture factory)
     {
-        _fixture = factory;
         _client = factory.CreateClient();
     }
 
@@ -158,264 +154,6 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         melding.StructuredDataId.ShouldNotBeNull();
         melding.AttachmentIds.Count.ShouldBe(postMeldingBody.Attachments.Count);
         melding.Tags.ShouldBe(postMeldingBody.Metadata);
-    }
-
-    [Fact]
-    public async Task DetachAttachment_PreviewApplyAndRetry_PreservesDocumentAndRemovesOnlyAttachment()
-    {
-        var (meldingId, documentId, mainDocumentId, storageReference) =
-            await CreateAltinnMeldingWithAttachment();
-        var route = $"/meldinger/{meldingId}/attachment-detachments";
-        var previewResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest { DocumentId = documentId },
-            TestContext.Current.CancellationToken
-        );
-
-        previewResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var preview = (
-            await previewResponse.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
-                _jsonSerializerOptions,
-                TestContext.Current.CancellationToken
-            )
-        ).ShouldNotBeNull();
-        preview.MeldingId.ShouldBe(meldingId);
-        preview.DocumentId.ShouldBe(documentId);
-        preview.ApplicationId.ShouldBe("ulykkesvarsel");
-        preview.MainContentId.ShouldBe(mainDocumentId);
-        preview.StructuredDataId.ShouldBeNull();
-        preview.AttachmentIdsBefore.ShouldBe([documentId]);
-        preview.AttachmentIdsAfter.ShouldBe([]);
-        preview.FileName.ShouldBe("detachable.txt");
-        preview.ContentType.ShouldBe("text/plain");
-        preview.Applied.ShouldBeFalse();
-        preview.AlreadyDetached.ShouldBeFalse();
-
-        var stillAttached = await _client.GetFromJsonAsync<GetMeldingResponse>(
-            $"/meldinger/{meldingId}",
-            _jsonSerializerOptions,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-        stillAttached
-            .ShouldNotBeNull()
-            .Melding.ShouldNotBeNull()
-            .AttachmentIds.ShouldContain(documentId);
-
-        var mainDocumentResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest { DocumentId = mainDocumentId },
-            TestContext.Current.CancellationToken
-        );
-        mainDocumentResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-        var unknownDocumentResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest { DocumentId = Guid.NewGuid() },
-            TestContext.Current.CancellationToken
-        );
-        unknownDocumentResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-        var unrelatedMelding = await CreateAltinnMeldingWithAttachment();
-        var foreignDocumentResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest { DocumentId = unrelatedMelding.DocumentId },
-            TestContext.Current.CancellationToken
-        );
-        foreignDocumentResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-        var unsupportedApplication = await CreateAltinnMeldingWithAttachment("another-app");
-        var unsupportedApplicationResponse = await _client.PostAsJsonAsync(
-            $"/meldinger/{unsupportedApplication.MeldingId}/attachment-detachments",
-            new AttachmentDetachmentRequest { DocumentId = unsupportedApplication.DocumentId },
-            TestContext.Current.CancellationToken
-        );
-        unsupportedApplicationResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
-
-        var unsupportedSource = await CreateAltinnMeldingWithAttachment(source: MessageSource.Api);
-        var unsupportedSourceResponse = await _client.PostAsJsonAsync(
-            $"/meldinger/{unsupportedSource.MeldingId}/attachment-detachments",
-            new AttachmentDetachmentRequest { DocumentId = unsupportedSource.DocumentId },
-            TestContext.Current.CancellationToken
-        );
-        unsupportedSourceResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
-
-        var emptyDocumentResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest { DocumentId = Guid.Empty },
-            TestContext.Current.CancellationToken
-        );
-        emptyDocumentResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-        var emptyMeldingIdResponse = await _client.PostAsJsonAsync(
-            $"/meldinger/{Guid.Empty}/attachment-detachments",
-            new AttachmentDetachmentRequest { DocumentId = documentId },
-            TestContext.Current.CancellationToken
-        );
-        emptyMeldingIdResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-        var applyResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest
-            {
-                DocumentId = documentId,
-                Apply = true,
-                ExpectedRevision = preview.Revision,
-            },
-            TestContext.Current.CancellationToken
-        );
-        applyResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var applied = (
-            await applyResponse.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
-                _jsonSerializerOptions,
-                TestContext.Current.CancellationToken
-            )
-        ).ShouldNotBeNull();
-        applied.Applied.ShouldBeTrue();
-        applied.AlreadyDetached.ShouldBeFalse();
-        applied.AttachmentIdsBefore.ShouldBe([documentId]);
-        applied.AttachmentIdsAfter.ShouldBe([]);
-        applied.Revision.ShouldNotBe(preview.Revision);
-
-        var freshPreviewResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest { DocumentId = documentId },
-            TestContext.Current.CancellationToken
-        );
-        var freshPreview = (
-            await freshPreviewResponse.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
-                _jsonSerializerOptions,
-                TestContext.Current.CancellationToken
-            )
-        ).ShouldNotBeNull();
-        freshPreview.AlreadyDetached.ShouldBeTrue();
-        freshPreview.AttachmentIdsBefore.ShouldBe([]);
-        freshPreview.AttachmentIdsAfter.ShouldBe([]);
-
-        var staleApplyResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest
-            {
-                DocumentId = documentId,
-                Apply = true,
-                ExpectedRevision = preview.Revision,
-            },
-            TestContext.Current.CancellationToken
-        );
-        staleApplyResponse.StatusCode.ShouldBe(HttpStatusCode.Conflict);
-
-        var idempotentApplyResponse = await _client.PostAsJsonAsync(
-            route,
-            new AttachmentDetachmentRequest
-            {
-                DocumentId = documentId,
-                Apply = true,
-                ExpectedRevision = freshPreview.Revision,
-            },
-            TestContext.Current.CancellationToken
-        );
-        idempotentApplyResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var idempotent = (
-            await idempotentApplyResponse.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
-                _jsonSerializerOptions,
-                TestContext.Current.CancellationToken
-            )
-        ).ShouldNotBeNull();
-        idempotent.Applied.ShouldBeTrue();
-        idempotent.AlreadyDetached.ShouldBeTrue();
-
-        using var scope = _fixture.Services.CreateScope();
-        var document = await scope
-            .ServiceProvider.GetRequiredService<IDocumentRepository>()
-            .GetDocumentAsync(documentId, TestContext.Current.CancellationToken);
-        document.ShouldNotBeNull();
-        document.FileMetadata.FileName.ShouldBe("detachable.txt");
-        document.FileMetadata.ContentType.ShouldBe("text/plain");
-
-        using var blobContent = new MemoryStream();
-        await scope
-            .ServiceProvider.GetRequiredService<IDocumentStorage>()
-            .Download(storageReference, blobContent, TestContext.Current.CancellationToken);
-        System.Text.Encoding.UTF8.GetString(blobContent.ToArray()).ShouldBe("preserved blob");
-
-        var detachedMelding = await _client.GetFromJsonAsync<GetMeldingResponse>(
-            $"/meldinger/{meldingId}",
-            _jsonSerializerOptions,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-        detachedMelding.ShouldNotBeNull().Melding.ShouldNotBeNull().AttachmentIds.ShouldBeEmpty();
-    }
-
-    private async Task<(
-        Guid MeldingId,
-        Guid DocumentId,
-        Guid MainDocumentId,
-        string StorageReference
-    )> CreateAltinnMeldingWithAttachment(
-        string applicationId = "ulykkesvarsel",
-        MessageSource source = MessageSource.Altinn
-    )
-    {
-        var meldingId = Guid.NewGuid();
-        var documentId = Guid.NewGuid();
-        var mainDocumentId = Guid.NewGuid();
-        using var scope = _fixture.Services.CreateScope();
-        var storage = scope.ServiceProvider.GetRequiredService<IDocumentStorage>();
-        var attachment = await storage.Upload(
-            new UploadRequest
-            {
-                Document = new Document
-                {
-                    DocumentId = documentId,
-                    MeldingId = meldingId,
-                    FileMetadata = new FileMetadata
-                    {
-                        FileName = "detachable.txt",
-                        ContentType = "text/plain",
-                    },
-                    ScanResult = DocumentScanResult.Clean,
-                },
-                InputStream = new MemoryStream("preserved blob"u8.ToArray()),
-            },
-            TestContext.Current.CancellationToken
-        );
-        var mainContent = await storage.Upload(
-            new UploadRequest
-            {
-                Document = new Document
-                {
-                    DocumentId = mainDocumentId,
-                    MeldingId = meldingId,
-                    FileMetadata = new FileMetadata
-                    {
-                        FileName = "main.pdf",
-                        ContentType = "application/pdf",
-                    },
-                    ScanResult = DocumentScanResult.Clean,
-                },
-                InputStream = new MemoryStream("main"u8.ToArray()),
-            },
-            TestContext.Current.CancellationToken
-        );
-        await scope
-            .ServiceProvider.GetRequiredService<IMeldingRepository>()
-            .CreateMelding(
-                new Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto.CreateMeldingRequest
-                {
-                    Id = meldingId,
-                    Source = source,
-                    ApplicationId = applicationId,
-                    ReceivedAt = DateTime.UtcNow,
-                    MainDocumentData = mainContent.PersistedDocument,
-                    AttachmentData = [attachment.PersistedDocument],
-                },
-                TestContext.Current.CancellationToken
-            );
-        return (
-            meldingId,
-            documentId,
-            mainDocumentId,
-            attachment.PersistedDocument.InternalDocumentReference
-        );
     }
 
     [Fact]

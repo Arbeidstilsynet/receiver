@@ -90,47 +90,6 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
     }
 
     [Fact]
-    public async Task DetachAttachment_DelegatesRequestToRepository()
-    {
-        var meldingId = Guid.NewGuid();
-        var request = new AttachmentDetachmentRequest
-        {
-            DocumentId = Guid.NewGuid(),
-            Apply = true,
-            ExpectedRevision = "sha256:current",
-        };
-        var expected = new AttachmentDetachmentResponse
-        {
-            MeldingId = meldingId,
-            DocumentId = request.DocumentId,
-            ApplicationId = "ulykkesvarsel",
-            MainContentId = null,
-            StructuredDataId = null,
-            AttachmentIdsBefore = [request.DocumentId],
-            AttachmentIdsAfter = [],
-            FileName = "attachment.pdf",
-            ContentType = "application/pdf",
-            Revision = "sha256:updated",
-            Applied = true,
-            AlreadyDetached = false,
-        };
-        _meldingRepository
-            .DetachAttachment(meldingId, request, Arg.Any<CancellationToken>())
-            .Returns(expected);
-
-        var result = await _sut.DetachAttachment(
-            meldingId,
-            request,
-            TestContext.Current.CancellationToken
-        );
-
-        result.ShouldBe(expected);
-        await _meldingRepository
-            .Received(1)
-            .DetachAttachment(meldingId, request, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task GetMeldingerByShortId_DelegatesToRepository()
     {
         //arrange

@@ -635,51 +635,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/meldinger/{meldingId}/attachment-detachments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    meldingId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["AttachmentDetachmentRequest"];
-                    "text/json": components["schemas"]["AttachmentDetachmentRequest"];
-                    "application/*+json": components["schemas"]["AttachmentDetachmentRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["AttachmentDetachmentResponse"];
-                        "application/json": components["schemas"]["AttachmentDetachmentResponse"];
-                        "text/json": components["schemas"]["AttachmentDetachmentResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/meldinger/by-short-id/{shortId}": {
         parameters: {
             query?: never;
@@ -916,30 +871,6 @@ export interface components {
         AppRegistration: {
             appId: string;
             messageSource?: components["schemas"]["MessageSource"];
-        };
-        AttachmentDetachmentRequest: {
-            /** Format: uuid */
-            documentId: string;
-            apply?: boolean;
-            expectedRevision?: null | string;
-        };
-        AttachmentDetachmentResponse: {
-            /** Format: uuid */
-            meldingId: string;
-            /** Format: uuid */
-            documentId: string;
-            applicationId: string;
-            /** Format: uuid */
-            mainContentId: null | string;
-            /** Format: uuid */
-            structuredDataId: null | string;
-            attachmentIdsBefore: string[];
-            attachmentIdsAfter: string[];
-            fileName: string;
-            contentType: string;
-            revision: string;
-            applied: boolean;
-            alreadyDetached: boolean;
         };
         CompleteConfirmation: {
             stakeholderId?: null | string;

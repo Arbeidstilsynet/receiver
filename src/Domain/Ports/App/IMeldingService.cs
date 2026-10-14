@@ -12,11 +12,6 @@ public interface IMeldingService
         GetMeldingRequest request,
         CancellationToken cancellationToken
     );
-    public Task<AttachmentDetachmentResponse> DetachAttachment(
-        Guid meldingId,
-        AttachmentDetachmentRequest request,
-        CancellationToken cancellationToken
-    );
 
     /// <summary>
     /// Resolves meldinger by their short id (the trailing 12 hex characters of the melding GUID).
