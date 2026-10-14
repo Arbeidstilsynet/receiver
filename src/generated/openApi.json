@@ -738,6 +738,66 @@
         }
       }
     },
+    "/meldinger/{meldingId}/attachment-detachments": {
+      "post": {
+        "tags": [
+          "Meldinger"
+        ],
+        "parameters": [
+          {
+            "name": "meldingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/meldinger/by-short-id/{shortId}": {
       "get": {
         "tags": [
@@ -1182,6 +1242,100 @@
           },
           "messageSource": {
             "$ref": "#/components/schemas/MessageSource"
+          }
+        }
+      },
+      "AttachmentDetachmentRequest": {
+        "required": [
+          "documentId"
+        ],
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apply": {
+            "type": "boolean"
+          },
+          "expectedRevision": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AttachmentDetachmentResponse": {
+        "required": [
+          "meldingId",
+          "documentId",
+          "applicationId",
+          "mainContentId",
+          "structuredDataId",
+          "attachmentIdsBefore",
+          "attachmentIdsAfter",
+          "fileName",
+          "contentType",
+          "revision",
+          "applied",
+          "alreadyDetached"
+        ],
+        "type": "object",
+        "properties": {
+          "meldingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationId": {
+            "type": "string"
+          },
+          "mainContentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "structuredDataId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "attachmentIdsBefore": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "attachmentIdsAfter": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "alreadyDetached": {
+            "type": "boolean"
           }
         }
       },

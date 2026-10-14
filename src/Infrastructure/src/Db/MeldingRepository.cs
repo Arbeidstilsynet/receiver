@@ -1,4 +1,9 @@
+using System.Data;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text.Json;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
@@ -46,6 +51,146 @@ internal class MeldingRepository : IMeldingRepository
             return _mapper.Map<Melding>(entity);
         }
         return null;
+    }
+
+    public async Task<AttachmentDetachmentResponse> DetachAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        using var activity = Tracer.Source.StartActivity("DetachAttachment");
+        activity?.SetTag("melding.id", meldingId);
+        activity?.SetTag("document.id", request.DocumentId);
+
+        if (meldingId == Guid.Empty || request.DocumentId == Guid.Empty)
+        {
+            throw new AttachmentDetachmentNotAllowedException(
+                "Melding and document IDs must be non-empty."
+            );
+        }
+
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            request.Apply ? IsolationLevel.ReadCommitted : IsolationLevel.RepeatableRead,
+            cancellationToken
+        );
+
+        var melding = request.Apply
+            ? await _dbContext
+                .Meldinger.FromSqlInterpolated(
+                    $"SELECT * FROM public.meldinger WHERE \"Id\" = {meldingId} FOR UPDATE"
+                )
+                .AsNoTracking()
+                .SingleOrDefaultAsync(cancellationToken)
+            : await _dbContext
+                .Meldinger.AsNoTracking()
+                .SingleOrDefaultAsync(m => m.Id == meldingId, cancellationToken);
+
+        if (melding == null)
+        {
+            throw new MeldingNotFoundException(meldingId);
+        }
+
+        if (
+            melding.Source != MessageSource.Altinn
+            || melding.ApplicationId is not ("ulykkesvarsel" or "forhandsmelding")
+        )
+        {
+            throw new AttachmentDetachmentForbiddenException();
+        }
+
+        var documents = request.Apply
+            ? await _dbContext
+                .Documents.FromSqlInterpolated(
+                    $"SELECT * FROM public.documents WHERE \"MeldingId\" = {meldingId} ORDER BY \"Id\" FOR UPDATE"
+                )
+                .AsNoTracking()
+                .ToListAsync(cancellationToken)
+            : await _dbContext
+                .Documents.AsNoTracking()
+                .Where(d => d.MeldingId == meldingId)
+                .OrderBy(d => d.Id)
+                .ToListAsync(cancellationToken);
+
+        var target = documents.FirstOrDefault(document => document.Id == request.DocumentId);
+        if (target == null)
+        {
+            throw new AttachmentDetachmentNotAllowedException(
+                "The document is not an attachment belonging to this melding."
+            );
+        }
+
+        var alreadyDetached = target.DocumentType == DocumentType.DetachedAttachment;
+        if (!alreadyDetached && target.DocumentType != DocumentType.Attachment)
+        {
+            throw new AttachmentDetachmentNotAllowedException(
+                "Only attachment documents can be detached."
+            );
+        }
+
+        if (request.Apply && string.IsNullOrWhiteSpace(request.ExpectedRevision))
+        {
+            throw new AttachmentDetachmentNotAllowedException(
+                "An expected revision is required when applying a detachment."
+            );
+        }
+
+        var revisionBeforeApply = CreateRevision(melding, documents);
+        if (
+            request.Apply
+            && !string.Equals(
+                request.ExpectedRevision,
+                revisionBeforeApply,
+                StringComparison.Ordinal
+            )
+        )
+        {
+            throw new AttachmentDetachmentConflictException();
+        }
+
+        var attachmentIdsBefore = GetAttachmentIds(documents);
+        var attachmentIdsAfter = alreadyDetached
+            ? attachmentIdsBefore
+            : attachmentIdsBefore.Where(id => id != target.Id).ToList();
+
+        var revision = revisionBeforeApply;
+        if (request.Apply && !alreadyDetached)
+        {
+            var trackedTarget = _dbContext
+                .ChangeTracker.Entries<DocumentEntity>()
+                .FirstOrDefault(entry => entry.Entity.Id == target.Id);
+            if (trackedTarget != null)
+            {
+                trackedTarget.State = EntityState.Detached;
+            }
+
+            _dbContext.Documents.Attach(target);
+            target.DocumentType = DocumentType.DetachedAttachment;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            revision = CreateRevision(melding, documents);
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+
+        return new AttachmentDetachmentResponse
+        {
+            MeldingId = melding.Id,
+            DocumentId = target.Id,
+            ApplicationId = melding.ApplicationId,
+            MainContentId = documents
+                .FirstOrDefault(d => d.DocumentType == DocumentType.MainContent)
+                ?.Id,
+            StructuredDataId = documents
+                .FirstOrDefault(d => d.DocumentType == DocumentType.StructuredData)
+                ?.Id,
+            AttachmentIdsBefore = attachmentIdsBefore,
+            AttachmentIdsAfter = attachmentIdsAfter,
+            FileName = target.FileName ?? string.Empty,
+            ContentType = target.ContentType ?? string.Empty,
+            Revision = revision,
+            Applied = request.Apply,
+            AlreadyDetached = alreadyDetached,
+        };
     }
 
     public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
@@ -96,6 +241,66 @@ internal class MeldingRepository : IMeldingRepository
             TotalRecords = totalRecords,
         };
     }
+
+    private static List<Guid> GetAttachmentIds(IEnumerable<DocumentEntity> documents) =>
+        documents
+            .Where(d => d.DocumentType == DocumentType.Attachment)
+            .Select(d => d.Id)
+            .Order()
+            .ToList();
+
+    private static string CreateRevision(
+        MeldingEntity melding,
+        IEnumerable<DocumentEntity> documents
+    )
+    {
+        using var content = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(content))
+        {
+            writer.WriteStartObject();
+            writer.WriteString("meldingId", melding.Id);
+            writer.WriteString("source", melding.Source.ToString());
+            writer.WriteString("applicationId", melding.ApplicationId);
+            writer.WriteString("updatedAt", FormatTimestamp(melding.UpdatedAt));
+            WriteTags(writer, "tags", melding.Tags);
+            WriteTags(writer, "internalTags", melding.InternalTags);
+
+            writer.WriteStartArray("documents");
+            foreach (var document in documents.OrderBy(d => d.Id))
+            {
+                writer.WriteStartObject();
+                writer.WriteString("id", document.Id);
+                writer.WriteString("type", document.DocumentType.ToString());
+                writer.WriteString("updatedAt", FormatTimestamp(document.UpdatedAt));
+                writer.WriteString("fileName", document.FileName);
+                writer.WriteString("contentType", document.ContentType);
+                WriteTags(writer, "tags", document.Tags);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        var hash = SHA256.HashData(content.GetBuffer().AsSpan(0, (int)content.Length));
+        return $"sha256:{Convert.ToHexString(hash).ToLowerInvariant()}";
+    }
+
+    private static void WriteTags(
+        Utf8JsonWriter writer,
+        string propertyName,
+        IReadOnlyDictionary<string, string> tags
+    )
+    {
+        writer.WriteStartObject(propertyName);
+        foreach (var tag in tags.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+        {
+            writer.WriteString(tag.Key, tag.Value);
+        }
+        writer.WriteEndObject();
+    }
+
+    private static string FormatTimestamp(DateTime value) =>
+        value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 }
 
 file static class MappingExtensions
