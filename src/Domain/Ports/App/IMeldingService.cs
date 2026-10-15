@@ -17,6 +17,11 @@ public interface IMeldingService
         AttachmentDetachmentRequest request,
         CancellationToken cancellationToken
     );
+    public Task<AttachmentDetachmentResponse> RestoreAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Resolves meldinger by their short id (the trailing 12 hex characters of the melding GUID).
@@ -24,11 +29,13 @@ public interface IMeldingService
     /// </summary>
     public Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
         string shortId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
     );
 
     Task<Domain.Ports.App.PaginationResponse<Melding>> GetMeldinger(
         int? pageNumber = 1,
-        int? pageSize = 10
+        int? pageSize = 10,
+        bool includeDeleted = false
     );
 }

@@ -26,11 +26,13 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
 
     public async Task<List<Document>> GetAllDocumentsForMelding(
         Guid meldingId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
     )
     {
         return await _dbContext
             .Documents.Where(d => d.MeldingId == meldingId)
+            .Where(d => includeDeleted || d.DocumentType != Model.DocumentType.DetachedAttachment)
             .Select(s => _mapper.Map<Document>(s))
             .ToListAsync(cancellationToken);
     }
@@ -48,14 +50,18 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
 
     public async Task<Document?> GetDocumentAsync(
         Guid documentId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
     )
     {
         var entity = await _dbContext.Documents.FindAsync(
             [documentId],
             cancellationToken: cancellationToken
         );
-        if (entity != null)
+        if (
+            entity != null
+            && (includeDeleted || entity.DocumentType != Model.DocumentType.DetachedAttachment)
+        )
         {
             return _mapper.Map<Document>(entity);
         }

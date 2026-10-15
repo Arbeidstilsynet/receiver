@@ -19,14 +19,19 @@ internal class DocumentService(
         CancellationToken cancellationToken
     )
     {
-        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
+        var melding = await meldingRepository.GetMelding(
+            request.MeldingId,
+            cancellationToken,
+            request.IncludeDeleted
+        );
 
         if (melding == null || !melding.ContainsDocument(request.DocumentId))
             return null;
 
         var document = await documentRepository.GetDocumentAsync(
             request.DocumentId,
-            cancellationToken
+            cancellationToken,
+            request.IncludeDeleted
         );
 
         if (document == null)
@@ -51,7 +56,8 @@ internal class DocumentService(
         {
             var documents = await documentRepository.GetAllDocumentsForMelding(
                 request.MeldingId,
-                cancellationToken
+                cancellationToken,
+                request.IncludeDeleted
             );
 
             var unsafeDocuments = new List<Document>();

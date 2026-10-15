@@ -207,6 +207,11 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
         mainDocumentResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (
+            await mainDocumentResponse.Content.ReadAsStringAsync(
+                TestContext.Current.CancellationToken
+            )
+        ).ShouldContain("Main content and structured data cannot be deleted.");
 
         var unknownDocumentResponse = await _client.PostAsJsonAsync(
             route,
@@ -222,22 +227,6 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
         foreignDocumentResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-        var unsupportedApplication = await CreateAltinnMeldingWithAttachment("another-app");
-        var unsupportedApplicationResponse = await _client.PostAsJsonAsync(
-            $"/meldinger/{unsupportedApplication.MeldingId}/attachment-detachments",
-            new AttachmentDetachmentRequest { DocumentId = unsupportedApplication.DocumentId },
-            TestContext.Current.CancellationToken
-        );
-        unsupportedApplicationResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
-
-        var unsupportedSource = await CreateAltinnMeldingWithAttachment(source: MessageSource.Api);
-        var unsupportedSourceResponse = await _client.PostAsJsonAsync(
-            $"/meldinger/{unsupportedSource.MeldingId}/attachment-detachments",
-            new AttachmentDetachmentRequest { DocumentId = unsupportedSource.DocumentId },
-            TestContext.Current.CancellationToken
-        );
-        unsupportedSourceResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
 
         var emptyDocumentResponse = await _client.PostAsJsonAsync(
             route,
@@ -290,6 +279,7 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         freshPreview.AlreadyDetached.ShouldBeTrue();
         freshPreview.AttachmentIdsBefore.ShouldBe([]);
         freshPreview.AttachmentIdsAfter.ShouldBe([]);
+        applied.Revision.ShouldBe(freshPreview.Revision);
 
         var staleApplyResponse = await _client.PostAsJsonAsync(
             route,
@@ -326,8 +316,13 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         using var scope = _fixture.Services.CreateScope();
         var document = await scope
             .ServiceProvider.GetRequiredService<IDocumentRepository>()
-            .GetDocumentAsync(documentId, TestContext.Current.CancellationToken);
+            .GetDocumentAsync(
+                documentId,
+                TestContext.Current.CancellationToken,
+                includeDeleted: true
+            );
         document.ShouldNotBeNull();
+        document.IsDeleted.ShouldBeTrue();
         document.FileMetadata.FileName.ShouldBe("detachable.txt");
         document.FileMetadata.ContentType.ShouldBe("text/plain");
 
@@ -343,6 +338,294 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
             cancellationToken: TestContext.Current.CancellationToken
         );
         detachedMelding.ShouldNotBeNull().Melding.ShouldNotBeNull().AttachmentIds.ShouldBeEmpty();
+
+        var listedDocuments = await _client.GetFromJsonAsync<GetAllDocumentsResponse>(
+            $"/meldinger/{meldingId}/documents",
+            _jsonSerializerOptions,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+        listedDocuments
+            .ShouldNotBeNull()
+            .Documents.Select(document => document.DocumentId)
+            .ShouldBe([mainDocumentId]);
+
+        var documentRoute = $"/meldinger/{meldingId}/documents/{documentId}";
+        using var hiddenLookup = await _client.GetAsync(
+            documentRoute,
+            TestContext.Current.CancellationToken
+        );
+        hiddenLookup.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        using var hiddenDownload = await _client.GetAsync(
+            $"{documentRoute}/download",
+            TestContext.Current.CancellationToken
+        );
+        hiddenDownload.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        using var downloadWithIgnoredQuery = await _client.GetAsync(
+            $"{documentRoute}/download?includeDeleted=true",
+            TestContext.Current.CancellationToken
+        );
+        downloadWithIgnoredQuery.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        var deletedDocument = await _client.GetFromJsonAsync<Document>(
+            $"{documentRoute}?includeDeleted=true",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+        deletedDocument.ShouldNotBeNull().IsDeleted.ShouldBeTrue();
+        using var foreignLookup = await _client.GetAsync(
+            $"/meldinger/{unrelatedMelding.MeldingId}/documents/{documentId}?includeDeleted=true",
+            TestContext.Current.CancellationToken
+        );
+        foreignLookup.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        var allDocuments = await _client.GetFromJsonAsync<GetAllDocumentsResponse>(
+            $"/meldinger/{meldingId}/documents?includeDeleted=true",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+        allDocuments.ShouldNotBeNull().Documents.Count.ShouldBe(2);
+        allDocuments.Documents.Single(d => d.DocumentId == documentId).IsDeleted.ShouldBeTrue();
+
+        var shortId = meldingId.ToString("D").Split('-')[^1];
+        foreach (
+            var meldingRoute in new[]
+            {
+                $"/meldinger/{meldingId}",
+                $"/meldinger/by-short-id/{shortId}",
+            }
+        )
+        {
+            var hidden = await _client.GetFromJsonAsync<GetMeldingResponse>(
+                meldingRoute,
+                _jsonSerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            hidden.ShouldNotBeNull().Melding.ShouldNotBeNull().AttachmentIds.ShouldBeEmpty();
+            var included = await _client.GetFromJsonAsync<GetMeldingResponse>(
+                $"{meldingRoute}?includeDeleted=true",
+                _jsonSerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            included
+                .ShouldNotBeNull()
+                .Melding.ShouldNotBeNull()
+                .AttachmentIds.ShouldBe([documentId]);
+        }
+        foreach (var includeDeleted in new[] { false, true })
+        {
+            var page = await _client.GetFromJsonAsync<GetAllMeldingerResponse>(
+                $"/meldinger?pageSize=100&includeDeleted={includeDeleted}",
+                _jsonSerializerOptions,
+                TestContext.Current.CancellationToken
+            );
+            page.ShouldNotBeNull()
+                .Items.Single(m => m.Id == meldingId)
+                .AttachmentIds.ShouldBe(includeDeleted ? [documentId] : []);
+        }
+
+        var restoreRoute = $"/meldinger/{meldingId}/attachment-restorations";
+        var restorePreview = await PreviewAttachmentChange(restoreRoute, documentId);
+        restorePreview.AlreadyDetached.ShouldBeTrue();
+        restorePreview.AttachmentIdsBefore.ShouldBeEmpty();
+        restorePreview.AttachmentIdsAfter.ShouldBe([documentId]);
+        using var stillHidden = await _client.GetAsync(
+            documentRoute,
+            TestContext.Current.CancellationToken
+        );
+        stillHidden.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        using var staleRestore = await _client.PostAsJsonAsync(
+            restoreRoute,
+            new AttachmentDetachmentRequest
+            {
+                DocumentId = documentId,
+                Apply = true,
+                ExpectedRevision = preview.Revision,
+            },
+            TestContext.Current.CancellationToken
+        );
+        staleRestore.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        var restored = await ApplyAttachmentChange(
+            restoreRoute,
+            documentId,
+            restorePreview.Revision
+        );
+        restored.Applied.ShouldBeTrue();
+        restored.AlreadyDetached.ShouldBeTrue();
+        restored.Revision.ShouldNotBe(restorePreview.Revision);
+        var restoredPreview = await PreviewAttachmentChange(restoreRoute, documentId);
+        restoredPreview.Revision.ShouldBe(restored.Revision);
+        restoredPreview.AlreadyDetached.ShouldBeFalse();
+        var noOp = await ApplyAttachmentChange(restoreRoute, documentId, restored.Revision);
+        noOp.Revision.ShouldBe(restored.Revision);
+
+        var activeDocument = await _client.GetFromJsonAsync<Document>(
+            documentRoute,
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+        activeDocument.ShouldNotBeNull().IsDeleted.ShouldBeFalse();
+        using var restoredDownload = await _client.GetAsync(
+            $"{documentRoute}/download",
+            TestContext.Current.CancellationToken
+        );
+        restoredDownload.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (
+            await restoredDownload.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)
+        ).ShouldBe("preserved blob");
+        var restoredDocuments = await _client.GetFromJsonAsync<GetAllDocumentsResponse>(
+            $"/meldinger/{meldingId}/documents",
+            _jsonSerializerOptions,
+            TestContext.Current.CancellationToken
+        );
+        restoredDocuments.ShouldNotBeNull().Documents.Count.ShouldBe(2);
+
+        var deleteAgainPreview = await PreviewAttachmentChange(route, documentId);
+        await ApplyAttachmentChange(route, documentId, deleteAgainPreview.Revision);
+        using var deletedAgain = await _client.GetAsync(
+            documentRoute,
+            TestContext.Current.CancellationToken
+        );
+        deletedAgain.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AttachmentDeletion_RejectsMainAndStructuredDocuments_ButRestorationIsNoOp(
+        bool structuredData
+    )
+    {
+        var (meldingId, _, protectedId, _) = await CreateAltinnMeldingWithAttachment(
+            mainIsStructuredData: structuredData
+        );
+        using var deletion = await _client.PostAsJsonAsync(
+            $"/meldinger/{meldingId}/attachment-detachments",
+            new AttachmentDetachmentRequest { DocumentId = protectedId },
+            TestContext.Current.CancellationToken
+        );
+        deletion.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (
+            await deletion.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)
+        ).ShouldContain("Main content and structured data cannot be deleted.");
+        var route = $"/meldinger/{meldingId}/attachment-restorations";
+        var preview = await PreviewAttachmentChange(route, protectedId);
+        var applied = await ApplyAttachmentChange(route, protectedId, preview.Revision);
+        applied.AlreadyDetached.ShouldBeFalse();
+        applied.Revision.ShouldBe(preview.Revision);
+        applied.AttachmentIdsAfter.ShouldBe(preview.AttachmentIdsBefore);
+    }
+
+    [Theory]
+    [InlineData(MessageSource.Api)]
+    [InlineData(MessageSource.Altinn)]
+    public async Task AttachmentDeletion_AnyApplicationAndSource_CanDeleteAndRestore(
+        MessageSource source
+    )
+    {
+        var (meldingId, documentId, _, _) = await CreateAltinnMeldingWithAttachment(
+            "another-app",
+            source
+        );
+        var route = $"/meldinger/{meldingId}/attachment-detachments";
+        var preview = await PreviewAttachmentChange(route, documentId);
+        await ApplyAttachmentChange(route, documentId, preview.Revision);
+        var restoreRoute = $"/meldinger/{meldingId}/attachment-restorations";
+        var restorePreview = await PreviewAttachmentChange(restoreRoute, documentId);
+        await ApplyAttachmentChange(restoreRoute, documentId, restorePreview.Revision);
+        using var lookup = await _client.GetAsync(
+            $"/meldinger/{meldingId}/documents/{documentId}",
+            TestContext.Current.CancellationToken
+        );
+        lookup.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Theory]
+    [InlineData("attachment-detachments")]
+    [InlineData("attachment-restorations")]
+    public async Task AttachmentDeletionChange_RejectsInvalidRequests(string operation)
+    {
+        var (meldingId, documentId, _, _) = await CreateAltinnMeldingWithAttachment();
+        var route = $"/meldinger/{meldingId}/{operation}";
+        using var missingRevision = await _client.PostAsJsonAsync(
+            route,
+            new AttachmentDetachmentRequest { DocumentId = documentId, Apply = true },
+            TestContext.Current.CancellationToken
+        );
+        missingRevision.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        using var emptyDocument = await _client.PostAsJsonAsync(
+            route,
+            new AttachmentDetachmentRequest { DocumentId = Guid.Empty },
+            TestContext.Current.CancellationToken
+        );
+        emptyDocument.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        using var unknownDocument = await _client.PostAsJsonAsync(
+            route,
+            new AttachmentDetachmentRequest { DocumentId = Guid.NewGuid() },
+            TestContext.Current.CancellationToken
+        );
+        unknownDocument.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        using var missingMelding = await _client.PostAsJsonAsync(
+            $"/meldinger/{Guid.NewGuid()}/{operation}",
+            new AttachmentDetachmentRequest { DocumentId = documentId },
+            TestContext.Current.CancellationToken
+        );
+        missingMelding.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        var foreignMelding = await CreateAltinnMeldingWithAttachment();
+        using var foreignDocument = await _client.PostAsJsonAsync(
+            route,
+            new AttachmentDetachmentRequest { DocumentId = foreignMelding.DocumentId },
+            TestContext.Current.CancellationToken
+        );
+        foreignDocument.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    private async Task<AttachmentDetachmentResponse> PreviewAttachmentChange(
+        string route,
+        Guid documentId
+    )
+    {
+        using var response = await _client.PostAsJsonAsync(
+            route,
+            new AttachmentDetachmentRequest { DocumentId = documentId },
+            TestContext.Current.CancellationToken
+        );
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        return (
+            await response.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
+                _jsonSerializerOptions,
+                TestContext.Current.CancellationToken
+            )
+        ).ShouldNotBeNull();
+    }
+
+    private async Task<AttachmentDetachmentResponse> ApplyAttachmentChange(
+        string route,
+        Guid documentId,
+        string revision
+    )
+    {
+        using var response = await _client.PostAsJsonAsync(
+            route,
+            new AttachmentDetachmentRequest
+            {
+                DocumentId = documentId,
+                Apply = true,
+                ExpectedRevision = revision,
+            },
+            TestContext.Current.CancellationToken
+        );
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        return (
+            await response.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
+                _jsonSerializerOptions,
+                TestContext.Current.CancellationToken
+            )
+        ).ShouldNotBeNull();
     }
 
     private async Task<(
@@ -352,7 +635,8 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
         string StorageReference
     )> CreateAltinnMeldingWithAttachment(
         string applicationId = "ulykkesvarsel",
-        MessageSource source = MessageSource.Altinn
+        MessageSource source = MessageSource.Altinn,
+        bool mainIsStructuredData = false
     )
     {
         var meldingId = Guid.NewGuid();
@@ -405,7 +689,8 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
                     Source = source,
                     ApplicationId = applicationId,
                     ReceivedAt = DateTime.UtcNow,
-                    MainDocumentData = mainContent.PersistedDocument,
+                    MainDocumentData = mainIsStructuredData ? null : mainContent.PersistedDocument,
+                    StructuredData = mainIsStructuredData ? mainContent.PersistedDocument : null,
                     AttachmentData = [attachment.PersistedDocument],
                 },
                 TestContext.Current.CancellationToken

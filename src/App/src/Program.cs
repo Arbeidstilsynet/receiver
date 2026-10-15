@@ -7,7 +7,6 @@ using Arbeidstilsynet.MeldingerReceiver.Domain.Logic.DependencyInjection;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication;
 using IAssemblyInfo = Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,15 +63,6 @@ services.AddQuartz(appSettings.InfrastructureConfig.PostgresConfiguration.Connec
 services.AddValidatorsFromAssemblyContaining<Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo>(
     includeInternalTypes: true
 );
-if (builder.Configuration.GetValue<bool>("API:Authentication:DangerousDisableAuth"))
-{
-    services
-        .AddAuthentication(DangerousDisableAuthHandler.SchemeName)
-        .AddScheme<AuthenticationSchemeOptions, DangerousDisableAuthHandler>(
-            DangerousDisableAuthHandler.SchemeName,
-            _ => { }
-        );
-}
 
 var app = builder.Build();
 

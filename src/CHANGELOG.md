@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- feat: add preview and revision-checked soft deletion and restoration of attachments for all message sources and applications. Main content and structured data cannot be deleted.
+- feat: hide deleted attachments from document and melding reads by default, with `includeDeleted=true` on listings and metadata lookups. Restore deleted attachments before downloading them.
+
 ## 1.10.3
 
 ### Changed

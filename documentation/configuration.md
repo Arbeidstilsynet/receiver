@@ -4,6 +4,7 @@
 |------------------------------------------------------------------|----------|---------------------------------------------------------------------------------------|
 | ASPNETCORE_ENVIRONMENT                                           | yes      | Development                                                                           |
 | ASPNETCORE_HTTP_PORT                                             | no       | "8080"                                                                                |
+| API__Authentication__DangerousDisableAuth                        | no       | true                                                                                  |
 | API__Cors__AllowedOrigins__0                                     | no       | <http://localhost:3000>                                                               |
 | API__Cors__AllowCredentials                                      | no       | false                                                                                 |
 | Domain__AllowOnlyRegisteredApps                                  | no       | true                                                                                  |
@@ -15,7 +16,7 @@
 | Infrastructure__AltinnClientsConfiguration__Events__Scopes__0    | no       | altinn:events.subscribe                                                               |
 | Infrastructure__AltinnClientsConfiguration__Events__Scopes__1    | no       | altinn:serviceowner/instances.read                                                     |
 | Infrastructure__AltinnClientsConfiguration__Apps__Scopes__0      | no       | altinn:serviceowner/instances.write                                                    |
-| Infrastructure__PostgresConfiguration__ConnectionString          | yes      | Host=postgres-receiver;Port=5432;Database=demo_db;Username=postgres;Password=postgres |
+| Infrastructure__PostgresConfiguration__ConnectionString          | yes      | Host=postgres-receiver;Port=5432;Database=demo_db;Username=postgres;Password=<password> |
 | Infrastructure__DocumentStorageConfiguration__BaseUrl            | no       | <http://file-storage:4443/storage/v1/>                                                |
 | Infrastructure__DocumentStorageConfiguration__AuthRequired       | no       | true                                                                                  |
 | Infrastructure__DocumentStorageConfiguration__BucketName         | yes      | test-bucket                                                                           |
@@ -26,6 +27,15 @@
 | OTEL_EXPORTER_OTLP_ENDPOINT                                      | no       | http://monitoring_otel:4317                                                           |
 
 \* required for communication with altinns staging and prod systems
+
+## Cluster-internal maintenance endpoints
+
+Attachment soft deletion and restoration do not add endpoint authentication. Access must be
+restricted by cluster network policies; do not expose these routes on a public ingress.
+No Entra or Maskinporten token is required by these endpoints.
+
+See [document soft deletion](./architecture.md#document-soft-deletion) for the request flow,
+deleted-document visibility, and restoration before downloading.
 
 ## Run with docker compose
 

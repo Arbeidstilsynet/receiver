@@ -6,6 +6,7 @@
     ContentType: null
   },
   ScanResult: Clean,
+  IsDeleted: false,
   Tags: {
     AltinnDataType: ref-data-as-pdf,
     AltinnId: Guid_3,

@@ -22,10 +22,16 @@ public class DocumentsController : ControllerBase
     public async Task<ActionResult<Document>> GetDocument(
         [Required] [FromRoute] Guid meldingId,
         [Required] [FromRoute] Guid documentId,
+        [FromQuery] bool includeDeleted,
         CancellationToken cancellationToken
     )
     {
-        var request = new GetDocumentRequest { MeldingId = meldingId, DocumentId = documentId };
+        var request = new GetDocumentRequest
+        {
+            MeldingId = meldingId,
+            DocumentId = documentId,
+            IncludeDeleted = includeDeleted,
+        };
 
         var document = await _documentService.GetDocument(request, cancellationToken);
 
@@ -34,6 +40,9 @@ public class DocumentsController : ControllerBase
         return document;
     }
 
+    /// <summary>
+    /// Downloads an active document. Restore a soft-deleted attachment before downloading it.
+    /// </summary>
     [HttpGet("{meldingId:guid}/documents/{documentId:guid}/download")]
     public async Task<IActionResult> DownloadDocument(
         [Required] [FromRoute] Guid meldingId,
@@ -63,10 +72,15 @@ public class DocumentsController : ControllerBase
     [HttpGet("{meldingId:guid}/documents")]
     public async Task<ActionResult<GetAllDocumentsResponse>> GetAllDocuments(
         [Required] [FromRoute] Guid meldingId,
+        [FromQuery] bool includeDeleted,
         CancellationToken cancellationToken
     )
     {
-        var request = new GetAllDocumentsRequest { MeldingId = meldingId };
+        var request = new GetAllDocumentsRequest
+        {
+            MeldingId = meldingId,
+            IncludeDeleted = includeDeleted,
+        };
 
         var documents = await _documentService.GetAllDocuments(request, cancellationToken);
 

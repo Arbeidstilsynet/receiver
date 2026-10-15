@@ -78,9 +78,6 @@ internal static class StartupExtensions
                     .AddExceptionMapping<AttachmentDetachmentNotAllowedException>(
                         HttpStatusCode.BadRequest
                     )
-                    .AddExceptionMapping<AttachmentDetachmentForbiddenException>(
-                        HttpStatusCode.Forbidden
-                    )
                     .AddExceptionMapping<AttachmentDetachmentConflictException>(
                         HttpStatusCode.Conflict
                     )

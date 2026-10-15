@@ -40,7 +40,11 @@ internal class MeldingRepository : IMeldingRepository
         return _mapper.Map<Melding>(updatedEntity.Entity);
     }
 
-    public async Task<Melding?> GetMelding(Guid meldingId, CancellationToken cancellationToken)
+    public async Task<Melding?> GetMelding(
+        Guid meldingId,
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
+    )
     {
         using var activity = Tracer.Source.StartActivity();
         var entity = await _dbContext
@@ -48,18 +52,33 @@ internal class MeldingRepository : IMeldingRepository
             .FirstOrDefaultAsync(f => f.Id == meldingId, cancellationToken);
         if (entity != null)
         {
-            return _mapper.Map<Melding>(entity);
+            return MapMelding(entity, includeDeleted);
         }
         return null;
     }
 
-    public async Task<AttachmentDetachmentResponse> DetachAttachment(
+    public Task<AttachmentDetachmentResponse> DetachAttachment(
         Guid meldingId,
         AttachmentDetachmentRequest request,
         CancellationToken cancellationToken
+    ) => ChangeAttachmentDeletion(meldingId, request, restore: false, cancellationToken);
+
+    public Task<AttachmentDetachmentResponse> RestoreAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    ) => ChangeAttachmentDeletion(meldingId, request, restore: true, cancellationToken);
+
+    private async Task<AttachmentDetachmentResponse> ChangeAttachmentDeletion(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        bool restore,
+        CancellationToken cancellationToken
     )
     {
-        using var activity = Tracer.Source.StartActivity("DetachAttachment");
+        using var activity = Tracer.Source.StartActivity(
+            restore ? "RestoreAttachment" : "DetachAttachment"
+        );
         activity?.SetTag("melding.id", meldingId);
         activity?.SetTag("document.id", request.DocumentId);
 
@@ -91,14 +110,6 @@ internal class MeldingRepository : IMeldingRepository
             throw new MeldingNotFoundException(meldingId);
         }
 
-        if (
-            melding.Source != MessageSource.Altinn
-            || melding.ApplicationId is not ("ulykkesvarsel" or "forhandsmelding")
-        )
-        {
-            throw new AttachmentDetachmentForbiddenException();
-        }
-
         var documents = request.Apply
             ? await _dbContext
                 .Documents.FromSqlInterpolated(
@@ -116,22 +127,22 @@ internal class MeldingRepository : IMeldingRepository
         if (target == null)
         {
             throw new AttachmentDetachmentNotAllowedException(
-                "The document is not an attachment belonging to this melding."
+                "The document does not belong to this melding."
             );
         }
 
         var alreadyDetached = target.DocumentType == DocumentType.DetachedAttachment;
-        if (!alreadyDetached && target.DocumentType != DocumentType.Attachment)
+        if (!restore && !alreadyDetached && target.DocumentType != DocumentType.Attachment)
         {
             throw new AttachmentDetachmentNotAllowedException(
-                "Only attachment documents can be detached."
+                "Only attachment documents can be soft-deleted. Main content and structured data cannot be deleted."
             );
         }
 
         if (request.Apply && string.IsNullOrWhiteSpace(request.ExpectedRevision))
         {
             throw new AttachmentDetachmentNotAllowedException(
-                "An expected revision is required when applying a detachment."
+                "An expected revision is required when applying a deletion or restoration."
             );
         }
 
@@ -149,12 +160,14 @@ internal class MeldingRepository : IMeldingRepository
         }
 
         var attachmentIdsBefore = GetAttachmentIds(documents);
-        var attachmentIdsAfter = alreadyDetached
-            ? attachmentIdsBefore
+        var attachmentIdsAfter = restore
+            ? alreadyDetached
+                ? attachmentIdsBefore.Append(target.Id).Order().ToList()
+                : attachmentIdsBefore
             : attachmentIdsBefore.Where(id => id != target.Id).ToList();
 
         var revision = revisionBeforeApply;
-        if (request.Apply && !alreadyDetached)
+        if (request.Apply && (restore ? alreadyDetached : !alreadyDetached))
         {
             var trackedTarget = _dbContext
                 .ChangeTracker.Entries<DocumentEntity>()
@@ -165,8 +178,11 @@ internal class MeldingRepository : IMeldingRepository
             }
 
             _dbContext.Documents.Attach(target);
-            target.DocumentType = DocumentType.DetachedAttachment;
+            target.DocumentType = restore
+                ? DocumentType.Attachment
+                : DocumentType.DetachedAttachment;
             await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.Entry(target).ReloadAsync(cancellationToken);
             revision = CreateRevision(melding, documents);
         }
 
@@ -195,7 +211,8 @@ internal class MeldingRepository : IMeldingRepository
 
     public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
         string shortId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
     )
     {
         using var activity = Tracer.Source.StartActivity();
@@ -210,10 +227,14 @@ internal class MeldingRepository : IMeldingRepository
             .Where(m => m.ShortId == normalizedShortId)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(e => _mapper.Map<Melding>(e)).ToList();
+        return entities.Select(e => MapMelding(e, includeDeleted)).ToList();
     }
 
-    public async Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1)
+    public async Task<PaginationResponse<Melding>> GetMeldinger(
+        int pageSize,
+        int pageNumber = 1,
+        bool includeDeleted = false
+    )
     {
         using var activity = Tracer.Source.StartActivity();
         var baseQuery = _dbContext.Meldinger.Select(s => new { s.Id, s.ReceivedAt });
@@ -234,12 +255,28 @@ internal class MeldingRepository : IMeldingRepository
             .ToListAsync();
         return new PaginationResponse<Melding>
         {
-            Items = [.. itemsWithDocument.Select(s => _mapper.Map<Melding>(s))],
+            Items = [.. itemsWithDocument.Select(s => MapMelding(s, includeDeleted))],
             PageNumber = pageNumber,
             PageSize = pageSize,
             TotalPages = totalPages,
             TotalRecords = totalRecords,
         };
+    }
+
+    private Melding MapMelding(MeldingEntity entity, bool includeDeleted)
+    {
+        var melding = _mapper.Map<Melding>(entity);
+        return includeDeleted
+            ? melding with
+            {
+                AttachmentIds = entity
+                    .Documents.Where(d =>
+                        d.DocumentType is DocumentType.Attachment or DocumentType.DetachedAttachment
+                    )
+                    .Select(d => d.Id)
+                    .ToList(),
+            }
+            : melding;
     }
 
     private static List<Guid> GetAttachmentIds(IEnumerable<DocumentEntity> documents) =>

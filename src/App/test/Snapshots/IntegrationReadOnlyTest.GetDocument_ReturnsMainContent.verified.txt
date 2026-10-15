@@ -6,5 +6,6 @@
     ContentType: text/plain
   },
   ScanResult: Clean,
+  IsDeleted: false,
   Tags: null
 }

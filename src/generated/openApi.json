@@ -477,6 +477,13 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -548,6 +555,13 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -672,6 +686,13 @@
               ],
               "format": "int32"
             }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -711,6 +732,13 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -798,6 +826,66 @@
         }
       }
     },
+    "/meldinger/{meldingId}/attachment-restorations": {
+      "post": {
+        "tags": [
+          "Meldinger"
+        ],
+        "parameters": [
+          {
+            "name": "meldingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/meldinger/by-short-id/{shortId}": {
       "get": {
         "tags": [
@@ -810,6 +898,13 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -1512,6 +1607,9 @@
           },
           "scanResult": {
             "$ref": "#/components/schemas/DocumentScanResult"
+          },
+          "isDeleted": {
+            "type": "boolean"
           },
           "tags": {
             "type": "object",

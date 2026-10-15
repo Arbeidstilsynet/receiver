@@ -6,8 +6,17 @@ namespace Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 public interface IMeldingRepository
 {
     Task<Melding> CreateMelding(CreateMeldingRequest request, CancellationToken cancellationToken);
-    Task<Melding?> GetMelding(Guid meldingId, CancellationToken cancellationToken);
+    Task<Melding?> GetMelding(
+        Guid meldingId,
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
+    );
     Task<AttachmentDetachmentResponse> DetachAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    );
+    Task<AttachmentDetachmentResponse> RestoreAttachment(
         Guid meldingId,
         AttachmentDetachmentRequest request,
         CancellationToken cancellationToken
@@ -19,8 +28,13 @@ public interface IMeldingRepository
     /// </summary>
     Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
         string shortId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
     );
 
-    Task<PaginationResponse<Melding>> GetMeldinger(int pageSize, int pageNumber = 1);
+    Task<PaginationResponse<Melding>> GetMeldinger(
+        int pageSize,
+        int pageNumber = 1,
+        bool includeDeleted = false
+    );
 }
