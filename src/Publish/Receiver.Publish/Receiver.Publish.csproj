@@ -6,12 +6,17 @@
     <RootNamespace>Arbeidstilsynet.Receiver</RootNamespace>
     <PackageId>Arbeidstilsynet.Receiver</PackageId>
     <Product>Arbeidstilsynet.Receiver</Product>
-    <Authors>Digital Samhandling</Authors>
+    <Authors>Arbeidstilsynet</Authors>
     <Company>Arbeidstilsynet</Company>
     <Description>Receive meldinger with attachments and structured data</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/Arbeidstilsynet/receiver</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Arbeidstilsynet/receiver</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.11.0</Version>
+    <Version>1.11.1</Version>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   <ItemGroup>
@@ -30,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="../../../assets/nuget-icon.png" Pack="true" PackagePath="icon.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Domain/Data/Domain.Data.csproj">
