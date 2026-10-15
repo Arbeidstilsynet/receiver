@@ -22,8 +22,8 @@ public class DocumentsController : ControllerBase
     public async Task<ActionResult<Document>> GetDocument(
         [Required] [FromRoute] Guid meldingId,
         [Required] [FromRoute] Guid documentId,
-        [FromQuery] bool includeDeleted,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeDeleted = false
     )
     {
         var request = new GetDocumentRequest
@@ -72,8 +72,8 @@ public class DocumentsController : ControllerBase
     [HttpGet("{meldingId:guid}/documents")]
     public async Task<ActionResult<GetAllDocumentsResponse>> GetAllDocuments(
         [Required] [FromRoute] Guid meldingId,
-        [FromQuery] bool includeDeleted,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeDeleted = false
     )
     {
         var request = new GetAllDocumentsRequest

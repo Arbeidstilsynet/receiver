@@ -59,6 +59,7 @@ Deleted attachments are excluded from document listings and from attachment IDs 
 listings and lookups by default. Document metadata lookups and downloads return `404` for
 deleted attachments.
 
+The `includeDeleted` query parameter is optional and defaults to `false`.
 Add `?includeDeleted=true` to opt in on these reads:
 
 - `GET /meldinger` (including paginated results)

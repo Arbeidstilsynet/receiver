@@ -73,7 +73,7 @@ public partial class MeldingerController : ControllerBase
     public async Task<ActionResult<GetAllMeldingerResponse>> GetMeldinger(
         [FromQuery] [Range(1, int.MaxValue)] int? pageNumber,
         [FromQuery] [Range(10, 100)] int? pageSize,
-        [FromQuery] bool includeDeleted
+        [FromQuery] bool includeDeleted = false
     )
     {
         var response = await _meldingService.GetMeldinger(pageNumber, pageSize, includeDeleted);
@@ -90,8 +90,8 @@ public partial class MeldingerController : ControllerBase
     [HttpGet("{meldingId:guid}")]
     public async Task<ActionResult<GetMeldingResponse>> GetMelding(
         [Required] [FromRoute] Guid meldingId,
-        [FromQuery] bool includeDeleted,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeDeleted = false
     )
     {
         var melding = await _meldingService.GetMelding(
@@ -194,8 +194,8 @@ public partial class MeldingerController : ControllerBase
     [ProducesResponseType<GetMeldingByShortIdConflictResponse>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<GetMeldingResponse>> GetMeldingByShortId(
         [Required] [FromRoute] string shortId,
-        [FromQuery] bool includeDeleted,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeDeleted = false
     )
     {
         if (!ShortIdRegex().IsMatch(shortId))
