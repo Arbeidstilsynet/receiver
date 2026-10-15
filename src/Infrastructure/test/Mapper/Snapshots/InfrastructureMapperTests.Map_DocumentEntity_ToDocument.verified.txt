@@ -6,5 +6,6 @@
     ContentType: application/pdf
   },
   ScanResult: Clean,
+  IsDeleted: false,
   Tags: null
 }

@@ -8,6 +8,7 @@ using Arbeidstilsynet.Receiver.Model.Response;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.WebApi.Controllers;
 
@@ -17,17 +18,23 @@ public partial class MeldingerController : ControllerBase
 {
     private readonly ApiMeters _apiMeters;
     private readonly IValidator<PostMeldingBody> _postMeldingValidator;
+    private readonly IValidator<AttachmentDetachmentRequest> _attachmentDetachmentValidator;
     private readonly IMeldingService _meldingService;
+    private readonly ILogger<MeldingerController> _logger;
 
     public MeldingerController(
         IValidator<PostMeldingBody> postMeldingValidator,
+        IValidator<AttachmentDetachmentRequest> attachmentDetachmentValidator,
         IMeldingService meldingService,
-        ApiMeters apiMeters
+        ApiMeters apiMeters,
+        ILogger<MeldingerController> logger
     )
     {
         _postMeldingValidator = postMeldingValidator;
+        _attachmentDetachmentValidator = attachmentDetachmentValidator;
         _meldingService = meldingService;
         _apiMeters = apiMeters;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -65,10 +72,11 @@ public partial class MeldingerController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<GetAllMeldingerResponse>> GetMeldinger(
         [FromQuery] [Range(1, int.MaxValue)] int? pageNumber,
-        [FromQuery] [Range(10, 100)] int? pageSize
+        [FromQuery] [Range(10, 100)] int? pageSize,
+        [FromQuery] bool includeDeleted = false
     )
     {
-        var response = await _meldingService.GetMeldinger(pageNumber, pageSize);
+        var response = await _meldingService.GetMeldinger(pageNumber, pageSize, includeDeleted);
         return new GetAllMeldingerResponse
         {
             Items = response.Items,
@@ -82,11 +90,12 @@ public partial class MeldingerController : ControllerBase
     [HttpGet("{meldingId:guid}")]
     public async Task<ActionResult<GetMeldingResponse>> GetMelding(
         [Required] [FromRoute] Guid meldingId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeDeleted = false
     )
     {
         var melding = await _meldingService.GetMelding(
-            new GetMeldingRequest { MeldingId = meldingId },
+            new GetMeldingRequest { MeldingId = meldingId, IncludeDeleted = includeDeleted },
             cancellationToken
         );
 
@@ -94,6 +103,79 @@ public partial class MeldingerController : ControllerBase
             return NotFound();
 
         return new GetMeldingResponse { Melding = melding };
+    }
+
+    /// <summary>
+    /// Soft-deletes one explicitly selected attachment, preserving its metadata and stored content.
+    /// </summary>
+    /// <remarks>
+    /// The default request is a dry-run. Set <c>apply</c> to true and pass the revision returned
+    /// by a current preview to persist the detachment.
+    /// </remarks>
+    [HttpPost("{meldingId:guid}/attachment-detachments")]
+    public async Task<ActionResult<AttachmentDetachmentResponse>> DetachAttachment(
+        [Required] [FromRoute] Guid meldingId,
+        [FromBody] AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        return await ChangeAttachmentDeletion(
+            meldingId,
+            request,
+            restore: false,
+            cancellationToken
+        );
+    }
+
+    /// <summary>
+    /// Restores a soft-deleted attachment. An active document, including main content or structured
+    /// data, is left unchanged.
+    /// </summary>
+    /// <remarks>
+    /// The default request is a dry-run. Set <c>apply</c> to true and pass the revision returned
+    /// by a current preview to persist the restoration. Restore before downloading deleted content.
+    /// </remarks>
+    [HttpPost("{meldingId:guid}/attachment-restorations")]
+    public async Task<ActionResult<AttachmentDetachmentResponse>> RestoreAttachment(
+        [Required] [FromRoute] Guid meldingId,
+        [FromBody] AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        return await ChangeAttachmentDeletion(meldingId, request, restore: true, cancellationToken);
+    }
+
+    private async Task<ActionResult<AttachmentDetachmentResponse>> ChangeAttachmentDeletion(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        bool restore,
+        CancellationToken cancellationToken
+    )
+    {
+        var validationResult = await _attachmentDetachmentValidator.ValidateAsync(
+            request,
+            cancellationToken
+        );
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToString());
+        }
+
+        var response = restore
+            ? await _meldingService.RestoreAttachment(meldingId, request, cancellationToken)
+            : await _meldingService.DetachAttachment(meldingId, request, cancellationToken);
+        _logger.LogInformation(
+            "Attachment deletion change completed for {MeldingId} and {DocumentId}: restore {Restore}, applied {Applied}, already detached {AlreadyDetached}; attachments before {AttachmentIdsBefore}, after {AttachmentIdsAfter}",
+            response.MeldingId,
+            response.DocumentId,
+            restore,
+            response.Applied,
+            response.AlreadyDetached,
+            response.AttachmentIdsBefore,
+            response.AttachmentIdsAfter
+        );
+
+        return Ok(response);
     }
 
     /// <summary>
@@ -112,7 +194,8 @@ public partial class MeldingerController : ControllerBase
     [ProducesResponseType<GetMeldingByShortIdConflictResponse>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<GetMeldingResponse>> GetMeldingByShortId(
         [Required] [FromRoute] string shortId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery] bool includeDeleted = false
     )
     {
         if (!ShortIdRegex().IsMatch(shortId))
@@ -122,7 +205,11 @@ public partial class MeldingerController : ControllerBase
             );
         }
 
-        var matches = await _meldingService.GetMeldingerByShortId(shortId, cancellationToken);
+        var matches = await _meldingService.GetMeldingerByShortId(
+            shortId,
+            cancellationToken,
+            includeDeleted
+        );
 
         return matches.Count switch
         {

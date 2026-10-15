@@ -6,5 +6,6 @@
     ContentType: application/json
   },
   ScanResult: Clean,
+  IsDeleted: false,
   Tags: null
 }

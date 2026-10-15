@@ -97,24 +97,49 @@ internal class MeldingService : IMeldingService
         CancellationToken cancellationToken
     )
     {
-        return await _meldingRepository.GetMelding(request.MeldingId, cancellationToken);
+        return await _meldingRepository.GetMelding(
+            request.MeldingId,
+            cancellationToken,
+            request.IncludeDeleted
+        );
     }
 
-    public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
-        string shortId,
+    public Task<AttachmentDetachmentResponse> DetachAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
         CancellationToken cancellationToken
     )
     {
-        return await _meldingRepository.GetMeldingerByShortId(shortId, cancellationToken);
+        return _meldingRepository.DetachAttachment(meldingId, request, cancellationToken);
+    }
+
+    public Task<AttachmentDetachmentResponse> RestoreAttachment(
+        Guid meldingId,
+        AttachmentDetachmentRequest request,
+        CancellationToken cancellationToken
+    ) => _meldingRepository.RestoreAttachment(meldingId, request, cancellationToken);
+
+    public async Task<IReadOnlyList<Melding>> GetMeldingerByShortId(
+        string shortId,
+        CancellationToken cancellationToken,
+        bool includeDeleted = false
+    )
+    {
+        return await _meldingRepository.GetMeldingerByShortId(
+            shortId,
+            cancellationToken,
+            includeDeleted
+        );
     }
 
     public async Task<Domain.Ports.App.PaginationResponse<Melding>> GetMeldinger(
         int? pageNumber = 1,
-        int? pageSize = 10
+        int? pageSize = 10,
+        bool includeDeleted = false
     )
     {
         return _mapper.Map<Domain.Ports.App.PaginationResponse<Melding>>(
-            await _meldingRepository.GetMeldinger(pageSize ?? 10, pageNumber ?? 1)
+            await _meldingRepository.GetMeldinger(pageSize ?? 10, pageNumber ?? 1, includeDeleted)
         );
     }
 

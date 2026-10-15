@@ -139,10 +139,13 @@ public class DocumentServiceTests
     }
 
     [Theory]
-    [InlineData(DocumentScanResult.Infected)]
-    [InlineData(DocumentScanResult.Unknown)]
+    [InlineData(DocumentScanResult.Infected, false)]
+    [InlineData(DocumentScanResult.Unknown, false)]
+    [InlineData(DocumentScanResult.Infected, true)]
+    [InlineData(DocumentScanResult.Unknown, true)]
     public async Task GetDocument_WhenDocumentIsNotSafeToUse_ThrowsException(
-        DocumentScanResult scanResult
+        DocumentScanResult scanResult,
+        bool includeDeleted
     )
     {
         //arrange
@@ -150,9 +153,10 @@ public class DocumentServiceTests
         {
             MeldingId = Guid.NewGuid(),
             DocumentId = Guid.NewGuid(),
+            IncludeDeleted = includeDeleted,
         };
         _meldingRepository
-            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetMelding(request.MeldingId, Arg.Any<CancellationToken>(), includeDeleted)
             .Returns(
                 SampleMelding with
                 {
@@ -161,13 +165,14 @@ public class DocumentServiceTests
                 }
             );
         _documentRepository
-            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>())
+            .GetDocumentAsync(request.DocumentId, Arg.Any<CancellationToken>(), includeDeleted)
             .Returns(
                 SampleDocument with
                 {
                     MeldingId = request.MeldingId,
                     DocumentId = request.DocumentId,
                     ScanResult = scanResult,
+                    IsDeleted = includeDeleted,
                 }
             );
 
@@ -179,14 +184,21 @@ public class DocumentServiceTests
     }
 
     [Theory]
-    [InlineData(DocumentScanResult.Infected)]
-    [InlineData(DocumentScanResult.Unknown)]
+    [InlineData(DocumentScanResult.Infected, false)]
+    [InlineData(DocumentScanResult.Unknown, false)]
+    [InlineData(DocumentScanResult.Infected, true)]
+    [InlineData(DocumentScanResult.Unknown, true)]
     public async Task GetAllDocuments_WhenDocumentOneIsNotSafeToUse_ExcludesItFromResult(
-        DocumentScanResult scanResult
+        DocumentScanResult scanResult,
+        bool includeDeleted
     )
     {
         //arrange
-        var request = new GetAllDocumentsRequest { MeldingId = Guid.NewGuid() };
+        var request = new GetAllDocumentsRequest
+        {
+            MeldingId = Guid.NewGuid(),
+            IncludeDeleted = includeDeleted,
+        };
 
         var safeDocument = SampleDocument with
         {
@@ -200,13 +212,18 @@ public class DocumentServiceTests
             MeldingId = request.MeldingId,
             DocumentId = Guid.NewGuid(),
             ScanResult = scanResult,
+            IsDeleted = includeDeleted,
         };
 
         _meldingRepository
             .GetMelding(request.MeldingId, Arg.Any<CancellationToken>())
             .Returns(SampleMelding with { Id = request.MeldingId });
         _documentRepository
-            .GetAllDocumentsForMelding(request.MeldingId, Arg.Any<CancellationToken>())
+            .GetAllDocumentsForMelding(
+                request.MeldingId,
+                Arg.Any<CancellationToken>(),
+                includeDeleted
+            )
             .Returns([safeDocument, unsafeDocument]);
 
         //act

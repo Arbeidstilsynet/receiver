@@ -8,6 +8,7 @@
         ContentType: text/plain
       },
       ScanResult: Clean,
+      IsDeleted: false,
       Tags: null
     },
     {
@@ -18,6 +19,7 @@
         ContentType: text/plain
       },
       ScanResult: Clean,
+      IsDeleted: false,
       Tags: null
     },
     {
@@ -28,6 +30,7 @@
         ContentType: text/plain
       },
       ScanResult: Clean,
+      IsDeleted: false,
       Tags: null
     },
     {
@@ -38,6 +41,7 @@
         ContentType: application/json
       },
       ScanResult: Clean,
+      IsDeleted: false,
       Tags: null
     }
   ]
