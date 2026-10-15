@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.11.2
+
+### Fixed
+
+- fix(consumer): refetch meldinger before listener and redrive dispatch so consumers receive current metadata and attachment references after soft deletion. Reject missing meldinger and identity changes without acknowledging the notification.
+
 ## 1.11.1
 
 ### Changed

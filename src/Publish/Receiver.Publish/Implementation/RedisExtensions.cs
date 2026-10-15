@@ -53,26 +53,20 @@ internal static class RedisExtensions
             {
                 // For parallel processing, each message gets its own scope and consumer.
                 // For sequential, reuse the caller-provided consumer directly.
-                var scope = maxConcurrency > 1 ? scopeFactory.CreateScope() : null;
-                try
-                {
-                    var effectiveConsumer =
-                        scope != null
-                            ? scope.ServiceProvider.GetRequiredService<IMeldingerConsumer>()
-                            : consumer;
-                    await effectiveConsumer.ConsumeMelding(
-                        kvp,
-                        successfulMessages,
-                        unsuccessfulMessages,
-                        apiMeters,
-                        logger,
-                        triggeredFromRedrive
-                    );
-                }
-                finally
-                {
-                    scope?.Dispose();
-                }
+                using var scope = scopeFactory.CreateScope();
+                var effectiveConsumer =
+                    maxConcurrency > 1
+                        ? scope.ServiceProvider.GetRequiredService<IMeldingerConsumer>()
+                        : consumer;
+                await effectiveConsumer.ConsumeMelding(
+                    kvp,
+                    scope.ServiceProvider,
+                    successfulMessages,
+                    unsuccessfulMessages,
+                    apiMeters,
+                    logger,
+                    triggeredFromRedrive
+                );
             }
         );
 
@@ -82,6 +76,7 @@ internal static class RedisExtensions
     private static async Task ConsumeMelding(
         this IMeldingerConsumer consumer,
         KeyValuePair<MessageId, Melding> meldingToConsumePair,
+        IServiceProvider serviceProvider,
         ConcurrentBag<MessageId> successfulMessages,
         ConcurrentBag<RedriveException> unsuccessfulMessages,
         ApiMeters apiMeters,
@@ -102,6 +97,24 @@ internal static class RedisExtensions
         );
         try
         {
+            var meldingerClient = serviceProvider.GetRequiredService<IMeldingerClient>();
+            var current =
+                await meldingerClient.GetMelding(melding.Id)
+                ?? throw new InvalidOperationException(
+                    $"Melding {melding.Id} no longer exists in receiver."
+                );
+            if (
+                current.Id != melding.Id
+                || current.ApplicationId != melding.ApplicationId
+                || current.Source != melding.Source
+            )
+            {
+                throw new InvalidOperationException(
+                    $"Receiver identity changed for melding {melding.Id}."
+                );
+            }
+
+            melding = current;
             var consumedAt = DateTime.Now;
             apiMeters.MeldingConsumed(melding, triggeredFromRedrive);
             await consumer.ConsumeMelding(melding);
@@ -118,7 +131,7 @@ internal static class RedisExtensions
         }
         catch (Exception e)
         {
-            var rootTraceId = melding.GetInternalTag("rootTraceId");
+            var rootTraceId = meldingToConsumePair.Value.GetInternalTag("rootTraceId");
             unsuccessfulMessages.Add(
                 new RedriveException()
                 {
