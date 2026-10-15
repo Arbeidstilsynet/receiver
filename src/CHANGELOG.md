@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.11.1
+
+### Changed
+
+- chore(nuget): standardize package authorship, MIT license metadata, embedded icon, and project/repository links for NuGet prefix reservation.
+
 ## 1.11.0
 
 ### Added
