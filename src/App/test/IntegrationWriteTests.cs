@@ -9,9 +9,12 @@ using Arbeidstilsynet.MeldingerReceiver.App.Test.fixture;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure.Dto;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db;
 using Arbeidstilsynet.Receiver.Model.Request;
 using Arbeidstilsynet.Receiver.Model.Response;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Shouldly;
 
 namespace Arbeidstilsynet.MeldingerReceiver.App.Test;
@@ -582,6 +585,116 @@ public class IntegrationWriteTests : IClassFixture<ApplicationFixture>
             TestContext.Current.CancellationToken
         );
         foreignDocument.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AttachmentDeletionChange_ConcurrentApplies_OnlyOneSucceeds(bool restore)
+    {
+        var (meldingId, documentId, _, _) = await CreateAltinnMeldingWithAttachment();
+        var deletionRoute = $"/meldinger/{meldingId}/attachment-detachments";
+        if (restore)
+        {
+            var deletionPreview = await PreviewAttachmentChange(deletionRoute, documentId);
+            await ApplyAttachmentChange(deletionRoute, documentId, deletionPreview.Revision);
+        }
+
+        var route = restore ? $"/meldinger/{meldingId}/attachment-restorations" : deletionRoute;
+        var preview = await PreviewAttachmentChange(route, documentId);
+        preview.AlreadyDetached.ShouldBe(restore);
+        var request = new AttachmentDetachmentRequest
+        {
+            DocumentId = documentId,
+            Apply = true,
+            ExpectedRevision = preview.Revision,
+        };
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(
+            TestContext.Current.CancellationToken
+        );
+        timeout.CancelAfter(TimeSpan.FromSeconds(30));
+        var cancellationToken = timeout.Token;
+
+        using var scope = _fixture.Services.CreateScope();
+        var connectionString = scope
+            .ServiceProvider.GetRequiredService<ReceiverDbContext>()
+            .Database.GetConnectionString();
+        await using var blocker = new NpgsqlConnection(connectionString);
+        await blocker.OpenAsync(cancellationToken);
+        await using var transaction = await blocker.BeginTransactionAsync(cancellationToken);
+        await using var lockCommand = new NpgsqlCommand(
+            """SELECT "Id" FROM public.meldinger WHERE "Id" = @meldingId FOR UPDATE""",
+            blocker,
+            transaction
+        );
+        lockCommand.Parameters.AddWithValue("meldingId", meldingId);
+        (await lockCommand.ExecuteScalarAsync(cancellationToken)).ShouldBe(meldingId);
+
+        // Separate HTTP requests resolve separate scoped DbContexts. Hold both at the same row lock.
+        var firstApply = _client.PostAsJsonAsync(route, request, cancellationToken);
+        var secondApply = _client.PostAsJsonAsync(route, request, cancellationToken);
+        try
+        {
+            await using var observer = new NpgsqlConnection(connectionString);
+            await observer.OpenAsync(cancellationToken);
+            await using var blockedRequests = new NpgsqlCommand(
+                """
+                WITH RECURSIVE blocked_requests(pid) AS (
+                    SELECT pid FROM pg_stat_activity
+                    WHERE @blockerPid = ANY(pg_blocking_pids(pid))
+                    UNION
+                    SELECT activity.pid FROM pg_stat_activity activity
+                    JOIN blocked_requests blocked ON blocked.pid = ANY(pg_blocking_pids(activity.pid))
+                )
+                SELECT count(DISTINCT activity.pid)
+                FROM pg_stat_activity activity
+                JOIN blocked_requests blocked ON blocked.pid = activity.pid
+                WHERE activity.wait_event_type = 'Lock'
+                    AND activity.query LIKE '%public.meldinger%'
+                """,
+                observer
+            );
+            blockedRequests.Parameters.AddWithValue("blockerPid", blocker.ProcessID);
+            while ((long)(await blockedRequests.ExecuteScalarAsync(cancellationToken))! != 2)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(10), cancellationToken);
+            }
+            firstApply.IsCompleted.ShouldBeFalse();
+            secondApply.IsCompleted.ShouldBeFalse();
+        }
+        finally
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+        }
+
+        var responses = await Task.WhenAll(firstApply, secondApply);
+        using var firstResponse = responses[0];
+        using var secondResponse = responses[1];
+        responses.Count(r => r.StatusCode == HttpStatusCode.OK).ShouldBe(1);
+        responses.Count(r => r.StatusCode == HttpStatusCode.Conflict).ShouldBe(1);
+        var successfulResponse = responses.Single(r => r.StatusCode == HttpStatusCode.OK);
+        var applied = (
+            await successfulResponse.Content.ReadFromJsonAsync<AttachmentDetachmentResponse>(
+                _jsonSerializerOptions,
+                cancellationToken
+            )
+        ).ShouldNotBeNull();
+        applied.Applied.ShouldBeTrue();
+        applied.AlreadyDetached.ShouldBe(restore);
+        applied.Revision.ShouldNotBe(preview.Revision);
+        applied.AttachmentIdsAfter.ShouldBe(restore ? [documentId] : []);
+
+        using var verificationScope = _fixture.Services.CreateScope();
+        var persistedDocument = await verificationScope
+            .ServiceProvider.GetRequiredService<IDocumentRepository>()
+            .GetDocumentAsync(documentId, cancellationToken, includeDeleted: true);
+        persistedDocument.ShouldNotBeNull().IsDeleted.ShouldBe(!restore);
+        var persistedMelding = await verificationScope
+            .ServiceProvider.GetRequiredService<IMeldingRepository>()
+            .GetMelding(meldingId, cancellationToken);
+        persistedMelding.ShouldNotBeNull().AttachmentIds.ShouldBe(applied.AttachmentIdsAfter);
+        var currentPreview = await PreviewAttachmentChange(route, documentId);
+        currentPreview.Revision.ShouldBe(applied.Revision);
     }
 
     private async Task<AttachmentDetachmentResponse> PreviewAttachmentChange(

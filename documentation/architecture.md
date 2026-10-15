@@ -18,7 +18,6 @@ The following diagram illustrates with which kind of external services the **rec
 ## Event driven `Melding` distribution
 
 ![valkey](./diagrams/stream.svg)
-
 ## Document soft deletion
 
 Only attachments can be soft-deleted. All applications and message sources are supported.

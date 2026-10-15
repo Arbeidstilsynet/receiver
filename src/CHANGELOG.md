@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.11.0
+
 ### Added
 
 - feat: add preview and revision-checked soft deletion and restoration of attachments for all message sources and applications. Main content and structured data cannot be deleted.
