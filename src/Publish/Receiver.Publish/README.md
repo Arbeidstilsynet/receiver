@@ -59,6 +59,12 @@ registers everything except the background listener.
 consumer subscribes to (`ConsumerManifest`), **how** it should be polled, and **what to do**
 when a new melding arrives (`ConsumeMelding`).
 
+Before dispatching a notification (including redrive), the client refetches the melding from
+the receiver API so the consumer receives current metadata and document references rather
+than the stream snapshot. The melding's `Id`, `ApplicationId`, and `Source` must still match
+the notification. If the melding is missing, its identity differs, or the fetch fails, the
+consumer is not called; the error is logged and the notification remains unacknowledged.
+
 | Member             | Purpose                                                                                                                   |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
 | `ConsumerManifest` | Declares the consumer's unique name and which app registrations (`AppId` + `MessageSource`) it should receive meldinger for. |
