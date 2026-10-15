@@ -128,6 +128,49 @@ public class RedisExtensionsTests : IDisposable
         await _scopedConsumer.DidNotReceive().ConsumeMelding(Arg.Any<Melding>());
     }
 
+    [Theory]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    public async Task ConsumeNotifications_WhenConsumerThrows_PreservesNotificationTraceId(
+        int maxConcurrency,
+        bool fromRedrive
+    )
+    {
+        const string originalTraceId = "0123456789abcdef0123456789abcdef";
+        var snapshot = CreateMelding() with
+        {
+            InternalTags = new() { ["rootTraceId"] = originalTraceId },
+        };
+        var current = snapshot with { InternalTags = [] };
+        _client.GetMelding(snapshot.Id).Returns(current);
+        _consumer.MaxConcurrency.Returns(maxConcurrency);
+        var effectiveConsumer = maxConcurrency > 1 ? _scopedConsumer : _consumer;
+        effectiveConsumer
+            .ConsumeMelding(Arg.Any<Melding>())
+            .Returns(Task.FromException(new InvalidOperationException("Consumer failed.")));
+        RedisValue messageId = "1-0";
+
+        var (successful, unsuccessful) = await _consumer.ConsumeNotifications(
+            _services.GetRequiredService<IServiceScopeFactory>(),
+            new() { [messageId] = snapshot },
+            _services.GetRequiredService<ApiMeters>(),
+            NullLogger.Instance,
+            fromRedrive
+        );
+
+        successful.ShouldBeEmpty();
+        var error = unsuccessful.ShouldHaveSingleItem();
+        error.OriginalTraceId.ShouldBe(originalTraceId);
+        error.MeldingId.ShouldBe(snapshot.Id);
+        error.ValkeyMessageId.ShouldBe((string)messageId!);
+        error.ExceptionMessage.ShouldBe("Consumer failed.");
+        await effectiveConsumer
+            .Received(1)
+            .ConsumeMelding(Arg.Is<Melding>(m => ReferenceEquals(m, current)));
+    }
+
     [Fact]
     public async Task ConsumeNotifications_WhenOneRefetchFails_StillConsumesOtherNotifications()
     {

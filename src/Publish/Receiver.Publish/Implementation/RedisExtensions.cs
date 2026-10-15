@@ -131,7 +131,7 @@ internal static class RedisExtensions
         }
         catch (Exception e)
         {
-            var rootTraceId = melding.GetInternalTag("rootTraceId");
+            var rootTraceId = meldingToConsumePair.Value.GetInternalTag("rootTraceId");
             unsuccessfulMessages.Add(
                 new RedriveException()
                 {
