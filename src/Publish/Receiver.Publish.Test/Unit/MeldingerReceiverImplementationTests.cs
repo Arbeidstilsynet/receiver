@@ -24,8 +24,12 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
         _testDatabase = fixture.GetService<IConnectionMultiplexer>(testOutputHelper)!.GetDatabase();
     }
 
-    [Fact]
-    public async Task GetNotifications_WhenCalledWithNotificationForApp_ReturnsNotificationForFirstCall()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(11)]
+    public async Task GetNotifications_WhenCalledWithNotificationForApp_ReturnsNotificationForFirstCall(
+        int existingMessageCount
+    )
     {
         //arrange
 
@@ -38,6 +42,14 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
                 new AppRegistration() { AppId = testAppName, MessageSource = MessageSource.Altinn },
             ],
         };
+        for (var i = 0; i < existingMessageCount; i++)
+        {
+            await _testDatabase.StreamAddAsync(
+                IConstants.Stream.StreamName,
+                [new(IConstants.Stream.MessageKey, "{}")]
+            );
+        }
+        await CreateConsumerGroupAtStreamEnd(consumerManifest);
         var testDto = new Melding()
         {
             ApplicationId = testAppName,
@@ -76,6 +88,7 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
                 new AppRegistration() { AppId = testAppName, MessageSource = MessageSource.Altinn },
             ],
         };
+        await CreateConsumerGroupAtStreamEnd(consumerManifest);
         var testDto = new Melding()
         {
             ApplicationId = "non-existing-app-id",
@@ -111,6 +124,7 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
                 new AppRegistration() { AppId = testAppName, MessageSource = MessageSource.Altinn },
             ],
         };
+        await CreateConsumerGroupAtStreamEnd(consumerManifest);
         var testDto = new Melding()
         {
             ApplicationId = testAppName,
@@ -152,6 +166,7 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
                 new AppRegistration() { AppId = testAppName, MessageSource = MessageSource.Altinn },
             ],
         };
+        await CreateConsumerGroupAtStreamEnd(consumerManifest);
         var testDto = new Melding()
         {
             ApplicationId = testAppName,
@@ -190,6 +205,7 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
                 new AppRegistration() { AppId = testAppName, MessageSource = MessageSource.Altinn },
             ],
         };
+        await CreateConsumerGroupAtStreamEnd(consumerManifest);
         var testDto = new Melding()
         {
             ApplicationId = testAppName,
@@ -233,12 +249,7 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
                 },
             ],
         };
-        await _testDatabase.StreamCreateConsumerGroupAsync(
-            IConstants.Stream.StreamName,
-            manifest.ConsumerName,
-            "$",
-            createStream: true
-        );
+        await CreateConsumerGroupAtStreamEnd(manifest);
         var pending = new Dictionary<RedisValue, Melding>();
         for (var i = 0; i < count; i++)
         {
@@ -314,4 +325,12 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
         );
         pendingInfo.PendingMessageCount.ShouldBe(expectedRemaining.Count);
     }
+
+    private Task CreateConsumerGroupAtStreamEnd(ConsumerManifest manifest) =>
+        _testDatabase.StreamCreateConsumerGroupAsync(
+            IConstants.Stream.StreamName,
+            manifest.ConsumerName,
+            "$",
+            createStream: true
+        );
 }
