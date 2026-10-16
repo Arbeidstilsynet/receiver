@@ -17,6 +17,14 @@ public interface IMeldingerRedriver
     Task<RedriveResult> RedrivePendingMessages();
 
     /// <summary>
+    /// Attempts to redrive only the specified pending Valkey stream messages.
+    /// Unknown or no-longer-pending IDs are ignored. An empty collection redrives nothing.
+    /// </summary>
+    /// <param name="messageIds">Stream message IDs returned by <see cref="GetPendingMessages"/>, not melding IDs.</param>
+    /// <returns>A redrive result which summarizes the selected pending messages.</returns>
+    Task<RedriveResult> RedrivePendingMessages(IReadOnlyCollection<MessageId> messageIds);
+
+    /// <summary>
     /// Gets all pending messages for the specified application and consumer group.
     /// </summary>
     /// <returns>A dictionary which maps pending messages (ids) to a received melding.</returns>
