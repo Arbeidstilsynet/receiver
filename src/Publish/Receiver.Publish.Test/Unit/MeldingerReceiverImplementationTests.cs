@@ -1,7 +1,11 @@
 using System.Text.Json;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
 using Arbeidstilsynet.Receiver.Adapters.Test.fixtures;
+using Arbeidstilsynet.Receiver.Implementation;
 using Arbeidstilsynet.Receiver.Ports;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 using Shouldly;
 using StackExchange.Redis;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
@@ -205,5 +209,109 @@ public class ValkeyConsumerTests : TestBed<MeldingerReceiverFixture>
         var ackCount = await _valkeyConsumer.AcknowledgeMessageAsync(consumerManifest, messageId);
         //assert
         ackCount.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(11, false)]
+    [InlineData(20, false)]
+    [InlineData(21, false)]
+    [InlineData(21, true)]
+    public async Task Redrive_WithMultiplePendingPages_FindsAndAcknowledgesRequestedMessages(
+        int count,
+        bool redriveAll
+    )
+    {
+        var manifest = new ConsumerManifest
+        {
+            ConsumerName = $"consumer-{Guid.NewGuid():n}",
+            AppRegistrations =
+            [
+                new AppRegistration
+                {
+                    AppId = $"test-app-{Guid.NewGuid():n}",
+                    MessageSource = MessageSource.Altinn,
+                },
+            ],
+        };
+        await _testDatabase.StreamCreateConsumerGroupAsync(
+            IConstants.Stream.StreamName,
+            manifest.ConsumerName,
+            "$",
+            createStream: true
+        );
+        var pending = new Dictionary<RedisValue, Melding>();
+        for (var i = 0; i < count; i++)
+        {
+            var melding = new Melding
+            {
+                ApplicationId = manifest.AppRegistrations[0].AppId,
+                Id = Guid.NewGuid(),
+                ReceivedAt = DateTime.UtcNow,
+                Source = MessageSource.Altinn,
+            };
+            var id = await _testDatabase.StreamAddAsync(
+                IConstants.Stream.StreamName,
+                [new(IConstants.Stream.MessageKey, JsonSerializer.Serialize(melding))]
+            );
+            pending.Add(id, melding);
+        }
+        await _testDatabase.StreamReadGroupAsync(
+            IConstants.Stream.StreamName,
+            manifest.ConsumerName,
+            "consumer_1",
+            ">",
+            count: count
+        );
+
+        var consumer = Substitute.For<IMeldingerConsumer>();
+        consumer.ConsumerManifest.Returns(manifest);
+        var client = Substitute.For<IMeldingerClient>();
+        foreach (var melding in pending.Values)
+        {
+            client.GetMelding(melding.Id).Returns(melding);
+        }
+        using var services = new ServiceCollection()
+            .AddMetrics()
+            .AddSingleton<ApiMeters>()
+            .AddScoped<IMeldingerClient>(_ => client)
+            .BuildServiceProvider();
+        var redriver = new MeldingerRedriver(
+            services.GetRequiredService<IServiceScopeFactory>(),
+            _valkeyConsumer,
+            consumer,
+            services.GetRequiredService<ApiMeters>(),
+            NullLogger<MeldingerRedriver>.Instance
+        );
+        var selected = pending.Last();
+
+        var result = redriveAll
+            ? await redriver.RedrivePendingMessages()
+            : await redriver.RedrivePendingMessages([selected.Key]);
+
+        result.SuccessfulCount.ShouldBe(redriveAll ? count : 1);
+        result.UnsuccessfulCount.ShouldBe(0);
+        result.RedriveExceptions.ShouldBeEmpty();
+        await consumer.Received(1).ConsumeMelding(selected.Value);
+        if (!redriveAll)
+        {
+            await consumer.DidNotReceive().ConsumeMelding(pending.First().Value);
+        }
+        var expectedRemaining = redriveAll
+            ? new Dictionary<RedisValue, Melding>()
+            : pending.Where(kvp => kvp.Key != selected.Key).ToDictionary();
+        var asyncPending = await _valkeyConsumer.GetPendingMessagesAsync(manifest);
+        var syncPending = _valkeyConsumer.GetPendingMessages(manifest);
+        asyncPending.Keys.ShouldBe(expectedRemaining.Keys);
+        syncPending.Keys.ShouldBe(expectedRemaining.Keys);
+        foreach (var (id, melding) in expectedRemaining)
+        {
+            asyncPending[id].ShouldBeEquivalentTo(melding);
+            syncPending[id].ShouldBeEquivalentTo(melding);
+        }
+        var pendingInfo = await _testDatabase.StreamPendingAsync(
+            IConstants.Stream.StreamName,
+            manifest.ConsumerName
+        );
+        pendingInfo.PendingMessageCount.ShouldBe(expectedRemaining.Count);
     }
 }
