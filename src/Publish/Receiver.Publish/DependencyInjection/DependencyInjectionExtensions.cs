@@ -143,9 +143,11 @@ public static class DependencyInjectionExtensions
         );
         return group.MapPost(
             "/redrive-pending-messages",
-            ([FromServices] IMeldingerRedriver redriver) =>
+            ([FromServices] IMeldingerRedriver redriver, [FromQuery] string[]? messageIds) =>
             {
-                return redriver.RedrivePendingMessages();
+                return messageIds is { Length: > 0 }
+                    ? redriver.RedrivePendingMessages([.. messageIds.Select(id => (MessageId)id)])
+                    : redriver.RedrivePendingMessages();
             }
         );
     }

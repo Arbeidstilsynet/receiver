@@ -175,3 +175,26 @@ manual instance processing.
 
 If you host redrive tooling, `MapCommonRedriveEndpoints(...)` exposes endpoints to inspect and
 re-drive pending messages.
+
+| Method | Default path | Behaviour |
+| --- | --- | --- |
+| `GET` | `/redrive-actions/get-pending-messages` | Returns pending meldinger keyed by Valkey stream message ID. |
+| `POST` | `/redrive-actions/redrive-pending-messages` | Reprocesses all pending messages, or only the IDs selected by the optional `messageIds` query parameter. Only successful messages are acknowledged. |
+| `POST` | `/redrive-actions/acknowledge-pending-messages` | Acknowledges all pending messages, or only the IDs selected by the optional `messageIds` query parameter, without reprocessing them. |
+
+For example, to retry two pending messages:
+
+```http
+POST /redrive-actions/redrive-pending-messages?messageIds=1720000000000-0&messageIds=1720000000001-0
+```
+
+These IDs are the **Valkey stream message IDs** returned as keys by `get-pending-messages`,
+not melding IDs. Unknown or already acknowledged IDs are ignored and do not contribute to
+the result counts. Failed messages are reported in `RedriveExceptions` and remain pending.
+Omitting the query filter (or supplying an empty array) preserves the endpoint's redrive-all
+behaviour. The query parameter is also exposed in the consumer host's generated OpenAPI.
+
+For programmatic use, inject `IMeldingerRedriver` and call
+`RedrivePendingMessages(IReadOnlyCollection<MessageId> messageIds)` (`MessageId` is
+`StackExchange.Redis.RedisValue`). Unlike the HTTP endpoint, an **empty collection redrives
+nothing**; use the parameterless `RedrivePendingMessages()` to retry everything.

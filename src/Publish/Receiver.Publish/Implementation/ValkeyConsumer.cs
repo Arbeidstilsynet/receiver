@@ -10,6 +10,7 @@ internal class ValkeyConsumer : IValkeyConsumer
 {
     private readonly ILogger<ValkeyConsumer> _logger;
     private const string DefaultConsumerName = "consumer_1";
+    private const int PendingPageSize = 10;
     private readonly IDatabase _db;
 
     public ValkeyConsumer(
@@ -63,28 +64,49 @@ internal class ValkeyConsumer : IValkeyConsumer
     )
     {
         var groupName = GetGroupName(consumerManifest);
-        var streamEntries = await _db.StreamReadGroupAsync(
-            key: IConstants.Stream.StreamName,
-            groupName: groupName,
-            consumerName: DefaultConsumerName,
-            position: "0-0",
-            count: 10
-        );
-        return streamEntries.GetMeldinger(consumerManifest, out _).MatchedEntries;
+        List<StreamEntry> streamEntries = [];
+        RedisValue position = "0-0";
+        while (true)
+        {
+            var page = await _db.StreamReadGroupAsync(
+                key: IConstants.Stream.StreamName,
+                groupName: groupName,
+                consumerName: DefaultConsumerName,
+                position: position,
+                count: PendingPageSize
+            );
+            streamEntries.AddRange(page);
+            if (page.Length < PendingPageSize)
+            {
+                break;
+            }
+            position = page[^1].Id;
+        }
+        return streamEntries.GetMeldinger(consumerManifest, out _, _logger).MatchedEntries;
     }
 
     public Dictionary<MessageId, Melding> GetPendingMessages(ConsumerManifest consumerManifest)
     {
         var groupName = GetGroupName(consumerManifest);
-        var streamEntries = _db.StreamReadGroup(
-            key: IConstants.Stream.StreamName,
-            groupName: groupName,
-            consumerName: DefaultConsumerName,
-            position: "0-0",
-            count: 10
-        );
-
-        return streamEntries.GetMeldinger(consumerManifest, out _).MatchedEntries;
+        List<StreamEntry> streamEntries = [];
+        RedisValue position = "0-0";
+        while (true)
+        {
+            var page = _db.StreamReadGroup(
+                key: IConstants.Stream.StreamName,
+                groupName: groupName,
+                consumerName: DefaultConsumerName,
+                position: position,
+                count: PendingPageSize
+            );
+            streamEntries.AddRange(page);
+            if (page.Length < PendingPageSize)
+            {
+                break;
+            }
+            position = page[^1].Id;
+        }
+        return streamEntries.GetMeldinger(consumerManifest, out _, _logger).MatchedEntries;
     }
 
     public Task<long> AcknowledgeMessageAsync(

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.12.0
+
+### Added
+
+- feat(consumer): support redriving selected pending Valkey stream messages through `IMeldingerRedriver.RedrivePendingMessages(messageIds)` and the optional `messageIds` query filter on `MapCommonRedriveEndpoints()`. Unknown or already acknowledged IDs are ignored; unsuccessful messages remain pending.
+
+### Fixed
+
+- fix(consumer): paginate pending-message lookups so inspection, acknowledgement and redrive include messages beyond the first ten pending entries.
+
 ## 1.11.2
 
 ### Fixed
