@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 # https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine@sha256:230c3fbae0ceedc70bca04eed2bfb5694e8b248cadbb81010f41b7a993601f55 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine@sha256:496914451b05ac5a24592024362ec370c3a2d3c3fe817f864e4aa55c4c194a56 AS build
 WORKDIR /source
 
 # Improves restore speed by skipping XML docs.
@@ -29,7 +29,7 @@ COPY src/Publish/ ./Publish/
 RUN dotnet publish ./App/src/App.csproj -c Release -f net10.0 -o /app --no-restore
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:819bd3649d8bf53f35527c68d62e17b348ef6f24ae73073f497f00a878348062
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:ecf8dcbaab8ebc4bdfb2322d6fe4217bbb118894310ebb6d53c580874ab4b27d
 WORKDIR /app
 # tzdata: RecoveryJob is scheduled in Europe/Oslo
 RUN apk add --no-cache curl tzdata
