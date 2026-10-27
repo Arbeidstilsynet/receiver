@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.12.1
+
+### Fixed
+
+- fix(security): pin multi-architecture Alpine 3.24 container images to .NET SDK 10.0.403 and ASP.NET runtime 10.0.14, the patched versions for [CVE-2026-111497](https://github.com/dotnet/announcements/issues/494).
+
 ## 1.12.0
 
 ### Added
