@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.12.1
+
+### Fixed
+
+- fix(security): update .NET container images to patched versions for CVE-2026-111497.
+
 ## 1.12.0
 
 ### Added
