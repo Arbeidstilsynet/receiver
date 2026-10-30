@@ -17,8 +17,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="TngTech.ArchUnitNET" Version="0.13.4" />
-    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.4" />
+    <PackageReference Include="TngTech.ArchUnitNET" Version="0.13.5" />
+    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Receiver.Publish/Receiver.Publish.csproj" />
