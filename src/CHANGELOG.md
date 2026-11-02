@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.12.2
+
+### Changed
+
+- chore(deps): update Arbeidstilsynet.Common.Altinn to 4.3.0. Local Altinn organization test tokens now default to authentication level 4 instead of 2. Tests can optionally override `Infrastructure__AltinnConfiguration__LocalAuthenticationLevel` (1 through 4); TT02 and Production authentication are unchanged.
+
 ## 1.12.1
 
 ### Fixed

@@ -11,6 +11,8 @@
 | Infrastructure__MaskinportenConfiguration__IntegrationId         | yes*     |                                                                                       |
 | Infrastructure__MaskinportenConfiguration__CertificatePrivateKey | yes*     |                                                                                       |
 | Infrastructure__MaskinportenConfiguration__CertificateChain      | yes*     |                                                                                       |
+| Infrastructure__AltinnConfiguration__Environment                 | no**     | Local                                                                                 |
+| Infrastructure__AltinnConfiguration__LocalAuthenticationLevel     | no       | 4                                                                                     |
 | Infrastructure__AltinnClientsConfiguration__Storage__Scopes__0   | no       | altinn:serviceowner/instances.read                                                     |
 | Infrastructure__AltinnClientsConfiguration__Events__Scopes__0    | no       | altinn:events.subscribe                                                               |
 | Infrastructure__AltinnClientsConfiguration__Events__Scopes__1    | no       | altinn:serviceowner/instances.read                                                     |
@@ -26,6 +28,42 @@
 | OTEL_EXPORTER_OTLP_ENDPOINT                                      | no       | http://monitoring_otel:4317                                                           |
 
 \* required for communication with altinns staging and prod systems
+
+\** Production always targets Altinn Production. Staging defaults to Tt02. Other host
+environments must explicitly select an Altinn target (`Local`, `Tt02`, or `Production`).
+
+## Optional configuration for local Altinn tests
+
+Receiver binds `Infrastructure:AltinnConfiguration` directly to the Common.Altinn
+configuration, including the optional `LocalAuthenticationLevel` setting.
+Leave it unset for normal use: local organization test tokens default to authentication
+level **4**. To exercise lower-authentication scenarios, override it for that test run.
+Valid values are **1 through 4**; invalid values fail during startup when targeting Local.
+The setting is ignored when targeting Altinn TT02 or Production and does not change
+receiver's own API authentication.
+
+For example, from `src/` in PowerShell:
+
+```powershell
+$env:Infrastructure__AltinnConfiguration__Environment = "Local"
+$env:Infrastructure__AltinnConfiguration__LocalAuthenticationLevel = "2"
+dotnet run --project App\src
+```
+
+Remove the override after the test to restore the default:
+
+```powershell
+Remove-Item Env:\Infrastructure__AltinnConfiguration__LocalAuthenticationLevel
+```
+
+For automated tests, prefer per-test host configuration overrides (for example,
+`ConfigureAppConfiguration` with `AddInMemoryCollection`) using
+`Infrastructure:AltinnConfiguration:Environment` and
+`Infrastructure:AltinnConfiguration:LocalAuthenticationLevel`. Avoid changing process-wide
+environment variables in parallel tests. The level applies to all Altinn clients in that
+receiver host, so use a separate host for each authentication-level scenario.
+No separate test-only section or HTTP endpoint is needed, and shared appsettings files
+should leave the level unset.
 
 ## Run with docker compose
 
