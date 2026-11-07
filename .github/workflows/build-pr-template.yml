@@ -105,7 +105,7 @@ jobs:
           fi
       - name: Get last version
         id: nuget_version_check
-        uses: Arbeidstilsynet/action-nuget-check-published@e9d27df91e2e0a5c4b6b041dd111127ba02d7b22 # v2
+        uses: Arbeidstilsynet/action-nuget-check-published@ad82979853a0b53fa12e63bb254925bc2692ef76 # v2
         with:
           name: ${{ steps.get_metadata_from_csprojectfile.outputs.name }}
           version: ${{ steps.get_metadata_from_csprojectfile.outputs.version }}
