@@ -84,7 +84,7 @@ jobs:
 
       - name: Publish nuget package if not already published
         if: inputs.nuget-published == false
-        uses: Arbeidstilsynet/action-dotnet-publish@d6a7f116db746d388ef2ca8d52d8f3d66b7cac05 # v3
+        uses: Arbeidstilsynet/action-dotnet-publish@09752923bf6cba15691243ca5eff4401553f0489 # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
@@ -170,7 +170,7 @@ jobs:
 
       - name: Publish nuget package if not already published
         if: inputs.nuget-published == false
-        uses: Arbeidstilsynet/action-dotnet-publish@d6a7f116db746d388ef2ca8d52d8f3d66b7cac05 # v3
+        uses: Arbeidstilsynet/action-dotnet-publish@09752923bf6cba15691243ca5eff4401553f0489 # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
