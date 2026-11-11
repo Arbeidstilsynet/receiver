@@ -456,3 +456,5 @@ $RECYCLE.BIN/
 
 .serena/
 
+# Compiled npm package output (pnpm build:npm)
+src/npm_publish/dist/

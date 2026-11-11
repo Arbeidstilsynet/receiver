@@ -1,23 +1,30 @@
 {
   "name": "@arbeidstilsynet/receiver-types",
   "version": "0.0.0",
-  "description": "TypeScript declarations for the receiver API",
+  "description": "Typed fetch SDK and TypeScript types for the receiver API",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Arbeidstilsynet/receiver.git",
     "directory": "npm_publish"
   },
-  "types": "./types.d.ts",
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
     }
   },
   "files": [
     "LICENSE",
     "README.md",
-    "types.d.ts"
+    "dist"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

@@ -196,42 +196,44 @@ services.AddOpenTelemetry()
             });
 ```
 
-## 📦 TypeScript Type Generation
+## 📦 TypeScript SDK Generation
 
-This template includes automated TypeScript type generation from your OpenAPI specification. The generated types can be used to create clients or for type-safe interactions with the API.
+This repository generates a typed TypeScript SDK from the OpenAPI specification with [`@hey-api/openapi-ts`](https://heyapi.dev/). The SDK contains one function per endpoint, the schema types and a bundled fetch client.
 
 ### Setup and Customization
 
-1. **Type generation tooling** is configured in [package.json](../package.json).
+1. **Generator tooling** is configured in [package.json](../package.json). `@hey-api/openapi-ts` is pinned to an exact version and needs the TypeScript 6 alias (`typescript: npm:@typescript/typescript6`), because it calls the TypeScript compiler API at runtime.
 2. **Customize the OpenAPI specification** in [App/src/Extensions/StartupExtensions.cs](./App/src/Extensions/StartupExtensions.cs), where `ConfigureApi()` calls `ConfigureBasicOpenApiSpec(...)`.
-3. **Adjust TypeScript generation options** in [package.json](../package.json). Update the `generate:ts` script to customize [openapi-typescript](https://openapi-ts.dev/cli) behavior as needed.
+3. **Adjust SDK generation options** in [openapi-ts.config.ts](../openapi-ts.config.ts).
 
-### Generate TypeScript Types
-
-Generate types on-demand:
+### Generate the SDK
 
 ```terminal
 pnpm install # Run this once to install dependencies
-pnpm generate:types
+pnpm generate:client
 ```
 
 This will:
 
 1. Generate the OpenAPI specification in `src/generated/openApi.json`
-2. Generate TypeScript type definitions in `src/generated/types.d.ts`
+2. Generate the SDK in `src/generated/api-client/` (committed; never edit by hand)
 
-### Publish TypeScript Types
+Inside this workspace the SDK source is exported as `receiver-tooling/api-client` (and `receiver-tooling/api-client/client` for `createClient`/`createConfig`).
 
-The publishable npm package root is [npm_publish](./npm_publish). It is published alongside receiver releases and uses the version from [Publish/Receiver.Publish/Receiver.Publish.csproj](./Publish/Receiver.Publish/Receiver.Publish.csproj), so the committed npm package version is only a placeholder and should not be bumped manually.
+### Publish the SDK
+
+The publishable npm package root is [npm_publish](./npm_publish) (`@arbeidstilsynet/receiver-types`). `pnpm build:npm` compiles `src/generated/api-client` to ESM JavaScript and `.d.ts` files in `src/npm_publish/dist`, which is what gets published. See the [package README](./npm_publish/README.md) for consumer usage.
+
+The package is published alongside receiver releases and uses the version from [Publish/Receiver.Publish/Receiver.Publish.csproj](./Publish/Receiver.Publish/Receiver.Publish.csproj), so the committed npm package version is only a placeholder and should not be bumped manually.
 
 Prerelease receiver versions (`*-*`) are published with the `next` npm tag. Stable receiver versions use npm's default tag.
 
 ### ⚠️ CI/CD Considerations
 
-If you have dependent steps, such as package publishing, ensure that the generated types are up to date:
+The PR build regenerates the SDK and fails if `src/generated` differs from what is committed:
 
 ```terminal
-pnpm generate:types && git diff --exit-code
+pnpm generate:client && git status --porcelain -- src/generated
 ```
 
 ## 📝 Further reads
