@@ -249,7 +249,7 @@ jobs:
 
       - name: Generate SBOM and sign NAIS image
         if: inputs.image-published == false
-        uses: nais/attest-sign@fb244dcfc50e17d1c47065afedad95b1844a12fc # v2
+        uses: nais/attest-sign@c93befb357f8c0a18f5e96119729907b09cd45b4 # v2
         with:
           image_ref: ${{ steps.nais_image_ref.outputs.image_repo }}:${{ needs.setup.outputs.version }}@${{ steps.nais_build_push.outputs.digest }}
 
