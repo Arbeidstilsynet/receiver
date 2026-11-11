@@ -92,6 +92,7 @@ jobs:
       - name: Build npm package
         run: |
           pnpm build:npm
+          pnpm test:npm
           cd src/npm_publish && npm pack --dry-run
 
   check_publish_version:

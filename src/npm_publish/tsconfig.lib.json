@@ -1,0 +1,8 @@
+{
+  // Compiles the hand-written helpers in lib/ next to the generated SDK in dist/.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./lib"
+  },
+  "include": ["lib/**/*.ts"]
+}

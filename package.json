@@ -5,12 +5,14 @@
   "packageManager": "pnpm@12.11.2",
   "exports": {
     "./api-client": "./src/generated/api-client/index.ts",
-    "./api-client/client": "./src/generated/api-client/client/index.ts"
+    "./api-client/client": "./src/generated/api-client/client/index.ts",
+    "./api-client/form-data": "./src/npm_publish/lib/form-data.ts"
   },
   "scripts": {
     "generate:openapi": "dotnet build src/Tools/Tools.GenerateOpenApi/Tools.GenerateOpenApi.csproj",
     "generate:client": "pnpm run generate:openapi && openapi-ts",
-    "build:npm": "tsc6 -p src/npm_publish/tsconfig.json"
+    "build:npm": "tsc6 -p src/npm_publish/tsconfig.json && tsc6 -p src/npm_publish/tsconfig.lib.json",
+    "test:npm": "node --test \"src/npm_publish/test/*.test.mjs\""
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",
