@@ -1,12 +1,12 @@
 {
-  "name": "@arbeidstilsynet/receiver-types",
+  "name": "@arbeidstilsynet/receiver",
   "version": "0.0.0",
   "description": "Typed fetch SDK and TypeScript types for the receiver API",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Arbeidstilsynet/receiver.git",
-    "directory": "npm_publish"
+    "directory": "src/npm_publish"
   },
   "type": "module",
   "sideEffects": false,

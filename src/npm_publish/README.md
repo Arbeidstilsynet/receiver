@@ -1,4 +1,4 @@
-# @arbeidstilsynet/receiver-types
+# @arbeidstilsynet/receiver
 
 A typed SDK for the Arbeidstilsynet **receiver** API, generated from its OpenAPI
 specification by [`@hey-api/openapi-ts`](https://heyapi.dev/). The package ships
@@ -12,9 +12,9 @@ API contract at compile time.
 ## Installation
 
 ```sh
-npm install @arbeidstilsynet/receiver-types
+npm install @arbeidstilsynet/receiver
 # or
-pnpm add @arbeidstilsynet/receiver-types
+pnpm add @arbeidstilsynet/receiver
 ```
 
 > The package is published alongside receiver releases and uses the receiver
@@ -22,7 +22,7 @@ pnpm add @arbeidstilsynet/receiver-types
 
 ## What's exported
 
-- `@arbeidstilsynet/receiver-types`
+- `@arbeidstilsynet/receiver`
   - SDK functions, one per endpoint, named after method and path
     (for example `getMeldinger`, `getMeldingerByMeldingId`,
     `getMeldingerByShortIdByShortId`, `getSubscriptions`, `postSubscriptions`).
@@ -31,7 +31,7 @@ pnpm add @arbeidstilsynet/receiver-types
     per-operation `*Data`, `*Responses` and `*Errors` types.
   - `client`: a shared default client without a base URL. Prefer creating your
     own client as shown below.
-- `@arbeidstilsynet/receiver-types/client`
+- `@arbeidstilsynet/receiver/client`
   - `createClient`, `createConfig` and the client types (`Client`, `Config`,
     `RequestResult`, ...).
 
@@ -41,7 +41,7 @@ Create one client per consumer with its own base URL, and pass it to the SDK
 functions:
 
 ```ts
-import { createClient, createConfig } from "@arbeidstilsynet/receiver-types/client";
+import { createClient, createConfig } from "@arbeidstilsynet/receiver/client";
 
 export const receiverClient = createClient(
   createConfig({ baseUrl: "/api/receiver" }),
@@ -60,7 +60,7 @@ import type {
   ConsumerManifest,
   GetAllMeldingerResponse,
   Melding,
-} from "@arbeidstilsynet/receiver-types";
+} from "@arbeidstilsynet/receiver";
 ```
 
 ## Usage examples
@@ -71,7 +71,7 @@ Fetch the first page of meldinger. SDK functions do not throw on HTTP errors;
 check `error` (and `response`) instead:
 
 ```ts
-import { getMeldinger } from "@arbeidstilsynet/receiver-types";
+import { getMeldinger } from "@arbeidstilsynet/receiver";
 
 const { data, error } = await getMeldinger({
   client: receiverClient,
@@ -88,7 +88,7 @@ console.log(data?.items);
 import {
   getSubscriptions,
   type ConsumerManifest,
-} from "@arbeidstilsynet/receiver-types";
+} from "@arbeidstilsynet/receiver";
 
 export async function fetchSubscriptions(): Promise<ConsumerManifest[]> {
   const { data, error, response } = await getSubscriptions({
@@ -110,7 +110,7 @@ export async function fetchSubscriptions(): Promise<ConsumerManifest[]> {
 ### Path parameters
 
 ```ts
-import { getMeldingerByMeldingId } from "@arbeidstilsynet/receiver-types";
+import { getMeldingerByMeldingId } from "@arbeidstilsynet/receiver";
 
 const { data } = await getMeldingerByMeldingId({
   client: receiverClient,
@@ -118,12 +118,14 @@ const { data } = await getMeldingerByMeldingId({
 });
 ```
 
-## Migrating from 1.x (`openapi-typescript` + `openapi-fetch`)
+## Migrating from `@arbeidstilsynet/receiver-types`
 
-Version 2.0.0 replaced the types-only package with the generated SDK. You can
-remove `openapi-fetch` from your dependencies.
+This package replaces the types-only `@arbeidstilsynet/receiver-types`
+(`openapi-typescript` declarations used with `openapi-fetch`), which will be
+deprecated. Install `@arbeidstilsynet/receiver` instead, remove
+`@arbeidstilsynet/receiver-types` and `openapi-fetch`, and update your calls:
 
-| 1.x                                                  | 2.x                                                                |
+| `receiver-types` + openapi-fetch                     | `receiver`                                                         |
 | ---------------------------------------------------- | ------------------------------------------------------------------ |
 | `createClient<paths>({ baseUrl })` from openapi-fetch | `createClient(createConfig({ baseUrl }))` from `.../client`        |
 | `client.GET("/meldinger", { params: { query } })`    | `getMeldinger({ client, query })`                                  |

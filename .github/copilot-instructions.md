@@ -91,4 +91,4 @@ this checklist before pushing:
 4. Verify generated artifacts are committed when changed (`src/generated/openApi.json`,
    `src/generated/api-client/`). Never hand-edit the generated client; adjust
    `openapi-ts.config.ts` and regenerate instead. `pnpm build:npm` compiles it for the
-   `@arbeidstilsynet/receiver-types` npm package (`src/npm_publish`).
+   `@arbeidstilsynet/receiver` npm package (`src/npm_publish`).
