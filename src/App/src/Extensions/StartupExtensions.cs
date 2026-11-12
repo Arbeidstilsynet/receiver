@@ -4,6 +4,7 @@ using Arbeidstilsynet.Common.AspNetCore.Extensions.CrossCutting;
 using Arbeidstilsynet.Common.AspNetCore.Extensions.Extensions;
 using Arbeidstilsynet.MeldingerReceiver.App.Jobs;
 using Arbeidstilsynet.MeldingerReceiver.App.WebApi;
+using Arbeidstilsynet.MeldingerReceiver.App.WebApi.ModelBinding;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -23,7 +24,11 @@ internal static class StartupExtensions
             openApiOptions.ConfigureBasicOpenApiSpec(IAssemblyInfo.AppName)
         );
 
-        return services.ConfigureStandardMvc();
+        return services
+            .ConfigureStandardMvc()
+            .AddMvcOptions(options =>
+                options.ModelBinderProviders.Insert(0, new PostMeldingMetadataModelBinderProvider())
+            );
     }
 
     public static IServiceCollection ConfigureApp(

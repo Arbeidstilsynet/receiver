@@ -456,3 +456,5 @@ $RECYCLE.BIN/
 
 .serena/
 
+# Compiled npm package output (pnpm --filter @arbeidstilsynet/receiver build)
+src/npm_publish/dist/

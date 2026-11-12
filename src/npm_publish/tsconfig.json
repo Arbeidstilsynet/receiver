@@ -1,0 +1,16 @@
+{
+  // Compiles the generated SDK to ESM JavaScript + declarations for the npm package.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "strict": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "rootDir": "../generated/api-client",
+    "outDir": "./dist"
+  },
+  "include": ["../generated/api-client/**/*.ts"]
+}

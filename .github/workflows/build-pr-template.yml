@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       backend: ${{ steps.backend.outputs.changes_detected }}
+      generator: ${{ steps.generator.outputs.changes_detected }}
       testfiles: ${{ steps.testfiles.outputs.changes_detected }}
     permissions:
       contents: read
@@ -44,6 +45,17 @@ jobs:
             ./src/**/*.Test/**
             ./compose**.yaml
 
+      - name: Client generator changed?
+        uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
+        id: generator
+        with:
+          base-ref: origin/main
+          include: |
+            ./openapi-ts.config.ts
+            ./package.json
+            ./pnpm-lock.yaml
+            ./pnpm-workspace.yaml
+
       - name: Testfiles changed?
         uses: Arbeidstilsynet/action-check-changes@6e51077b178b819e4194f40e32bd562df0954f3f # v1
         id: testfiles
@@ -56,7 +68,7 @@ jobs:
   build_dotnet:
     needs: [check_changes]
     runs-on: ubuntu-latest
-    if: needs.check_changes.outputs.backend == 'true' || needs.check_changes.outputs.testfiles == 'true'
+    if: needs.check_changes.outputs.backend == 'true' || needs.check_changes.outputs.testfiles == 'true' || needs.check_changes.outputs.generator == 'true'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -66,15 +78,22 @@ jobs:
           working-directory: ./src
       - uses: Arbeidstilsynet/action-pnpm-setup@aa6683c3137594dc38a60b539dbdabb5a4531edd # v4
 
-      - name: Generate types
-        run: pnpm generate:types
+      - name: Generate API client
+        run: pnpm generate:client
 
-      - name: Verify generated types are up to date
+      - name: Verify generated API client is up to date
         run: |
           if [ -n "$(git status --porcelain -- 'src/generated')" ]; then
-            echo "::error::Generated types are out of date. Run 'pnpm generate:types' locally and commit the result."
+            git status --porcelain -- 'src/generated'
+            echo "::error::Generated OpenAPI spec or API client is out of date. Run 'pnpm generate:client' locally and commit the result."
             exit 1
           fi
+
+      - name: Build npm package
+        run: |
+          pnpm --filter @arbeidstilsynet/receiver build
+          pnpm --filter @arbeidstilsynet/receiver test
+          cd src/npm_publish && npm pack --dry-run
 
   check_publish_version:
     needs: [build_dotnet, check_changes]

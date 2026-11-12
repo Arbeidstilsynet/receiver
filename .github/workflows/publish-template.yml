@@ -62,23 +62,23 @@ jobs:
           node-version: 26
           package-manager-cache: false
 
+      - name: Setup pnpm
+        if: inputs.npm-published == false
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Build npm package (compile generated SDK)
+        if: inputs.npm-published == false
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm --filter @arbeidstilsynet/receiver build
+
       - name: Publish npm package if not already published
         if: inputs.npm-published == false
         working-directory: ./src/npm_publish
         run: |
           set -euo pipefail
 
-          types_source="$(readlink types.d.ts || true)"
-          if [ -z "$types_source" ]; then
-            types_source="../generated/types.d.ts"
-          fi
-
-          if [ ! -f "$types_source" ]; then
-            echo "::error::Unable to materialize npm package types from types.d.ts symlink or ../generated/types.d.ts."
-            exit 1
-          fi
-
-          cp --remove-destination "$types_source" types.d.ts
           npm pkg set version="${{ needs.setup.outputs.version }}"
           npm publish --access public --tag next
 
@@ -148,23 +148,23 @@ jobs:
           node-version: 26
           package-manager-cache: false
 
+      - name: Setup pnpm
+        if: inputs.npm-published == false
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Build npm package (compile generated SDK)
+        if: inputs.npm-published == false
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm --filter @arbeidstilsynet/receiver build
+
       - name: Publish npm package if not already published
         if: inputs.npm-published == false
         working-directory: ./src/npm_publish
         run: |
           set -euo pipefail
 
-          types_source="$(readlink types.d.ts || true)"
-          if [ -z "$types_source" ]; then
-            types_source="../generated/types.d.ts"
-          fi
-
-          if [ ! -f "$types_source" ]; then
-            echo "::error::Unable to materialize npm package types from types.d.ts symlink or ../generated/types.d.ts."
-            exit 1
-          fi
-
-          cp --remove-destination "$types_source" types.d.ts
           npm pkg set version="${{ needs.setup.outputs.version }}"
           npm publish --access public
 

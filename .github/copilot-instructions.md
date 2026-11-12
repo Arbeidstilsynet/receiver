@@ -77,9 +77,9 @@ tests fail. Run them before assuming a change is correct.
 When a change touches API surface, generated client types, or versioning/release metadata, complete
 this checklist before pushing:
 
-1. Regenerate OpenAPI + TS types:
+1. Regenerate the OpenAPI spec + TypeScript SDK (hey-api):
    ```sh
-   pnpm generate:types
+   pnpm generate:client
    ```
 2. Run relevant tests/builds:
    ```sh
@@ -89,4 +89,8 @@ this checklist before pushing:
 3. If version is bumped (`src/Publish/Receiver.Publish/Receiver.Publish.csproj`), update `src/CHANGELOG.md`
    in the same change.
 4. Verify generated artifacts are committed when changed (`src/generated/openApi.json`,
-   `src/generated/types.d.ts`).
+   `src/generated/api-client/`). Never hand-edit the generated client; adjust
+   `openapi-ts.config.ts` and regenerate instead. `pnpm --filter @arbeidstilsynet/receiver build` compiles it for the
+   `@arbeidstilsynet/receiver` npm package (`src/npm_publish`); `pnpm --filter @arbeidstilsynet/receiver test`
+   (after `build`; set `UPDATE_FIXTURE=1` to rewrite the fixture) checks the built SDK's multipart body against
+   `src/App/test/fixture/post-meldinger.multipart`, which the App tests replay.
