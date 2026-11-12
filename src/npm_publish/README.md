@@ -34,9 +34,6 @@ pnpm add @arbeidstilsynet/receiver
 - `@arbeidstilsynet/receiver/client`
   - `createClient`, `createConfig` and the client types (`Client`, `Config`,
     `RequestResult`, ...).
-- `@arbeidstilsynet/receiver/form-data`
-  - `receiverFormDataBodySerializer`, required for multipart endpoints such as
-    `postMeldinger` (see below).
 
 ## Creating a client
 
@@ -123,19 +120,15 @@ const { data } = await getMeldingerByMeldingId({
 
 ### Posting a melding (multipart)
 
-`postMeldinger` sends `multipart/form-data`. The generated SDK's default form
-serializer JSON-encodes object fields, so `Metadata` would arrive as a single
-field and the receiver would silently drop it. Always spread
-`receiverFormDataBodySerializer` into multipart calls; it sends
-`Metadata[key]=value` entries, repeats `Attachments` and passes files through:
+`postMeldinger` sends `multipart/form-data` and works as generated. Pass a
+plain object as `body`; files are sent as file parts, `Attachments` as repeated
+form fields and `Metadata` as one JSON form field:
 
 ```ts
 import { postMeldinger } from "@arbeidstilsynet/receiver";
-import { receiverFormDataBodySerializer } from "@arbeidstilsynet/receiver/form-data";
 
 const { data, error } = await postMeldinger({
   client: receiverClient,
-  ...receiverFormDataBodySerializer,
   body: {
     ApplicationId: "ulykkesvarsel",
     Metadata: { orgnr: "123456789" },
@@ -145,9 +138,11 @@ const { data, error } = await postMeldinger({
 });
 ```
 
-Setting the serializer on the client is not enough: the generated multipart
-functions set their own serializer per call. Don't pass a prebuilt `FormData`
-as `body` either; the serializer expects a plain object.
+The receiver API accepts `Metadata` either as a single form field containing a
+JSON object of string values (`Metadata={"orgnr":"123456789"}`, what the SDK
+sends) or as bracketed form fields (`Metadata[orgnr]=123456789`). Sending both
+forms in one request, invalid JSON or non-string values is rejected with
+`400 Bad Request`.
 
 ## Migrating from `@arbeidstilsynet/receiver-types`
 

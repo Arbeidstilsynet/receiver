@@ -1,0 +1,24 @@
+--receiver-fixture-boundary
+Content-Disposition: form-data; name="ApplicationId"
+
+ulykkesvarsel
+--receiver-fixture-boundary
+Content-Disposition: form-data; name="Metadata"
+
+{"orgnr":"123456789","kommune":"Oslo"}
+--receiver-fixture-boundary
+Content-Disposition: form-data; name="MainContent"; filename="melding.pdf"
+Content-Type: application/pdf
+
+%PDF
+--receiver-fixture-boundary
+Content-Disposition: form-data; name="Attachments"; filename="a.txt"
+Content-Type: text/plain
+
+a
+--receiver-fixture-boundary
+Content-Disposition: form-data; name="Attachments"; filename="b.txt"
+Content-Type: text/plain
+
+b
+--receiver-fixture-boundary--
