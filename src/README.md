@@ -222,7 +222,7 @@ Inside this workspace the SDK source is exported as `receiver-tooling/api-client
 
 ### Publish the SDK
 
-The publishable npm package root is [npm_publish](./npm_publish) (`@arbeidstilsynet/receiver`, formerly `@arbeidstilsynet/receiver-types`). `pnpm build:npm` compiles `src/generated/api-client` to ESM JavaScript and `.d.ts` files in `src/npm_publish/dist`, which is what gets published. `pnpm test:npm` runs smoke tests against the built package; they check the multipart body the generated `postMeldinger` sends against the fixture that `PostMeldingBodyFormBindingTests` replays against the API (`UPDATE_FIXTURE=1 pnpm test:npm` rewrites it). See the [package README](./npm_publish/README.md) for consumer usage.
+The publishable npm package root is [npm_publish](./npm_publish) (`@arbeidstilsynet/receiver`, formerly `@arbeidstilsynet/receiver-types`). `pnpm --filter @arbeidstilsynet/receiver build` (a pnpm workspace package; scripts live in its `package.json`) compiles `src/generated/api-client` to ESM JavaScript and `.d.ts` files in `src/npm_publish/dist`, which is what gets published. `pnpm --filter @arbeidstilsynet/receiver test` runs smoke tests against the built package; they check the multipart body the generated `postMeldinger` sends against the fixture that `PostMeldingBodyFormBindingTests` replays against the API (set `UPDATE_FIXTURE=1` to rewrite it). See the [package README](./npm_publish/README.md) for consumer usage.
 
 The package is published alongside receiver releases and uses the version from [Publish/Receiver.Publish/Receiver.Publish.csproj](./Publish/Receiver.Publish/Receiver.Publish.csproj), so the committed npm package version is only a placeholder and should not be bumped manually.
 

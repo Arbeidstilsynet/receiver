@@ -1,4 +1,5 @@
-// Runs against the built package: pnpm build:npm && pnpm test:npm
+// Runs against the built package:
+//   pnpm --filter @arbeidstilsynet/receiver build && pnpm --filter @arbeidstilsynet/receiver test
 // Set UPDATE_FIXTURE=1 to rewrite the multipart fixture replayed by the App tests
 // (src/App/test/PostMeldingBodyFormBindingTests.cs).
 import assert from "node:assert/strict";

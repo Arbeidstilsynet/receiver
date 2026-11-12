@@ -118,7 +118,7 @@ public class PostMeldingBodyFormBindingTests
     [Fact]
     public async Task PostMelding_WhenBodyIsCapturedFromGeneratedSdk_RoundTripsMetadataAndFiles()
     {
-        // Written by `pnpm build:npm && pnpm test:npm` from the built SDK's default postMeldinger.
+        // Written by `UPDATE_FIXTURE=1 pnpm --filter @arbeidstilsynet/receiver test` (after `build`) from the built SDK's default postMeldinger.
         var body = await File.ReadAllTextAsync(
             GetSdkFixturePath(),
             TestContext.Current.CancellationToken

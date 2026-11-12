@@ -71,7 +71,7 @@ jobs:
         run: |
           set -euo pipefail
           pnpm install --frozen-lockfile
-          pnpm build:npm
+          pnpm --filter @arbeidstilsynet/receiver build
 
       - name: Publish npm package if not already published
         if: inputs.npm-published == false
@@ -157,7 +157,7 @@ jobs:
         run: |
           set -euo pipefail
           pnpm install --frozen-lockfile
-          pnpm build:npm
+          pnpm --filter @arbeidstilsynet/receiver build
 
       - name: Publish npm package if not already published
         if: inputs.npm-published == false

@@ -178,6 +178,12 @@ importers:
         specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
 
+  src/npm_publish:
+    devDependencies:
+      typescript:
+        specifier: npm:@typescript/typescript6@6.0.2
+        version: '@typescript/typescript6@6.0.2'
+
 packages:
 
   '@hey-api/codegen-core@0.9.1':

@@ -21,6 +21,13 @@
       "default": "./dist/client/index.js"
     }
   },
+  "scripts": {
+    "build": "tsc6 -p tsconfig.json",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "devDependencies": {
+    "typescript": "npm:@typescript/typescript6@6.0.2"
+  },
   "files": [
     "LICENSE",
     "README.md",

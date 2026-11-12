@@ -91,8 +91,8 @@ jobs:
 
       - name: Build npm package
         run: |
-          pnpm build:npm
-          pnpm test:npm
+          pnpm --filter @arbeidstilsynet/receiver build
+          pnpm --filter @arbeidstilsynet/receiver test
           cd src/npm_publish && npm pack --dry-run
 
   check_publish_version:

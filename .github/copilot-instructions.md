@@ -90,7 +90,7 @@ this checklist before pushing:
    in the same change.
 4. Verify generated artifacts are committed when changed (`src/generated/openApi.json`,
    `src/generated/api-client/`). Never hand-edit the generated client; adjust
-   `openapi-ts.config.ts` and regenerate instead. `pnpm build:npm` compiles it for the
-   `@arbeidstilsynet/receiver` npm package (`src/npm_publish`); `pnpm test:npm` (after
-   `pnpm build:npm`) checks the built SDK's multipart body against
+   `openapi-ts.config.ts` and regenerate instead. `pnpm --filter @arbeidstilsynet/receiver build` compiles it for the
+   `@arbeidstilsynet/receiver` npm package (`src/npm_publish`); `pnpm --filter @arbeidstilsynet/receiver test`
+   (after `build`; set `UPDATE_FIXTURE=1` to rewrite the fixture) checks the built SDK's multipart body against
    `src/App/test/fixture/post-meldinger.multipart`, which the App tests replay.
