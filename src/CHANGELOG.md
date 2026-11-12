@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.13.1
+
+### Fixed
+
+- fix(api): the OpenAPI spec now describes `GET /meldinger/{meldingId}/documents/{documentId}/download` as a binary `application/octet-stream` response (`type: string, format: binary`) and documents its `404 Not Found`. The npm SDK types the 200 response as `Blob | File` instead of `unknown`; pass `parseAs: "blob"` to always receive a `Blob`. No runtime change: the actual document `Content-Type`, `Content-Disposition` and streaming are unchanged.
+
 ## 1.13.0
 
 ### Changed

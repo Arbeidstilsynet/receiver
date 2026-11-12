@@ -144,6 +144,27 @@ sends) or as bracketed form fields (`Metadata[orgnr]=123456789`). Sending both
 forms in one request, invalid JSON or non-string values is rejected with
 `400 Bad Request`.
 
+### Downloading a document
+
+`getMeldingerByMeldingIdDocumentsByDocumentIdDownload` returns the document as
+`Blob | File`. The response carries the document's own `Content-Type`, so pass
+`parseAs: "blob"` to avoid text or JSON documents being parsed:
+
+```ts
+import { getMeldingerByMeldingIdDocumentsByDocumentIdDownload } from "@arbeidstilsynet/receiver";
+
+const { data, error } = await getMeldingerByMeldingIdDocumentsByDocumentIdDownload({
+  client: receiverClient,
+  path: { meldingId, documentId },
+  parseAs: "blob",
+});
+
+if (error) throw new Error(JSON.stringify(error));
+if (data) {
+  const blob: Blob = data;
+}
+```
+
 ## Migrating from `@arbeidstilsynet/receiver-types`
 
 This package replaces the types-only `@arbeidstilsynet/receiver-types`

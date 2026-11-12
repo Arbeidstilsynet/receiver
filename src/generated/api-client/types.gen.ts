@@ -214,6 +214,8 @@ export type RecoveryJobResult = {
     resolvedCount?: number | string;
 };
 
+export type Stream = Blob | File;
+
 export type GetAltinnNonCompletedInstancesData = {
     body?: never;
     path?: never;
@@ -434,12 +436,23 @@ export type GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadData = {
     url: '/meldinger/{meldingId}/documents/{documentId}/download';
 };
 
+export type GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadError = GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadErrors[keyof GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadErrors];
+
 export type GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: Stream;
 };
+
+export type GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadResponse = GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadResponses[keyof GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadResponses];
 
 export type GetMeldingerByMeldingIdDocumentsData = {
     body?: never;

@@ -44,6 +44,8 @@ public class DocumentsController : ControllerBase
     /// Downloads an active document. Restore a soft-deleted attachment before downloading it.
     /// </summary>
     [HttpGet("{meldingId:guid}/documents/{documentId:guid}/download")]
+    [ProducesResponseType<Stream>(StatusCodes.Status200OK, "application/octet-stream")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadDocument(
         [Required] [FromRoute] Guid meldingId,
         [Required] [FromRoute] Guid documentId,
