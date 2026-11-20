@@ -22,7 +22,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
     <PackageReference Include="Bogus" Version="35.6.5" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
-    <PackageReference Include="Xunit.Microsoft.DependencyInjection" Version="10.1.0" />
+    <PackageReference Include="Xunit.Microsoft.DependencyInjection" Version="11.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
