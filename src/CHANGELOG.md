@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.14.0
+
+### Fixed
+
+- fix: If we are receiving a response including an error message from our antivirus service, we automatically set the ScanResult to `UNKOWN`, which makes the attachment indirectly unsafe to use and might be a problem for workflows depending on it. Now, if we are getting a result with an explicit error type, we are throwing an exception to interrupt the workflow - making it retryable from hand.
+
 ## 1.13.0
 
 ### Changed

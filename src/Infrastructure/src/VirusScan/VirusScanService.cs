@@ -74,6 +74,14 @@ internal class VirusScanService : IVirusScanService
             {
                 return DocumentScanResult.Infected;
             }
+            else if (scanResponse is { Result: Status.ERROR })
+            {
+                throw new InvalidOperationException(
+                    "Virus scan resulted in an error. Description: "
+                        + scanResponse?.Error
+                        + ". If our virus scan service was not available, please try again later. If not, we need to investigate this together with the nais-team."
+                );
+            }
 
             return DocumentScanResult.Unknown;
         }
