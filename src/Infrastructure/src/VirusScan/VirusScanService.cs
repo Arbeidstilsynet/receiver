@@ -38,63 +38,48 @@ internal class VirusScanService : IVirusScanService
         CancellationToken cancellationToken
     )
     {
-        try
+        using var activity = Tracer.Source.StartActivity();
+        using var httpContent = new DocumentDownloadHttpContent(
+            _documentStorage,
+            uploadResponse.PersistedDocument
+        );
+        using var multipartContent = new MultipartFormDataContent
         {
-            using var activity = Tracer.Source.StartActivity();
-            using var httpContent = new DocumentDownloadHttpContent(
-                _documentStorage,
-                uploadResponse.PersistedDocument
-            );
-            using var multipartContent = new MultipartFormDataContent
-            {
-                { httpContent, "file", uploadResponse.PersistedDocument.FileName },
-            };
+            { httpContent, "file", uploadResponse.PersistedDocument.FileName },
+        };
 
-            var response = await _httpClient.PostAsync(
-                "api/v2/scan",
-                multipartContent,
-                cancellationToken
-            );
-            response.EnsureSuccessStatusCode();
-            var scanResponseAsString = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogInformation("Virus scan result was {ScanResponse}", scanResponseAsString);
-            var scanResponseArray = JsonSerializer.Deserialize<ScanResponse[]>(
-                scanResponseAsString,
-                JsonSerializerOptions
-            );
-            var scanResponse =
-                scanResponseArray?.FirstOrDefault(s =>
-                    s.Filename == uploadResponse.PersistedDocument.FileName
-                ) ?? scanResponseArray?[0];
-            if (scanResponse is { Result: Status.OK })
-            {
-                return DocumentScanResult.Clean;
-            }
-            else if (scanResponse is { Result: Status.FOUND })
-            {
-                return DocumentScanResult.Infected;
-            }
-            else if (scanResponse is { Result: Status.ERROR })
-            {
-                throw new InvalidOperationException(
-                    "Virus scan resulted in an error. Description: "
-                        + scanResponse?.Error
-                        + ". If our virus scan service was not available, please try again later. If not, we need to investigate this together with the nais-team."
-                );
-            }
-
-            return DocumentScanResult.Unknown;
+        var response = await _httpClient.PostAsync(
+            "api/v2/scan",
+            multipartContent,
+            cancellationToken
+        );
+        response.EnsureSuccessStatusCode();
+        var scanResponseAsString = await response.Content.ReadAsStringAsync(cancellationToken);
+        _logger.LogInformation("Virus scan result was {ScanResponse}", scanResponseAsString);
+        var scanResponseArray = JsonSerializer.Deserialize<ScanResponse[]>(
+            scanResponseAsString,
+            JsonSerializerOptions
+        );
+        var scanResponse =
+            scanResponseArray?.FirstOrDefault(s =>
+                s.Filename == uploadResponse.PersistedDocument.FileName
+            ) ?? scanResponseArray?[0];
+        if (scanResponse is { Result: Status.OK })
+        {
+            return DocumentScanResult.Clean;
         }
-        catch (Exception ex)
+        else if (scanResponse is { Result: Status.FOUND })
         {
-            _logger.LogError(
-                ex,
-                "Could not scan file '{FileName}' for virus. Internal document id: {InternalDocumentId}",
-                uploadResponse.PersistedDocument.FileName,
-                uploadResponse.PersistedDocument.InternalDocumentReference
+            return DocumentScanResult.Infected;
+        }
+        else if (scanResponse is { Result: Status.ERROR })
+        {
+            throw new InvalidOperationException(
+                "Virus scan resulted in an error. Description: "
+                    + scanResponse?.Error
+                    + ". If our virus scan service was not available, please try again later. If not, we need to investigate this together with the nais-team."
             );
         }
-
         return DocumentScanResult.Unknown;
     }
 
