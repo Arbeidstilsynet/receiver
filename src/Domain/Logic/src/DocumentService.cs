@@ -19,19 +19,14 @@ internal class DocumentService(
         CancellationToken cancellationToken
     )
     {
-        var melding = await meldingRepository.GetMelding(
-            request.MeldingId,
-            cancellationToken,
-            request.IncludeDeleted
-        );
+        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
 
         if (melding == null || !melding.ContainsDocument(request.DocumentId))
             return null;
 
         var document = await documentRepository.GetDocumentAsync(
             request.DocumentId,
-            cancellationToken,
-            request.IncludeDeleted
+            cancellationToken
         );
 
         if (document == null)
@@ -52,40 +47,69 @@ internal class DocumentService(
     )
     {
         var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
-        if (melding != null)
-        {
-            var documents = await documentRepository.GetAllDocumentsForMelding(
-                request.MeldingId,
-                cancellationToken,
-                request.IncludeDeleted
-            );
-
-            var unsafeDocuments = new List<Document>();
-            var safeDocuments = new List<Document>();
-
-            foreach (var document in documents)
-            {
-                if (!document.IsDocumentSafeToUse)
-                {
-                    unsafeDocuments.Add(document);
-                }
-                else
-                {
-                    safeDocuments.Add(document);
-                }
-            }
-
-            if (unsafeDocuments.Count > 0)
-            {
-                logger.LogSkippedUnsafeDocuments(request.MeldingId, unsafeDocuments);
-            }
-
-            return safeDocuments;
-        }
-        else
+        if (melding == null)
         {
             return null;
         }
+
+        var documents = await documentRepository.GetAllDocumentsForMelding(
+            request.MeldingId,
+            cancellationToken
+        );
+        return ExcludeUnsafeDocuments(request.MeldingId, documents);
+    }
+
+    public async Task<IEnumerable<Document>?> GetDeletedDocuments(
+        GetAllDocumentsRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        var melding = await meldingRepository.GetMelding(request.MeldingId, cancellationToken);
+        if (melding == null)
+        {
+            return null;
+        }
+
+        var documents = await documentRepository.GetDeletedDocumentsForMelding(
+            request.MeldingId,
+            cancellationToken
+        );
+        return ExcludeUnsafeDocuments(request.MeldingId, documents);
+    }
+
+    public async Task<bool> SetDocumentDeleted(
+        Guid meldingId,
+        Guid documentId,
+        bool deleted,
+        CancellationToken cancellationToken
+    )
+    {
+        var found = await documentRepository.SetDeleted(
+            meldingId,
+            documentId,
+            deleted,
+            cancellationToken
+        );
+        if (found)
+        {
+            logger.LogInformation(
+                "Set deleted to {Deleted} for document {DocumentId} on melding {MeldingId}",
+                deleted,
+                documentId,
+                meldingId
+            );
+        }
+        return found;
+    }
+
+    private List<Document> ExcludeUnsafeDocuments(Guid meldingId, List<Document> documents)
+    {
+        var unsafeDocuments = documents.Where(d => !d.IsDocumentSafeToUse).ToList();
+        if (unsafeDocuments.Count > 0)
+        {
+            logger.LogSkippedUnsafeDocuments(meldingId, unsafeDocuments);
+        }
+        return documents.Where(d => d.IsDocumentSafeToUse).ToList();
     }
 
     public async Task DownloadDocument(

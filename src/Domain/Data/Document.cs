@@ -6,7 +6,7 @@ public record Document
     public required Guid MeldingId { get; init; }
     public required FileMetadata FileMetadata { get; init; }
     public required DocumentScanResult ScanResult { get; init; }
-    public bool IsDeleted { get; init; }
+    public DateTime? DeletedAt { get; init; }
     public Dictionary<string, string> Tags { get; init; } = [];
 }
 

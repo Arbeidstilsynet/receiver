@@ -46,10 +46,6 @@ internal class InfrastructureMapper : IRegister
             .NewConfig<DocumentEntity, Domain.Data.Document>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.DocumentId, src => src.Id)
-            .Map(
-                target => target.IsDeleted,
-                src => src.DocumentType == DocumentType.DetachedAttachment
-            )
             .Map(target => target.FileMetadata, src => src.Adapt<FileMetadata>());
 
         config

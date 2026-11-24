@@ -25,4 +25,6 @@ internal class DocumentEntity : BaseEntity
 
     [Column(TypeName = "varchar(24)")]
     public required DocumentScanResult ScanResult { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 }

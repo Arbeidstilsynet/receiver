@@ -61,9 +61,8 @@ when a new melding arrives (`ConsumeMelding`).
 
 Before dispatching a notification (including redrive), the client refetches the melding from
 the receiver API so the consumer receives current metadata and document references rather
-than the stream snapshot. The melding's `Id`, `ApplicationId`, and `Source` must still match
-the notification. If the melding is missing, its identity differs, or the fetch fails, the
-consumer is not called; the error is logged and the notification remains unacknowledged.
+than the stream snapshot. If the melding is missing or the fetch fails, the consumer is not
+called; the error is logged and the notification remains unacknowledged.
 
 | Member             | Purpose                                                                                                                   |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
