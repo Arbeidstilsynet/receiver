@@ -477,14 +477,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "includeDeleted",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
           }
         ],
         "responses": {
@@ -504,6 +496,148 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Documents"
+        ],
+        "parameters": [
+          {
+            "name": "meldingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meldinger/{meldingId}/documents/{documentId}/restore": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "parameters": [
+          {
+            "name": "meldingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -557,13 +691,45 @@
               "type": "string",
               "format": "uuid"
             }
-          },
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllDocumentsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllDocumentsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllDocumentsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meldinger/{meldingId}/documents/deleted": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "parameters": [
           {
-            "name": "includeDeleted",
-            "in": "query",
+            "name": "meldingId",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -688,14 +854,6 @@
               ],
               "format": "int32"
             }
-          },
-          {
-            "name": "includeDeleted",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
           }
         ],
         "responses": {
@@ -736,14 +894,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "includeDeleted",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
           }
         ],
         "responses": {
@@ -763,126 +913,6 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetMeldingResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/meldinger/{meldingId}/attachment-detachments": {
-      "post": {
-        "tags": [
-          "Meldinger"
-        ],
-        "parameters": [
-          {
-            "name": "meldingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/meldinger/{meldingId}/attachment-restorations": {
-      "post": {
-        "tags": [
-          "Meldinger"
-        ],
-        "parameters": [
-          {
-            "name": "meldingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachmentDetachmentRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentDetachmentResponse"
                 }
               }
             }
@@ -902,14 +932,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "includeDeleted",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
             }
           }
         ],
@@ -1345,100 +1367,6 @@
           }
         }
       },
-      "AttachmentDetachmentRequest": {
-        "required": [
-          "documentId"
-        ],
-        "type": "object",
-        "properties": {
-          "documentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "apply": {
-            "type": "boolean"
-          },
-          "expectedRevision": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "AttachmentDetachmentResponse": {
-        "required": [
-          "meldingId",
-          "documentId",
-          "applicationId",
-          "mainContentId",
-          "structuredDataId",
-          "attachmentIdsBefore",
-          "attachmentIdsAfter",
-          "fileName",
-          "contentType",
-          "revision",
-          "applied",
-          "alreadyDetached"
-        ],
-        "type": "object",
-        "properties": {
-          "meldingId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "documentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "applicationId": {
-            "type": "string"
-          },
-          "mainContentId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "structuredDataId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "attachmentIdsBefore": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "attachmentIdsAfter": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "revision": {
-            "type": "string"
-          },
-          "applied": {
-            "type": "boolean"
-          },
-          "alreadyDetached": {
-            "type": "boolean"
-          }
-        }
-      },
       "CompleteConfirmation": {
         "type": "object",
         "properties": {
@@ -1613,8 +1541,12 @@
           "scanResult": {
             "$ref": "#/components/schemas/DocumentScanResult"
           },
-          "isDeleted": {
-            "type": "boolean"
+          "deletedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           },
           "tags": {
             "type": "object",

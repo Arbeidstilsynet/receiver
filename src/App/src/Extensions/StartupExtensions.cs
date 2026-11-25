@@ -79,12 +79,8 @@ internal static class StartupExtensions
                         HttpStatusCode.InternalServerError
                     )
                     .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
-                    .AddExceptionMapping<MeldingNotFoundException>(HttpStatusCode.NotFound)
-                    .AddExceptionMapping<AttachmentDetachmentNotAllowedException>(
+                    .AddExceptionMapping<DocumentDeletionNotAllowedException>(
                         HttpStatusCode.BadRequest
-                    )
-                    .AddExceptionMapping<AttachmentDetachmentConflictException>(
-                        HttpStatusCode.Conflict
                     )
         );
 

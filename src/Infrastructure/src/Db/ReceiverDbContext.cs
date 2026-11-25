@@ -34,6 +34,9 @@ internal class ReceiverDbContext(DbContextOptions<ReceiverDbContext> dbContextOp
             builder.HasIndex(m => m.ShortId);
         });
 
+        // Soft-deleted documents are hidden from every query unless IgnoreQueryFilters() is used.
+        modelBuilder.Entity<DocumentEntity>().HasQueryFilter(d => d.DeletedAt == null);
+
         modelBuilder.AddQuartz(builder => builder.UsePostgreSql());
     }
 

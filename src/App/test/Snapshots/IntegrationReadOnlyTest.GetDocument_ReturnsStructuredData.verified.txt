@@ -6,6 +6,6 @@
     ContentType: application/json
   },
   ScanResult: Clean,
-  IsDeleted: false,
+  DeletedAt: null,
   Tags: null
 }

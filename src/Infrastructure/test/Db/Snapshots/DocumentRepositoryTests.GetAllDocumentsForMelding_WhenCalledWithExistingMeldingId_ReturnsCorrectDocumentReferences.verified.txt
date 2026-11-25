@@ -7,7 +7,7 @@
       ContentType: null
     },
     ScanResult: Clean,
-    IsDeleted: false,
+    DeletedAt: null,
     Tags: {
       AltinnDataType: ref-data-as-pdf,
       AltinnId: Guid_3,
@@ -22,7 +22,7 @@
       ContentType: null
     },
     ScanResult: Clean,
-    IsDeleted: false,
+    DeletedAt: null,
     Tags: {
       AltinnDataType: vedlegg,
       AltinnId: Guid_5
@@ -36,7 +36,7 @@
       ContentType: null
     },
     ScanResult: Clean,
-    IsDeleted: false,
+    DeletedAt: null,
     Tags: {
       AltinnDataType: skjema,
       AltinnId: Guid_7

@@ -46,10 +46,6 @@ internal class InfrastructureMapper : IRegister
             .NewConfig<DocumentEntity, Domain.Data.Document>()
             .NameMatchingStrategy(NameMatchingStrategy.Flexible)
             .Map(target => target.DocumentId, src => src.Id)
-            .Map(
-                target => target.IsDeleted,
-                src => src.DocumentType == DocumentType.DetachedAttachment
-            )
             .Map(target => target.FileMetadata, src => src.Adapt<FileMetadata>());
 
         config
@@ -99,9 +95,13 @@ file static class MappingExtensions
 
     public static List<Guid> GetAttachmentIds(this MeldingEntity melding)
     {
-        return melding
-            .Documents.Where(d => d.DocumentType == DocumentType.Attachment)
-            .Select(d => d.Id)
-            .ToList();
+        return
+        [
+            .. melding
+                .Documents.Where(d =>
+                    d.DocumentType == DocumentType.Attachment && d.DeletedAt == null
+                )
+                .Select(d => d.Id),
+        ];
     }
 }

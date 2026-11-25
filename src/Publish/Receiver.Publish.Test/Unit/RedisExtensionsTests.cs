@@ -70,14 +70,8 @@ public class RedisExtensionsTests : IDisposable
 
     [Theory]
     [InlineData("missing", false)]
-    [InlineData("id", false)]
-    [InlineData("application", false)]
-    [InlineData("source", false)]
     [InlineData("fetch", false)]
     [InlineData("missing", true)]
-    [InlineData("id", true)]
-    [InlineData("application", true)]
-    [InlineData("source", true)]
     [InlineData("fetch", true)]
     public async Task ConsumeNotifications_WhenRefetchFails_DoesNotConsumeOrAcknowledge(
         string failure,
@@ -85,14 +79,6 @@ public class RedisExtensionsTests : IDisposable
     )
     {
         var snapshot = CreateMelding();
-        var current = failure switch
-        {
-            "missing" => null,
-            "id" => snapshot with { Id = Guid.NewGuid() },
-            "application" => snapshot with { ApplicationId = "another-app" },
-            "source" => snapshot with { Source = MessageSource.Api },
-            _ => snapshot,
-        };
         _client
             .GetMelding(snapshot.Id)
             .Returns(
@@ -100,7 +86,7 @@ public class RedisExtensionsTests : IDisposable
                     ? Task.FromException<Melding?>(
                         new HttpRequestException("Receiver unavailable.")
                     )
-                    : Task.FromResult(current)
+                    : Task.FromResult<Melding?>(null)
             );
         RedisValue messageId = "1-0";
 
@@ -117,12 +103,9 @@ public class RedisExtensionsTests : IDisposable
         error.MeldingId.ShouldBe(snapshot.Id);
         error.ValkeyMessageId.ShouldBe((string)messageId!);
         error.ExceptionMessage.ShouldBe(
-            failure switch
-            {
-                "missing" => $"Melding {snapshot.Id} no longer exists in receiver.",
-                "fetch" => "Receiver unavailable.",
-                _ => $"Receiver identity changed for melding {snapshot.Id}.",
-            }
+            failure == "missing"
+                ? $"Melding {snapshot.Id} no longer exists in receiver."
+                : "Receiver unavailable."
         );
         await _consumer.DidNotReceive().ConsumeMelding(Arg.Any<Melding>());
         await _scopedConsumer.DidNotReceive().ConsumeMelding(Arg.Any<Melding>());
