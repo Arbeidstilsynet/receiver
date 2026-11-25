@@ -99,7 +99,7 @@ file static class MappingExtensions
         [
             .. melding
                 .Documents.Where(d =>
-                    d.DocumentType == DocumentType.Attachment && d.DeletedAt != null
+                    d.DocumentType == DocumentType.Attachment && d.DeletedAt == null
                 )
                 .Select(d => d.Id),
         ];
