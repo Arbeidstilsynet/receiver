@@ -95,9 +95,13 @@ file static class MappingExtensions
 
     public static List<Guid> GetAttachmentIds(this MeldingEntity melding)
     {
-        return melding
-            .Documents.Where(d => d.DocumentType == DocumentType.Attachment)
-            .Select(d => d.Id)
-            .ToList();
+        return
+        [
+            .. melding
+                .Documents.Where(d =>
+                    d.DocumentType == DocumentType.Attachment && d.DeletedAt != null
+                )
+                .Select(d => d.Id),
+        ];
     }
 }
