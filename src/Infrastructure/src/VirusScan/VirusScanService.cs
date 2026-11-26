@@ -76,7 +76,7 @@ internal class VirusScanService : IVirusScanService
         {
             throw new InvalidOperationException(
                 "Virus scan resulted in an error. Description: "
-                    + scanResponse?.Error
+                    + scanResponse.Error
                     + ". If our virus scan service was not available, please try again later. If not, we need to investigate this together with the nais-team."
             );
         }
