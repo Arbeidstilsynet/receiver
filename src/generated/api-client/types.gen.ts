@@ -59,27 +59,6 @@ export type AppRegistration = {
     messageSource?: MessageSource;
 };
 
-export type AttachmentDetachmentRequest = {
-    documentId: string;
-    apply?: boolean;
-    expectedRevision?: null | string;
-};
-
-export type AttachmentDetachmentResponse = {
-    meldingId: string;
-    documentId: string;
-    applicationId: string;
-    mainContentId: null | string;
-    structuredDataId: null | string;
-    attachmentIdsBefore: Array<string>;
-    attachmentIdsAfter: Array<string>;
-    fileName: string;
-    contentType: string;
-    revision: string;
-    applied: boolean;
-    alreadyDetached: boolean;
-};
-
 export type CompleteConfirmation = {
     stakeholderId?: null | string;
     confirmedOn?: null | string;
@@ -122,7 +101,7 @@ export type Document = {
     meldingId: string;
     fileMetadata: FileMetadata;
     scanResult: DocumentScanResult;
-    isDeleted?: boolean;
+    deletedAt?: null | string;
     tags?: {
         [key: string]: string;
     };
@@ -403,15 +382,45 @@ export type GetAltinnInstancesByInstanceGuidMetadataResponses = {
 
 export type GetAltinnInstancesByInstanceGuidMetadataResponse = GetAltinnInstancesByInstanceGuidMetadataResponses[keyof GetAltinnInstancesByInstanceGuidMetadataResponses];
 
+export type DeleteMeldingerByMeldingIdDocumentsByDocumentIdData = {
+    body?: never;
+    path: {
+        meldingId: string;
+        documentId: string;
+    };
+    query?: never;
+    url: '/meldinger/{meldingId}/documents/{documentId}';
+};
+
+export type DeleteMeldingerByMeldingIdDocumentsByDocumentIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: string;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteMeldingerByMeldingIdDocumentsByDocumentIdError = DeleteMeldingerByMeldingIdDocumentsByDocumentIdErrors[keyof DeleteMeldingerByMeldingIdDocumentsByDocumentIdErrors];
+
+export type DeleteMeldingerByMeldingIdDocumentsByDocumentIdResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteMeldingerByMeldingIdDocumentsByDocumentIdResponse = DeleteMeldingerByMeldingIdDocumentsByDocumentIdResponses[keyof DeleteMeldingerByMeldingIdDocumentsByDocumentIdResponses];
+
 export type GetMeldingerByMeldingIdDocumentsByDocumentIdData = {
     body?: never;
     path: {
         meldingId: string;
         documentId: string;
     };
-    query?: {
-        includeDeleted?: boolean;
-    };
+    query?: never;
     url: '/meldinger/{meldingId}/documents/{documentId}';
 };
 
@@ -423,6 +432,38 @@ export type GetMeldingerByMeldingIdDocumentsByDocumentIdResponses = {
 };
 
 export type GetMeldingerByMeldingIdDocumentsByDocumentIdResponse = GetMeldingerByMeldingIdDocumentsByDocumentIdResponses[keyof GetMeldingerByMeldingIdDocumentsByDocumentIdResponses];
+
+export type PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreData = {
+    body?: never;
+    path: {
+        meldingId: string;
+        documentId: string;
+    };
+    query?: never;
+    url: '/meldinger/{meldingId}/documents/{documentId}/restore';
+};
+
+export type PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreErrors = {
+    /**
+     * Bad Request
+     */
+    400: string;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreError = PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreErrors[keyof PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreErrors];
+
+export type PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreResponse = PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreResponses[keyof PostMeldingerByMeldingIdDocumentsByDocumentIdRestoreResponses];
 
 export type GetMeldingerByMeldingIdDocumentsByDocumentIdDownloadData = {
     body?: never;
@@ -446,9 +487,7 @@ export type GetMeldingerByMeldingIdDocumentsData = {
     path: {
         meldingId: string;
     };
-    query?: {
-        includeDeleted?: boolean;
-    };
+    query?: never;
     url: '/meldinger/{meldingId}/documents';
 };
 
@@ -461,13 +500,30 @@ export type GetMeldingerByMeldingIdDocumentsResponses = {
 
 export type GetMeldingerByMeldingIdDocumentsResponse = GetMeldingerByMeldingIdDocumentsResponses[keyof GetMeldingerByMeldingIdDocumentsResponses];
 
+export type GetMeldingerByMeldingIdDocumentsDeletedData = {
+    body?: never;
+    path: {
+        meldingId: string;
+    };
+    query?: never;
+    url: '/meldinger/{meldingId}/documents/deleted';
+};
+
+export type GetMeldingerByMeldingIdDocumentsDeletedResponses = {
+    /**
+     * OK
+     */
+    200: GetAllDocumentsResponse;
+};
+
+export type GetMeldingerByMeldingIdDocumentsDeletedResponse = GetMeldingerByMeldingIdDocumentsDeletedResponses[keyof GetMeldingerByMeldingIdDocumentsDeletedResponses];
+
 export type GetMeldingerData = {
     body?: never;
     path?: never;
     query?: {
         pageNumber?: number | string;
         pageSize?: number | string;
-        includeDeleted?: boolean;
     };
     url: '/meldinger';
 };
@@ -511,9 +567,7 @@ export type GetMeldingerByMeldingIdData = {
     path: {
         meldingId: string;
     };
-    query?: {
-        includeDeleted?: boolean;
-    };
+    query?: never;
     url: '/meldinger/{meldingId}';
 };
 
@@ -526,50 +580,12 @@ export type GetMeldingerByMeldingIdResponses = {
 
 export type GetMeldingerByMeldingIdResponse = GetMeldingerByMeldingIdResponses[keyof GetMeldingerByMeldingIdResponses];
 
-export type PostMeldingerByMeldingIdAttachmentDetachmentsData = {
-    body: AttachmentDetachmentRequest;
-    path: {
-        meldingId: string;
-    };
-    query?: never;
-    url: '/meldinger/{meldingId}/attachment-detachments';
-};
-
-export type PostMeldingerByMeldingIdAttachmentDetachmentsResponses = {
-    /**
-     * OK
-     */
-    200: AttachmentDetachmentResponse;
-};
-
-export type PostMeldingerByMeldingIdAttachmentDetachmentsResponse = PostMeldingerByMeldingIdAttachmentDetachmentsResponses[keyof PostMeldingerByMeldingIdAttachmentDetachmentsResponses];
-
-export type PostMeldingerByMeldingIdAttachmentRestorationsData = {
-    body: AttachmentDetachmentRequest;
-    path: {
-        meldingId: string;
-    };
-    query?: never;
-    url: '/meldinger/{meldingId}/attachment-restorations';
-};
-
-export type PostMeldingerByMeldingIdAttachmentRestorationsResponses = {
-    /**
-     * OK
-     */
-    200: AttachmentDetachmentResponse;
-};
-
-export type PostMeldingerByMeldingIdAttachmentRestorationsResponse = PostMeldingerByMeldingIdAttachmentRestorationsResponses[keyof PostMeldingerByMeldingIdAttachmentRestorationsResponses];
-
 export type GetMeldingerByShortIdByShortIdData = {
     body?: never;
     path: {
         shortId: string;
     };
-    query?: {
-        includeDeleted?: boolean;
-    };
+    query?: never;
     url: '/meldinger/by-short-id/{shortId}';
 };
 

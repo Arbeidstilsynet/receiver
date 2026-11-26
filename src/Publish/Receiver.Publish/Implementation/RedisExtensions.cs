@@ -98,23 +98,11 @@ internal static class RedisExtensions
         try
         {
             var meldingerClient = serviceProvider.GetRequiredService<IMeldingerClient>();
-            var current =
+            melding =
                 await meldingerClient.GetMelding(melding.Id)
                 ?? throw new InvalidOperationException(
                     $"Melding {melding.Id} no longer exists in receiver."
                 );
-            if (
-                current.Id != melding.Id
-                || current.ApplicationId != melding.ApplicationId
-                || current.Source != melding.Source
-            )
-            {
-                throw new InvalidOperationException(
-                    $"Receiver identity changed for melding {melding.Id}."
-                );
-            }
-
-            melding = current;
             var consumedAt = DateTime.Now;
             apiMeters.MeldingConsumed(melding, triggeredFromRedrive);
             await consumer.ConsumeMelding(melding);

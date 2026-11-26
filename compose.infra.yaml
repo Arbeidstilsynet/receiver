@@ -108,7 +108,7 @@ services:
       retries: 10
 
   clamav-web:
-    image: europe-north1-docker.pkg.dev/nais-io/nais/images/clamav-rest:latest@sha256:e1b58fe784eb93c42f2da2a34b63e04d48faed0f2962279d1bb7299e1c787ea0
+    image: europe-north1-docker.pkg.dev/nais-io/nais/images/clamav-rest:latest@sha256:66f75c493fd6bb62e4a9c4654b53f47e8eada0e261201881dda8f70871cb8969
     container_name: clamav-web
     environment:
       DAEMON_ENDPOINT: clamav:3310

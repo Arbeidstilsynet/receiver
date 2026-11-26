@@ -1,5 +1,7 @@
 using Arbeidstilsynet.MeldingerReceiver.Domain.Data;
+using Arbeidstilsynet.MeldingerReceiver.Domain.Data.Exceptions;
 using Arbeidstilsynet.MeldingerReceiver.Domain.Ports.Infrastructure;
+using Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Model;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,15 +28,56 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
 
     public async Task<List<Document>> GetAllDocumentsForMelding(
         Guid meldingId,
-        CancellationToken cancellationToken,
-        bool includeDeleted = false
+        CancellationToken cancellationToken
     )
     {
         return await _dbContext
             .Documents.Where(d => d.MeldingId == meldingId)
-            .Where(d => includeDeleted || d.DocumentType != Model.DocumentType.DetachedAttachment)
             .Select(s => _mapper.Map<Document>(s))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Document>> GetDeletedDocumentsForMelding(
+        Guid meldingId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _dbContext
+            .Documents.IgnoreQueryFilters()
+            .Where(d => d.MeldingId == meldingId && d.DeletedAt != null)
+            .Select(s => _mapper.Map<Document>(s))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> SetDeleted(
+        Guid meldingId,
+        Guid documentId,
+        bool deleted,
+        CancellationToken cancellationToken
+    )
+    {
+        var entity = await _dbContext
+            .Documents.IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                d => d.Id == documentId && d.MeldingId == meldingId,
+                cancellationToken
+            );
+        if (entity == null)
+        {
+            return false;
+        }
+
+        if (entity.DocumentType != DocumentType.Attachment)
+        {
+            throw new DocumentDeletionNotAllowedException(documentId);
+        }
+
+        if (deleted != (entity.DeletedAt != null))
+        {
+            entity.DeletedAt = deleted ? DateTime.UtcNow : null;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        return true;
     }
 
     // internal method, should not be exposed via interface
@@ -50,21 +93,13 @@ internal class DocumentRepository : IDocumentRepository, IInternalDocumentReposi
 
     public async Task<Document?> GetDocumentAsync(
         Guid documentId,
-        CancellationToken cancellationToken,
-        bool includeDeleted = false
+        CancellationToken cancellationToken
     )
     {
-        var entity = await _dbContext.Documents.FindAsync(
-            [documentId],
-            cancellationToken: cancellationToken
+        var entity = await _dbContext.Documents.SingleOrDefaultAsync(
+            d => d.Id == documentId,
+            cancellationToken
         );
-        if (
-            entity != null
-            && (includeDeleted || entity.DocumentType != Model.DocumentType.DetachedAttachment)
-        )
-        {
-            return _mapper.Map<Document>(entity);
-        }
-        return null;
+        return entity == null ? null : _mapper.Map<Document>(entity);
     }
 }

@@ -7,11 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## 1.14.0
+## 1.15.0
 
 ### Fixed
 
 - fix: If we are receiving a response including an error message from our antivirus service, we automatically set the ScanResult to `UNKOWN`, which makes the attachment indirectly unsafe to use and might be a problem for workflows depending on it. Now, if we are getting a result with an explicit error type, we are throwing an exception to interrupt the workflow - making it retryable from hand.
+
+## 1.14.0
+
+### Changed
+
+- **BREAKING (cluster-internal API):** attachment soft deletion is simplified to a plain state change. The preview/`apply`/`expectedRevision` flow, the `attachment-detachments` and `attachment-restorations` endpoints and the `AttachmentDetachmentRequest`/`AttachmentDetachmentResponse` types are removed. Use `DELETE /meldinger/{meldingId}/documents/{documentId}` and `POST /meldinger/{meldingId}/documents/{documentId}/restore` instead; both return `204 No Content`, `404` when the document is not on the melding, and `400` for main content and structured data.
+- **BREAKING (cluster-internal API):** the `includeDeleted` query parameter is removed from all reads. Use the new `GET /meldinger/{meldingId}/documents/deleted` to list soft-deleted attachments. `Document.isDeleted` is replaced by `Document.deletedAt`.
+- Soft deletion is stored in a new `documents.DeletedAt` column with an EF Core global query filter instead of the `DetachedAttachment` document type. A migration converts existing detached attachments.
+- fix(consumer): drop the redundant identity check after refetching a melding; a missing melding or failed fetch still leaves the notification unacknowledged.
 
 ## 1.13.0
 
