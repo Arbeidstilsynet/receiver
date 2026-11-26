@@ -15,10 +15,8 @@ internal static class ArchUnitExtensions
     {
         var rule = Types().That().Are(myTypes).Should().NotDependOnAny(typesToNotDependOn);
 
-        return additionalTypesToNotDependOn.Aggregate(
-            rule,
-            (current, type) =>
-                current.And().Types().That().Are(myTypes).Should().NotDependOnAny(type)
+        return additionalTypesToNotDependOn.Aggregate(rule, (current, type) =>
+            current.And().Types().That().Are(myTypes).Should().NotDependOnAny(type)
         );
     }
 }

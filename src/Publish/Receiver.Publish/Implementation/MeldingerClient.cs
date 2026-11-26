@@ -30,9 +30,9 @@ internal class MeldingerClient : IMeldingerClient
     public async Task<GetAllDocumentsResponse> GetDocuments(Guid meldingId)
     {
         return await _httpClient.GetFromJsonAsync<GetAllDocumentsResponse>(
-                $"meldinger/{meldingId}/documents",
-                _jsonSerializerOptions
-            ) ?? new GetAllDocumentsResponse();
+            $"meldinger/{meldingId}/documents",
+            _jsonSerializerOptions
+        ) ?? new GetAllDocumentsResponse();
     }
 
     public async Task<Melding?> GetMelding(Guid meldingId)

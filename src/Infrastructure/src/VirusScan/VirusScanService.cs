@@ -60,10 +60,9 @@ internal class VirusScanService : IVirusScanService
             scanResponseAsString,
             JsonSerializerOptions
         );
-        var scanResponse =
-            scanResponseArray?.FirstOrDefault(s =>
-                s.Filename == uploadResponse.PersistedDocument.FileName
-            ) ?? scanResponseArray?[0];
+        var scanResponse = scanResponseArray?.FirstOrDefault(s =>
+            s.Filename == uploadResponse.PersistedDocument.FileName
+        ) ?? scanResponseArray?[0];
         if (scanResponse is { Result: Status.OK })
         {
             return DocumentScanResult.Clean;

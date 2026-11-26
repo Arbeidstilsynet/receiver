@@ -71,17 +71,13 @@ internal static class StartupExtensions
 
     public static WebApplication AddApi(this WebApplication app, ApiConfiguration apiConfiguration)
     {
-        app.AddStandardApi(
-            apiConfiguration.AuthenticationConfiguration,
-            options =>
-                options
-                    .AddExceptionMapping<AltinnEventSourceParseException>(
-                        HttpStatusCode.InternalServerError
-                    )
-                    .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
-                    .AddExceptionMapping<DocumentDeletionNotAllowedException>(
-                        HttpStatusCode.BadRequest
-                    )
+        app.AddStandardApi(apiConfiguration.AuthenticationConfiguration, options =>
+            options
+                .AddExceptionMapping<AltinnEventSourceParseException>(
+                    HttpStatusCode.InternalServerError
+                )
+                .AddExceptionMapping<DocumentNotSafeToUseException>(HttpStatusCode.NotFound)
+                .AddExceptionMapping<DocumentDeletionNotAllowedException>(HttpStatusCode.BadRequest)
         );
 
         return app;

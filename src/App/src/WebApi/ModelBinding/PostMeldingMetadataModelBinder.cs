@@ -116,8 +116,7 @@ internal sealed class PostMeldingMetadataModelBinderProvider : IModelBinderProvi
             return null;
         }
 
-        var defaultBinder =
-            _dictionaryBinderProvider.GetBinder(context)
+        var defaultBinder = _dictionaryBinderProvider.GetBinder(context)
             ?? throw new InvalidOperationException(
                 $"No dictionary model binder for {nameof(PostMeldingBody)}.{nameof(PostMeldingBody.Metadata)}."
             );

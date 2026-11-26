@@ -107,10 +107,7 @@ public class AltinnCompletionActionTests
     public async Task RunPostActionFor_WhenCalledWithInvalidAltinnMelding_ShouldThrow()
     {
         //arrange
-        var melding = SampleMelding(SampleAltinnMetadata()) with
-        {
-            Tags = [],
-        };
+        var melding = SampleMelding(SampleAltinnMetadata()) with { Tags = [] };
         //act
         var act = () => _sut.RunPostActionFor(melding, TestContext.Current.CancellationToken);
         //assert

@@ -61,10 +61,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_calendars",
-                        x => new { x.sched_name, x.calendar_name }
-                    );
+                    table.PrimaryKey("PK_qrtz_calendars", x => new
+                    {
+                        x.sched_name,
+                        x.calendar_name,
+                    });
                 }
             );
 
@@ -89,10 +90,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_fired_triggers",
-                        x => new { x.sched_name, x.entry_id }
-                    );
+                    table.PrimaryKey("PK_qrtz_fired_triggers", x => new
+                    {
+                        x.sched_name,
+                        x.entry_id,
+                    });
                 }
             );
 
@@ -114,15 +116,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_job_details",
-                        x => new
-                        {
-                            x.sched_name,
-                            x.job_name,
-                            x.job_group,
-                        }
-                    );
+                    table.PrimaryKey("PK_qrtz_job_details", x => new
+                    {
+                        x.sched_name,
+                        x.job_name,
+                        x.job_group,
+                    });
                 }
             );
 
@@ -150,10 +149,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_paused_trigger_grps",
-                        x => new { x.sched_name, x.trigger_group }
-                    );
+                    table.PrimaryKey("PK_qrtz_paused_trigger_grps", x => new
+                    {
+                        x.sched_name,
+                        x.trigger_group,
+                    });
                 }
             );
 
@@ -169,10 +169,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_scheduler_state",
-                        x => new { x.sched_name, x.instance_name }
-                    );
+                    table.PrimaryKey("PK_qrtz_scheduler_state", x => new
+                    {
+                        x.sched_name,
+                        x.instance_name,
+                    });
                 }
             );
 
@@ -255,15 +256,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_triggers",
-                        x => new
-                        {
-                            x.sched_name,
-                            x.trigger_name,
-                            x.trigger_group,
-                        }
-                    );
+                    table.PrimaryKey("PK_qrtz_triggers", x => new
+                    {
+                        x.sched_name,
+                        x.trigger_name,
+                        x.trigger_group,
+                    });
                     table.ForeignKey(
                         name: "FK_qrtz_triggers_qrtz_job_details_sched_name_job_name_job_group",
                         columns: x => new
@@ -292,15 +290,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_blob_triggers",
-                        x => new
-                        {
-                            x.sched_name,
-                            x.trigger_name,
-                            x.trigger_group,
-                        }
-                    );
+                    table.PrimaryKey("PK_qrtz_blob_triggers", x => new
+                    {
+                        x.sched_name,
+                        x.trigger_name,
+                        x.trigger_group,
+                    });
                     table.ForeignKey(
                         name: "FK_qrtz_blob_triggers_qrtz_triggers_sched_name_trigger_name_tr~",
                         columns: x => new
@@ -330,15 +325,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_cron_triggers",
-                        x => new
-                        {
-                            x.sched_name,
-                            x.trigger_name,
-                            x.trigger_group,
-                        }
-                    );
+                    table.PrimaryKey("PK_qrtz_cron_triggers", x => new
+                    {
+                        x.sched_name,
+                        x.trigger_name,
+                        x.trigger_group,
+                    });
                     table.ForeignKey(
                         name: "FK_qrtz_cron_triggers_qrtz_triggers_sched_name_trigger_name_tr~",
                         columns: x => new
@@ -369,15 +361,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_simple_triggers",
-                        x => new
-                        {
-                            x.sched_name,
-                            x.trigger_name,
-                            x.trigger_group,
-                        }
-                    );
+                    table.PrimaryKey("PK_qrtz_simple_triggers", x => new
+                    {
+                        x.sched_name,
+                        x.trigger_name,
+                        x.trigger_group,
+                    });
                     table.ForeignKey(
                         name: "FK_qrtz_simple_triggers_qrtz_triggers_sched_name_trigger_name_~",
                         columns: x => new
@@ -417,15 +406,12 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_simprop_triggers",
-                        x => new
-                        {
-                            x.sched_name,
-                            x.trigger_name,
-                            x.trigger_group,
-                        }
-                    );
+                    table.PrimaryKey("PK_qrtz_simprop_triggers", x => new
+                    {
+                        x.sched_name,
+                        x.trigger_name,
+                        x.trigger_group,
+                    });
                     table.ForeignKey(
                         name: "FK_qrtz_simprop_triggers_qrtz_triggers_sched_name_trigger_name~",
                         columns: x => new

@@ -98,8 +98,7 @@ internal static class RedisExtensions
         try
         {
             var meldingerClient = serviceProvider.GetRequiredService<IMeldingerClient>();
-            melding =
-                await meldingerClient.GetMelding(melding.Id)
+            melding = await meldingerClient.GetMelding(melding.Id)
                 ?? throw new InvalidOperationException(
                     $"Melding {melding.Id} no longer exists in receiver."
                 );

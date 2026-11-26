@@ -241,10 +241,7 @@ public class MeldingServiceTests : TestBed<DomainLogicTestFixture>
     public async Task ProcessMelding_WhenCalledWithAlreadyPersistedMelding_OnlyCallsPostMeldingActions()
     {
         //arrange
-        var existingRequest = SampleMeldingRequest with
-        {
-            MeldingId = Guid.NewGuid(),
-        };
+        var existingRequest = SampleMeldingRequest with { MeldingId = Guid.NewGuid() };
         _meldingRepository
             .GetMelding(existingRequest.MeldingId, Arg.Any<CancellationToken>())
             .Returns(Substitute.For<Melding>());
