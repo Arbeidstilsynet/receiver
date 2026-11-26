@@ -18,7 +18,7 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "hstore");
@@ -113,6 +113,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                         .HasColumnType("text")
                         .HasColumnName("execution_log");
 
+                    b.Property<string>("FireInstanceId")
+                        .HasColumnType("text")
+                        .HasColumnName("fire_instance_id");
+
                     b.Property<long>("FiredTime")
                         .HasColumnType("bigint")
                         .HasColumnName("fired_time");
@@ -127,10 +131,30 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                         .HasColumnType("text")
                         .HasColumnName("job_group");
 
+                    b.Property<string>("JobInput")
+                        .HasColumnType("text")
+                        .HasColumnName("job_input");
+
+                    b.Property<bool?>("JobInputTooLarge")
+                        .HasColumnType("bool")
+                        .HasColumnName("job_input_too_large");
+
                     b.Property<string>("JobName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("job_name");
+
+                    b.Property<bool?>("Manual")
+                        .HasColumnType("bool")
+                        .HasColumnName("manual");
+
+                    b.Property<string>("Metrics")
+                        .HasColumnType("text")
+                        .HasColumnName("metrics");
+
+                    b.Property<int?>("Result")
+                        .HasColumnType("integer")
+                        .HasColumnName("result");
 
                     b.Property<int>("RetryAttempt")
                         .ValueGeneratedOnAdd()
@@ -151,6 +175,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                     b.Property<bool>("Succeeded")
                         .HasColumnType("bool")
                         .HasColumnName("succeeded");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("text")
+                        .HasColumnName("summary");
 
                     b.Property<string>("TriggerGroup")
                         .IsRequired()
@@ -195,6 +223,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("instance_name");
+
+                    b.Property<long?>("InterruptRequestedTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("interrupt_requested_time");
 
                     b.Property<bool>("IsNonConcurrent")
                         .HasColumnType("bool")
@@ -306,6 +338,84 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                         .HasDatabaseName("idx_qrtz_j_g_n");
 
                     b.ToTable("qrtz_job_details", "quartz");
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobStatus", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("sched_name");
+
+                    b.Property<string>("JobGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("job_group");
+
+                    b.Property<string>("JobName")
+                        .HasColumnType("text")
+                        .HasColumnName("job_name");
+
+                    b.Property<int>("ConsecutiveFailures")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("consecutive_failures");
+
+                    b.Property<long>("FailureCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("failure_count");
+
+                    b.Property<long>("FirstFiredTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("first_fired_time");
+
+                    b.Property<string>("LastEntryId")
+                        .HasColumnType("text")
+                        .HasColumnName("last_entry_id");
+
+                    b.Property<string>("LastFailureMessage")
+                        .HasColumnType("text")
+                        .HasColumnName("last_failure_message");
+
+                    b.Property<long?>("LastFailureTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_failure_time");
+
+                    b.Property<long>("LastFiredTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_fired_time");
+
+                    b.Property<string>("LastInstanceName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("last_instance_name");
+
+                    b.Property<int>("LastResult")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_result");
+
+                    b.Property<long>("LastRunTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_run_time");
+
+                    b.Property<long?>("LastSuccessTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_success_time");
+
+                    b.Property<string>("LastSummary")
+                        .HasColumnType("text")
+                        .HasColumnName("last_summary");
+
+                    b.Property<long>("RunCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("run_count");
+
+                    b.HasKey("SchedulerName", "JobGroup", "JobName");
+
+                    b.ToTable("qrtz_job_status", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzLock", b =>
@@ -450,6 +560,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                     b.Property<long>("LastCheckInTime")
                         .HasColumnType("bigint")
                         .HasColumnName("last_checkin_time");
+
+                    b.Property<string>("QuartzVersion")
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("quartz_version");
 
                     b.HasKey("SchedulerName", "InstanceName");
 
@@ -596,6 +710,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("execution_group");
 
+                    b.Property<bool?>("FixedDelay")
+                        .HasColumnType("boolean")
+                        .HasColumnName("fixed_delay");
+
                     b.Property<byte[]>("JobData")
                         .HasColumnType("bytea")
                         .HasColumnName("job_data");
@@ -617,6 +735,10 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                     b.Property<long?>("MisfireOriginalFireTime")
                         .HasColumnType("bigint")
                         .HasColumnName("misfire_orig_fire_time");
+
+                    b.Property<long?>("MisfireThreshold")
+                        .HasColumnType("bigint")
+                        .HasColumnName("misfire_threshold");
 
                     b.Property<long?>("NextFireTime")
                         .HasColumnType("bigint")
