@@ -9,6 +9,11 @@ using Arbeidstilsynet.MeldingerReceiver.Infrastructure.DependencyInjection;
 using FluentValidation;
 using IAssemblyInfo = Arbeidstilsynet.MeldingerReceiver.App.IAssemblyInfo;
 
+if (args is [HealthCheckProbe.Argument])
+{
+    return await HealthCheckProbe.Run();
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 var appSettings = builder.Configuration.GetRequired<AppSettings>();
@@ -79,3 +84,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 await app.RunAsync();
+return 0;
