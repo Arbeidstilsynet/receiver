@@ -17,9 +17,8 @@ public class MeldingerRepositoryTests : TestBed<InfrastructureAdapterReadOnlyTes
         .UseSeed(1337)
         .RuleForType(typeof(Guid), faker => faker.Random.Guid())
         .RuleFor(x => x.Source, faker => faker.PickRandom(MessageSource.Altinn, MessageSource.Api))
-        .RuleForType(
-            typeof(DateTime),
-            faker => faker.Date.PastDateOnly(2).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+        .RuleForType(typeof(DateTime), faker =>
+            faker.Date.PastDateOnly(2).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
         )
         .RuleFor(x => x.ApplicationId, faker => "test-app")
         .RuleFor(

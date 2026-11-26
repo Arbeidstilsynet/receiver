@@ -73,9 +73,8 @@ public static class DependencyInjectionExtensions
     )
     {
         services.AddSingleton<IConnectionMultiplexer>(sp =>
-            ConnectionMultiplexer.Connect(
-                valkeyConfiguration.ConnectionString,
-                options => options.AbortOnConnectFail = false
+            ConnectionMultiplexer.Connect(valkeyConfiguration.ConnectionString, options =>
+                options.AbortOnConnectFail = false
             )
         );
         services.AddSingleton<ApiMeters>();
@@ -86,13 +85,10 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IMeldingerRedriver, MeldingerRedriver>();
 
         services
-            .AddHttpClient(
-                MeldingerReceiverApiClientKey,
-                client =>
-                {
-                    client.BaseAddress = new Uri(meldingerReceiverApiConfiguration.BaseUrl);
-                }
-            )
+            .AddHttpClient(MeldingerReceiverApiClientKey, client =>
+            {
+                client.BaseAddress = new Uri(meldingerReceiverApiConfiguration.BaseUrl);
+            })
             .AddStandardResilienceHandler();
 
         return services;
@@ -120,13 +116,10 @@ public static class DependencyInjectionExtensions
     {
         var group = endpoints.MapGroup(pattern).WithTags("Redrive Actions");
 
-        group.MapGet(
-            "/get-pending-messages",
-            ([FromServices] IMeldingerRedriver redriver) =>
-            {
-                return redriver.GetPendingMessages();
-            }
-        );
+        group.MapGet("/get-pending-messages", ([FromServices] IMeldingerRedriver redriver) =>
+        {
+            return redriver.GetPendingMessages();
+        });
         group.MapPost(
             "/acknowledge-pending-messages",
             async ([FromServices] IMeldingerRedriver redriver, [FromQuery] string[]? messageIds) =>

@@ -20,8 +20,7 @@ internal static class AltinnMappingExtensions
         {
             MeldingId = altinnInstanceSummary.Metadata.InstanceGuid,
             Source = MessageSource.Altinn,
-            ApplicationReference =
-                altinnInstanceSummary.Metadata.App
+            ApplicationReference = altinnInstanceSummary.Metadata.App
                 ?? throw new ArgumentException(
                     "Could not find app name in metadata. This is required in order to succeed."
                 ),
@@ -77,8 +76,7 @@ internal static class AltinnMappingExtensions
         Guid? sanitizedDocumentId
     )
     {
-        var contentType =
-            fileMetadata.ContentType
+        var contentType = fileMetadata.ContentType
             ?? throw new ArgumentException("ContentType is required in order to succeed.");
 
         return new DocumentFileMetadata

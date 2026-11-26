@@ -26,10 +26,7 @@ public class MeldingerAdapterTests
     public async Task FetchStructuredData_WhenStructuredDataIdIsNull_ReturnsDefault()
     {
         // Arrange
-        var melding = CreateTestMelding() with
-        {
-            StructuredDataId = null,
-        };
+        var melding = CreateTestMelding() with { StructuredDataId = null };
 
         // Act
         var result = await _sut.FetchStructuredData<TestStructuredData>(melding);

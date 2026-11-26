@@ -259,10 +259,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_execution_history",
-                        x => new { x.sched_name, x.entry_id }
-                    );
+                    table.PrimaryKey("PK_qrtz_execution_history", x => new
+                    {
+                        x.sched_name,
+                        x.entry_id,
+                    });
                 }
             );
 
@@ -284,10 +285,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_misfire_history",
-                        x => new { x.sched_name, x.entry_id }
-                    );
+                    table.PrimaryKey("PK_qrtz_misfire_history", x => new
+                    {
+                        x.sched_name,
+                        x.entry_id,
+                    });
                 }
             );
 
@@ -304,10 +306,11 @@ namespace Arbeidstilsynet.MeldingerReceiver.Infrastructure.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_qrtz_paused_job_grps",
-                        x => new { x.sched_name, x.job_group }
-                    );
+                    table.PrimaryKey("PK_qrtz_paused_job_grps", x => new
+                    {
+                        x.sched_name,
+                        x.job_group,
+                    });
                 }
             );
 
