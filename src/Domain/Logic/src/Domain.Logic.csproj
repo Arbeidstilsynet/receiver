@@ -2,12 +2,12 @@
   <ItemGroup>
     <PackageReference Include="Mapster" Version="10.0.14" />
     <PackageReference Include="Mapster.DependencyInjection" Version="10.0.14" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.15" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.15" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.11.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="11.0.1" />
   </ItemGroup>
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Arbeidstilsynet.MeldingerReceiver.Domain.Logic</RootNamespace>

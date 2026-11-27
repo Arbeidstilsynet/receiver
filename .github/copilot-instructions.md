@@ -36,7 +36,10 @@ dotnet csharpier format .
 dotnet csharpier check .
 ```
 
-- **SDK: .NET 10** (`global.json` is the source of truth). Test runner is `Microsoft.Testing.Platform`.
+- **SDK: .NET 11** (`global.json` is the source of truth). Test runner is `Microsoft.Testing.Platform`.
+- The NuGet package (`Receiver.Publish` + embedded `Domain.Data`) multi-targets `net10.0;net11.0` so .NET 10
+  consumers keep working; its `Microsoft.Extensions.*` references are TFM-conditional (10.x vs 11.x). All other
+  projects target `net11.0`.
 - EF Core migrations (run from `src/`):
   ```sh
   dotnet ef migrations add <Name> --startup-project App/src --project Infrastructure/src -o Db/Migrations

@@ -74,7 +74,7 @@ export type ContentType = {
     charSet?: null | string;
     mediaType?: string;
     name?: null | string;
-    parameters?: null | Array<unknown>;
+    parameters?: Array<unknown>;
 };
 
 export type DataElement = {
@@ -128,7 +128,15 @@ export type GetAllMeldingerResponse = {
     totalPages: number | string;
 };
 
+/**
+ * Returned when a short id lookup matches more than one melding.
+ * A short id is the trailing 12 hex characters of a melding GUID and is not guaranteed to be unique.
+ * The caller can use List&lt;Guid&gt; GetMeldingByShortIdConflictResponse.MatchingMeldingIds to disambiguate by performing a full-id lookup.
+ */
 export type GetMeldingByShortIdConflictResponse = {
+    /**
+     * The full melding GUIDs that share the requested short id.
+     */
     matchingMeldingIds: Array<string>;
 };
 
@@ -538,6 +546,14 @@ export type GetMeldingerResponses = {
 export type GetMeldingerResponse = GetMeldingerResponses[keyof GetMeldingerResponses];
 
 export type PostMeldingerData = {
+    /**
+     * Optional key for avoiding duplicate uploads. If set, this value becomes the
+     * externally visible MeldingId returned by the API and used for subsequent lookups.
+     * <br />
+     * The value must be unique per string PostMeldingBody.ApplicationId and must not be reused for a
+     * different melding payload. If the same key is submitted again for the same application,
+     * the server handles the request idempotently instead of creating a new melding.
+     */
     body: {
         ApplicationId?: string;
         Metadata?: {

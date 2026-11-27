@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.1",
+  "openapi": "3.1.2",
   "info": {
     "title": "MeldingerReceiver API",
     "description": "Common entrypoints to interact with MeldingerReceiver.",
@@ -763,6 +763,7 @@
           "Meldinger"
         ],
         "requestBody": {
+          "description": "Optional key for avoiding duplicate uploads. If set, this value becomes the\nexternally visible MeldingId returned by the API and used for subsequent lookups.\n<br />\nThe value must be unique per string PostMeldingBody.ApplicationId and must not be reused for a\ndifferent melding payload. If the same key is submitted again for the same application,\nthe server handles the request idempotently instead of creating a new melding.",
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -1427,10 +1428,7 @@
             ]
           },
           "parameters": {
-            "type": [
-              "null",
-              "array"
-            ]
+            "type": "array"
           }
         }
       },
@@ -1660,9 +1658,11 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The full melding GUIDs that share the requested short id."
           }
-        }
+        },
+        "description": "Returned when a short id lookup matches more than one melding.\nA short id is the trailing 12 hex characters of a melding GUID and is not guaranteed to be unique.\nThe caller can use List&lt;Guid&gt; GetMeldingByShortIdConflictResponse.MatchingMeldingIds to disambiguate by performing a full-id lookup."
       },
       "GetMeldingResponse": {
         "type": "object",

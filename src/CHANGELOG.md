@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.16.0
+
+### Changed
+
+- build: the receiver service now runs on .NET 11 (SDK `11.0.100`). The NuGet package `Arbeidstilsynet.Receiver` now multi-targets `net10.0` and `net11.0`, so .NET 10 consumers are still supported.
+- build(docker): the runtime image is now `mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled-extra` (Ubuntu 26.04 "resolute", still distroless and non-root).
+- chore(api): the OpenAPI document is generated with Microsoft.OpenApi 3 and now includes additional XML-doc descriptions; `ContentType.parameters` is no longer nullable in the generated client.
+
 ## 1.15.2
 
 ### Security
