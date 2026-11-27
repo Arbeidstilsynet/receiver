@@ -87,6 +87,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-publish@27da10b983a30ca735ca09d1d36ccc60869ee98d # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
+          global-json-file: src/global.json
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta
@@ -173,6 +174,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-publish@27da10b983a30ca735ca09d1d36ccc60869ee98d # v3
         with:
           working-directory: ./src/Publish/Receiver.Publish
+          global-json-file: src/global.json
           nuget-username: ${{ vars.NUGET_BOT_USERNAME }}
 
       - name: Docker meta

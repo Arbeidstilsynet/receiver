@@ -11,6 +11,13 @@
       "matchUpdateTypes": ["pinDigest"],
       "automerge": true,
       "description": "Automerge pinDigest PRs (e.g., GitHub Actions)"
+    },
+    {
+      "matchFileNames": ["src/Publish/Receiver.Publish/Receiver.Publish.csproj"],
+      "matchPackageNames": ["Microsoft.Extensions.**"],
+      "matchCurrentVersion": "<11.0.0",
+      "allowedVersions": "<11.0.0",
+      "description": "Keep the net10.0 dependency group of the NuGet package on 10.x so .NET 10 consumers keep working"
     }
   ]
 }

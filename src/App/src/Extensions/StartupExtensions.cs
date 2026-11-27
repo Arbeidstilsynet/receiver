@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.RegularExpressions;
 using Arbeidstilsynet.Common.Altinn.Model.Exceptions;
 using Arbeidstilsynet.Common.AspNetCore.Extensions.CrossCutting;
 using Arbeidstilsynet.Common.AspNetCore.Extensions.Extensions;
@@ -21,8 +22,20 @@ internal static class StartupExtensions
     public static IMvcBuilder ConfigureApi(this IServiceCollection services)
     {
         services.AddOpenApi(openApiOptions =>
-            openApiOptions.ConfigureBasicOpenApiSpec(IAssemblyInfo.AppName)
-        );
+        {
+            openApiOptions.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
+            openApiOptions
+                .ConfigureBasicOpenApiSpec(IAssemblyInfo.AppName)
+                // Workaround for https://github.com/dotnet/aspnetcore/issues/70584: .NET 11 no longer
+                // applies RouteOptions.LowercaseUrls to OpenAPI paths.
+                .AddDocumentTransformer(
+                    (document, _, _) =>
+                    {
+                        document.Paths = LowercasePaths(document.Paths);
+                        return Task.CompletedTask;
+                    }
+                );
+        });
 
         return services
             .ConfigureStandardMvc()
@@ -67,6 +80,21 @@ internal static class StartupExtensions
         services.ConfigureCors(apiConfiguration.Cors, env.IsDevelopment());
 
         return services;
+    }
+
+    private static OpenApiPaths LowercasePaths(OpenApiPaths paths)
+    {
+        var lowercased = new OpenApiPaths();
+        foreach (var (path, item) in paths)
+        {
+            // Lowercase literal segments only; route parameter names ({appId}) keep their casing.
+            var key = Regex.Replace(path, @"\{[^}]*\}|[^{]+", match =>
+                match.Value.StartsWith('{') ? match.Value : match.Value.ToLowerInvariant()
+            );
+            lowercased[key] = item;
+        }
+
+        return lowercased;
     }
 
     public static WebApplication AddApi(this WebApplication app, ApiConfiguration apiConfiguration)

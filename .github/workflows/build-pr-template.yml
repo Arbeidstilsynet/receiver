@@ -76,6 +76,7 @@ jobs:
         uses: Arbeidstilsynet/action-dotnet-build@66d88d1a0ffb58b5638b1ba9bf9a7cf5e1811261 # v4
         with:
           working-directory: ./src
+          dotnet-version: "11.0.x"
       - uses: Arbeidstilsynet/action-pnpm-setup@aa6683c3137594dc38a60b539dbdabb5a4531edd # v4
 
       - name: Generate API client
