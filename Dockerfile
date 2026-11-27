@@ -29,9 +29,8 @@ COPY src/Publish/ ./Publish/
 RUN dotnet publish ./App/src/App.csproj -c Release -f net10.0 -o /app --no-restore
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-alpine3.24@sha256:21c3f9798416cba4c0576a947c286231cb71ea2884896cb968253f5c9668f930
+# Distroless, non-root by default. The -extra variant includes tzdata (RecoveryJob is scheduled in Europe/Oslo).
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-noble-chiseled-extra@sha256:c8dd08a50d8ffd19bd8da72edee05a7ac15b486a5b1869cf46fdb370bf1fbc76
 WORKDIR /app
-# tzdata: RecoveryJob is scheduled in Europe/Oslo
-RUN apk add --no-cache curl tzdata
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "MeldingerReceiver.App.dll"]
