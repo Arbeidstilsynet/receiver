@@ -6,7 +6,7 @@ minimumReleaseAge: 4320
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
-  - @arbeidstilsynet/receiver
+  - '@arbeidstilsynet/receiver'
 
 overrides:
   js-yaml@<=4.1.1: ^4.1.2
