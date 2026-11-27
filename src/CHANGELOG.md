@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- build(docker): the runtime image is now the distroless `mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra` instead of `aspnet:10.0-alpine`, which removes the Alpine `libssl3`/`libcrypto3` vulnerabilities. The image has no shell, `curl` or package manager, and runs as non-root (`app`, UID 1654) by default. Container healthchecks that use `curl` or `sh` must switch to HTTP probes (`/healthz/live`, `/healthz/ready`) or `["CMD", "dotnet", "MeldingerReceiver.App.dll", "--healthcheck"]`, which exits `0` when `/healthz/ready` is healthy.
+- build(docker): the runtime image is now the distroless `mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra` instead of `aspnet:10.0-alpine`, which removes the Alpine `libssl3`/`libcrypto3` vulnerabilities. The image has no shell, `curl` or package manager, and runs as non-root (`app`, UID 1654) by default. Container healthchecks that use `curl` or `sh` must switch to HTTP probes (`/healthz/live`, `/healthz/ready`).
 
 ## 1.15.1
 
